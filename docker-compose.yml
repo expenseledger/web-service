@@ -1,0 +1,19 @@
+version: '3.1'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./db:/share
+    ports:
+      - "5430:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "8008:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: password
