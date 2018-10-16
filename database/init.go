@@ -18,6 +18,11 @@ func InitTables(db *sql.DB) {
 	if err != nil {
 		log.Println("Error creating table: wallet", err)
 	}
+
+	err = createCategoryTable(db)
+	if err != nil {
+		log.Println("Error creating table: category", err)
+	}
 }
 
 func createWalletTypeTable(db *sql.DB) (err error) {
@@ -44,6 +49,21 @@ func createWalletTable(db *sql.DB) (err error) {
 			name character varying(20) NOT NULL,
 			type character varying(20) REFERENCES wallet_type,
 			balance NUMERIC(11, 2) DEFAULT 0.00,
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone
+		);
+		`
+
+	_, err = db.Exec(query)
+	return
+}
+
+func createCategoryTable(db *sql.DB) (err error) {
+	query :=
+		`
+		CREATE TABLE IF NOT EXISTS category (
+			name character varying(20) NOT NULL PRIMARY KEY,
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			deleted_at timestamp with time zone
