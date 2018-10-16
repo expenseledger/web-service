@@ -29,6 +29,11 @@ func InitTables(db *sql.DB) {
 	if err != nil {
 		log.Println("Error creating table: transaction_type", err)
 	}
+
+	err = createTransactionTable(db)
+	if err != nil {
+		log.Println("Error creating table: transaction", err)
+	}
 }
 
 func createWalletTable(db *sql.DB) (err error) {
@@ -36,9 +41,9 @@ func createWalletTable(db *sql.DB) (err error) {
 		`
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 		CREATE TABLE IF NOT EXISTS wallet (
-			id uuid NOT NULL DEFAULT uuid_generate_v4(),
+			id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
 			name character varying(20) NOT NULL,
-			type character varying(20) REFERENCES wallet_type,
+			type character varying(20) NOT NULL REFERENCES wallet_type,
 			balance NUMERIC(11, 2) DEFAULT 0.00,
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +62,28 @@ func createConstantTable(db *sql.DB, tableName string) (err error) {
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			deleted_at timestamp with time zone);`
+	_, err = db.Exec(query)
+	return
+}
+
+func createTransactionTable(db *sql.DB) (err error) {
+	query :=
+		`
+		CREATE TABLE IF NOT EXISTS transaction (
+			id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+			src_wallet uuid NOT NULL REFERENCES wallet,
+			dst_wallet uuid REFERENCES wallet,
+			amount NUMERIC(11, 2) DEFAULT 0.00,
+			type character varying(20) NOT NULL REFERENCES transaction_type,
+			category character varying(20) NOT NULL REFERENCES category,
+			description text,
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone,
+			CHECK (dst_wallet <> src_wallet)
+		);
+		`
+
 	_, err = db.Exec(query)
 	return
 }
