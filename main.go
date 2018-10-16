@@ -12,7 +12,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
+	var err error
+	err = godotenv.Load()
 	if err != nil {
 		log.Println("Error loading .env file", err)
 	}
@@ -35,6 +36,10 @@ func main() {
 		log.Fatal("Error opening connection to the database", err)
 	}
 
-	database.InitTables(db)
-	log.Println("Done")
+	err = database.CreateTables(db)
+	if err != nil {
+		log.Println("Error creating tables")
+	} else {
+		log.Println("Successfully created tables")
+	}
 }

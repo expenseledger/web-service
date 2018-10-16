@@ -6,34 +6,39 @@ import (
 	"log"
 )
 
-// InitTables create (if not exists) tables
-func InitTables(db *sql.DB) {
-	var err error
-
+// CreateTables create (if not exists) tables
+func CreateTables(db *sql.DB) (err error) {
 	err = createConstantTable(db, "wallet_type")
 	if err != nil {
 		log.Println("Error creating table: wallet_type", err)
+		return
 	}
 
 	err = createWalletTable(db)
 	if err != nil {
 		log.Println("Error creating table: wallet", err)
+		return
 	}
 
 	err = createConstantTable(db, "category")
 	if err != nil {
 		log.Println("Error creating table: category", err)
+		return
 	}
 
 	err = createConstantTable(db, "transaction_type")
 	if err != nil {
 		log.Println("Error creating table: transaction_type", err)
+		return
 	}
 
 	err = createTransactionTable(db)
 	if err != nil {
 		log.Println("Error creating table: transaction", err)
+		return
 	}
+
+	return
 }
 
 func createWalletTable(db *sql.DB) (err error) {
