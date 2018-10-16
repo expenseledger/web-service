@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -9,7 +10,7 @@ import (
 func InitTables(db *sql.DB) {
 	var err error
 
-	err = createWalletTypeTable(db)
+	err = createConstantTable(db, "wallet_type")
 	if err != nil {
 		log.Println("Error creating table: wallet_type", err)
 	}
@@ -19,25 +20,15 @@ func InitTables(db *sql.DB) {
 		log.Println("Error creating table: wallet", err)
 	}
 
-	err = createCategoryTable(db)
+	err = createConstantTable(db, "category")
 	if err != nil {
 		log.Println("Error creating table: category", err)
 	}
-}
 
-func createWalletTypeTable(db *sql.DB) (err error) {
-	query :=
-		`
-		CREATE TABLE IF NOT EXISTS wallet_type (
-			name character varying(20) NOT NULL PRIMARY KEY,
-			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone
-		);
-		`
-
-	_, err = db.Exec(query)
-	return
+	err = createConstantTable(db, "transaction_type")
+	if err != nil {
+		log.Println("Error creating table: transaction_type", err)
+	}
 }
 
 func createWalletTable(db *sql.DB) (err error) {
@@ -59,17 +50,13 @@ func createWalletTable(db *sql.DB) (err error) {
 	return
 }
 
-func createCategoryTable(db *sql.DB) (err error) {
+func createConstantTable(db *sql.DB, tableName string) (err error) {
 	query :=
-		`
-		CREATE TABLE IF NOT EXISTS category (
-			name character varying(20) NOT NULL PRIMARY KEY,
+		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
+			`name character varying(20) NOT NULL PRIMARY KEY,
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone
-		);
-		`
-
+			deleted_at timestamp with time zone);`
 	_, err = db.Exec(query)
 	return
 }
