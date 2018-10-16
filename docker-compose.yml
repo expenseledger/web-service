@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_PASSWORD: password
     volumes:
-      - ./db:/share
+      - ./pgdata:/var/lib/postgresql/data
     ports:
       - "5430:5432"
   pgadmin:
