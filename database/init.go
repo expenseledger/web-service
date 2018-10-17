@@ -38,6 +38,30 @@ func CreateTables(db *sql.DB) (err error) {
 		return
 	}
 
+	err = createTriggerSetUpdatedAt(
+		db,
+		"wallet_type",
+		"wallet",
+		"category",
+		"transaction_type",
+		"transaction",
+	)
+	if err != nil {
+		log.Println("Error creating trigger for updated_at", err)
+		return
+	}
+
+	return
+}
+
+func createConstantTable(db *sql.DB, tableName string) (err error) {
+	query :=
+		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
+			`name character varying(20) NOT NULL PRIMARY KEY,
+			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp with time zone);`
+	_, err = db.Exec(query)
 	return
 }
 
@@ -60,17 +84,6 @@ func createWalletTable(db *sql.DB) (err error) {
 	return
 }
 
-func createConstantTable(db *sql.DB, tableName string) (err error) {
-	query :=
-		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
-			`name character varying(20) NOT NULL PRIMARY KEY,
-			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone);`
-	_, err = db.Exec(query)
-	return
-}
-
 func createTransactionTable(db *sql.DB) (err error) {
 	query :=
 		`
@@ -88,6 +101,26 @@ func createTransactionTable(db *sql.DB) (err error) {
 			CHECK (dst_wallet <> src_wallet)
 		);
 		`
+
+	_, err = db.Exec(query)
+	return
+}
+
+func createTriggerSetUpdatedAt(db *sql.DB, tableNames ...string) (err error) {
+	query := "CREATE EXTENSION IF NOT EXISTS moddatetime;"
+
+	for _, tableName := range tableNames {
+		query += fmt.Sprintf(
+			`
+			CREATE TRIGGER %s
+			BEFORE UPDATE ON %s
+			FOR EACH ROW
+			EXECUTE PROCEDURE moddatetime (updated_at);
+			`,
+			"mdt_"+tableName,
+			tableName,
+		)
+	}
 
 	_, err = db.Exec(query)
 	return
