@@ -107,7 +107,8 @@ func createTransactionTable(db *sql.DB) (err error) {
 }
 
 func createTriggerSetUpdatedAt(db *sql.DB, tableNames ...string) (err error) {
-	query := "CREATE EXTENSION IF NOT EXISTS moddatetime;"
+	query := deleteExistingTriggers(db, tableNames)
+	query += "CREATE EXTENSION IF NOT EXISTS moddatetime;"
 
 	for _, tableName := range tableNames {
 		query += fmt.Sprintf(
@@ -124,4 +125,18 @@ func createTriggerSetUpdatedAt(db *sql.DB, tableNames ...string) (err error) {
 
 	_, err = db.Exec(query)
 	return
+}
+
+func deleteExistingTriggers(db *sql.DB, tableNames []string) string {
+	var query string
+
+	for _, tableName := range tableNames {
+		query += fmt.Sprintf(
+			"DROP TRIGGER IF EXISTS %s ON %s;",
+			"mdt_"+tableName,
+			tableName,
+		)
+	}
+
+	return query
 }
