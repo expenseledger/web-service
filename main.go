@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -31,12 +30,12 @@ func main() {
 		dbinfo = os.Getenv("DATABASE_URL")
 	}
 
-	db, err := sql.Open("postgres", dbinfo)
+	err = database.Init(dbinfo)
 	if err != nil {
-		log.Fatal("Error opening connection to the database", err)
+		log.Fatal("Error initializing database")
 	}
 
-	err = database.CreateTables(db)
+	err = database.CreateTables()
 	if err != nil {
 		log.Println("Error creating tables")
 	} else {

@@ -1,45 +1,63 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
-// CreateTables create (if not exists) tables
-func CreateTables(db *sql.DB) (err error) {
-	err = createConstantTable(db, "wallet_type")
+var db *sqlx.DB
+
+// Init MUST be called before any package's operations
+// @TODO: fix this lame way to initial a package. It's highly depends on
+// the order of execution because, somehow, it needs dbinfo.
+func Init(dbinfo string) (err error) {
+	db, err = sqlx.Open("postgres", dbinfo)
+	if err != nil {
+		log.Println("Error opening connection to the database", err)
+	}
+	return
+}
+
+// GetDB returns an (probably) initialized instance of sqlx.DB
+func GetDB() *sqlx.DB {
+	return db
+}
+
+// CreateTables creates (if not exists) all the required tables
+func CreateTables() (err error) {
+	err = createConstantTable("wallet_type")
 	if err != nil {
 		log.Println("Error creating table: wallet_type", err)
 		return
 	}
 
-	err = createWalletTable(db)
+	err = createWalletTable()
 	if err != nil {
 		log.Println("Error creating table: wallet", err)
 		return
 	}
 
-	err = createConstantTable(db, "category")
+	err = createConstantTable("category")
 	if err != nil {
 		log.Println("Error creating table: category", err)
 		return
 	}
 
-	err = createConstantTable(db, "transaction_type")
+	err = createConstantTable("transaction_type")
 	if err != nil {
 		log.Println("Error creating table: transaction_type", err)
 		return
 	}
 
-	err = createTransactionTable(db)
+	err = createTransactionTable()
 	if err != nil {
 		log.Println("Error creating table: transaction", err)
 		return
 	}
 
 	err = createTriggerSetUpdatedAt(
-		db,
 		"wallet_type",
 		"wallet",
 		"category",
@@ -54,7 +72,7 @@ func CreateTables(db *sql.DB) (err error) {
 	return
 }
 
-func createConstantTable(db *sql.DB, tableName string) (err error) {
+func createConstantTable(tableName string) (err error) {
 	query :=
 		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
 			`name character varying(20) NOT NULL PRIMARY KEY,
@@ -65,7 +83,7 @@ func createConstantTable(db *sql.DB, tableName string) (err error) {
 	return
 }
 
-func createWalletTable(db *sql.DB) (err error) {
+func createWalletTable() (err error) {
 	query :=
 		`
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -84,7 +102,7 @@ func createWalletTable(db *sql.DB) (err error) {
 	return
 }
 
-func createTransactionTable(db *sql.DB) (err error) {
+func createTransactionTable() (err error) {
 	query :=
 		`
 		CREATE TABLE IF NOT EXISTS transaction (
@@ -106,8 +124,8 @@ func createTransactionTable(db *sql.DB) (err error) {
 	return
 }
 
-func createTriggerSetUpdatedAt(db *sql.DB, tableNames ...string) (err error) {
-	query := deleteExistingTriggers(db, tableNames)
+func createTriggerSetUpdatedAt(tableNames ...string) (err error) {
+	query := deleteExistingTriggers(tableNames)
 	query += "CREATE EXTENSION IF NOT EXISTS moddatetime;"
 
 	for _, tableName := range tableNames {
@@ -127,7 +145,7 @@ func createTriggerSetUpdatedAt(db *sql.DB, tableNames ...string) (err error) {
 	return
 }
 
-func deleteExistingTriggers(db *sql.DB, tableNames []string) string {
+func deleteExistingTriggers(tableNames []string) string {
 	var query string
 
 	for _, tableName := range tableNames {
