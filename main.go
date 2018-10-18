@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/ExpenseLedger/expense-ledger-web-service/controller"
 	"github.com/ExpenseLedger/expense-ledger-web-service/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -37,8 +38,15 @@ func main() {
 
 	err = database.CreateTables()
 	if err != nil {
-		log.Println("Error creating tables")
+		log.Fatal("Error creating tables")
 	} else {
 		log.Println("Successfully created tables")
+	}
+
+	router := controller.InitRoutes()
+
+	err = router.Run(":3000")
+	if err != nil {
+		log.Fatal("Error running the server", err)
 	}
 }
