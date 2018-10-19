@@ -28,8 +28,7 @@ func walletCreate(context *gin.Context) {
 	var wallet model.Wallet
 	copier.Copy(&wallet, &form)
 
-	createdWallet, err := wallet.Create()
-	if err != nil {
+	if err := wallet.Create(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -39,7 +38,7 @@ func walletCreate(context *gin.Context) {
 
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(createdWallet),
+		buildSuccessResponse(wallet),
 	)
 	return
 }

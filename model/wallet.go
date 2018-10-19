@@ -17,17 +17,16 @@ type Wallet struct {
 }
 
 // Create ...
-func (wallet Wallet) Create() (*Wallet, error) {
+func (wallet *Wallet) Create() error {
 	var dbWallet dbmodel.Wallet
 
 	copier.Copy(&dbWallet, &wallet)
 
-	createdWallet, err := dbWallet.Insert()
+	err := dbWallet.Insert()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var newWallet Wallet
-	copier.Copy(&newWallet, &createdWallet)
-	return &newWallet, nil
+	copier.Copy(wallet, &dbWallet)
+	return nil
 }
