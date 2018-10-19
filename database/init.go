@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ExpenseLedger/expense-ledger-web-service/constant"
 	"github.com/jmoiron/sqlx"
@@ -87,7 +88,7 @@ func createWalletTypeEnum() (err error) {
 			constant.WalletType.Credit,
 		)
 	_, err = db.Exec(query)
-	return
+	return shouldIgnoreError(err)
 }
 
 func createTransactionTypeEnum() (err error) {
@@ -99,7 +100,7 @@ func createTransactionTypeEnum() (err error) {
 			constant.TransactionType.Transfer,
 		)
 	_, err = db.Exec(query)
-	return
+	return shouldIgnoreError(err)
 }
 
 func createWalletTable() (err error) {
@@ -176,4 +177,11 @@ func deleteExistingTriggers(tableNames []string) string {
 	}
 
 	return query
+}
+
+func shouldIgnoreError(err error) error {
+	if err != nil && strings.Contains(err.Error(), "already exists") {
+		return nil
+	}
+	return err
 }
