@@ -1,0 +1,1 @@
+web: expense-ledger-web-service
