@@ -45,7 +45,12 @@ func main() {
 
 	router := controller.InitRoutes()
 
-	err = router.Run(":3000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	err = router.Run(":" + port)
 	if err != nil {
 		log.Fatal("Error running the server", err)
 	}
