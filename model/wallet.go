@@ -10,7 +10,6 @@ import (
 
 // Wallet the structure represents a wallet in presentation layer
 type Wallet struct {
-	ID        string          `json:"id"`
 	Name      string          `json:"name"`
 	Type      string          `json:"type"`
 	Balance   decimal.Decimal `json:"balance"`
