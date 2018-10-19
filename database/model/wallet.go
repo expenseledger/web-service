@@ -10,7 +10,6 @@ import (
 
 // Wallet the structure represents a stored wallet on database
 type Wallet struct {
-	ID        string          `db:"id"`
 	Name      string          `db:"name"`
 	Type      string          `db:"type"`
 	Balance   decimal.Decimal `db:"balance"`
