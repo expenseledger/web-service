@@ -24,6 +24,11 @@
 #   go-tests = true
 #   unused-packages = true
 
+[metadata.heroku]
+  root-package = "github.com/ExpenseLedger/expense-ledger-web-service"
+  go-version = "go1.11"
+  install = [ "." ]
+  ensure = "true"
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"
