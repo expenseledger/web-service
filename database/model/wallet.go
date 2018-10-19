@@ -16,23 +16,30 @@ type Wallet struct {
 	Balance   decimal.Decimal `db:"balance"`
 	CreatedAt time.Time       `db:"created_at"`
 	UpdatedAt time.Time       `db:"updated_at"`
-	DeletedAt time.Time       `db:"deleted_at"`
+	DeletedAt *time.Time      `db:"deleted_at"`
 }
 
 // Insert inserts a wallet into the database
-func (wallet Wallet) Insert() error {
+func (wallet Wallet) Insert() (*Wallet, error) {
 	query :=
 		`
 		INSERT INTO wallet (name, type, balance)
 		VALUES (:name, :type, :balance)
+		RETURNING *;
 		`
 	db := database.GetDB()
 
-	_, err := db.NamedExec(query, &wallet)
+	stmt, err := db.PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a wallet", err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	var createdWallet Wallet
+	if err := stmt.Get(&createdWallet, &wallet); err != nil {
+		log.Println("Error inserting a wallet", err)
+		return nil, err
+	}
+
+	return &createdWallet, nil
 }
