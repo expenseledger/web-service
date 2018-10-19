@@ -12,7 +12,7 @@ import (
 type Wallet struct {
 	ID        string          `db:"id"`
 	Name      string          `db:"name"`
-	Type      WalletType      `db:"type"`
+	Type      string          `db:"type"`
 	Balance   decimal.Decimal `db:"balance"`
 	CreatedAt time.Time       `db:"created_at"`
 	UpdatedAt time.Time       `db:"updated_at"`

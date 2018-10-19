@@ -3,7 +3,9 @@ package database
 import (
 	"fmt"
 	"log"
+	"strings"
 
+	"github.com/ExpenseLedger/expense-ledger-web-service/constant"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -27,9 +29,15 @@ func GetDB() *sqlx.DB {
 
 // CreateTables creates (if not exists) all the required tables
 func CreateTables() (err error) {
-	err = createConstantTable("wallet_type")
+	err = createWalletTypeEnum()
 	if err != nil {
-		log.Println("Error creating table: wallet_type", err)
+		log.Println("Error creating enum: wallet_type", err)
+		return
+	}
+
+	err = createTransactionTypeEnum()
+	if err != nil {
+		log.Println("Error creating enum: transaction_type", err)
 		return
 	}
 
@@ -45,25 +53,13 @@ func CreateTables() (err error) {
 		return
 	}
 
-	err = createConstantTable("transaction_type")
-	if err != nil {
-		log.Println("Error creating table: transaction_type", err)
-		return
-	}
-
 	err = createTransactionTable()
 	if err != nil {
 		log.Println("Error creating table: transaction", err)
 		return
 	}
 
-	err = createTriggerSetUpdatedAt(
-		"wallet_type",
-		"wallet",
-		"category",
-		"transaction_type",
-		"transaction",
-	)
+	err = createTriggerSetUpdatedAt("wallet", "category", "transaction")
 	if err != nil {
 		log.Println("Error creating trigger for updated_at", err)
 		return
@@ -83,6 +79,30 @@ func createConstantTable(tableName string) (err error) {
 	return
 }
 
+func createWalletTypeEnum() (err error) {
+	query :=
+		fmt.Sprintf(
+			"CREATE TYPE wallet_type AS ENUM ('%s', '%s', '%s');",
+			constant.WalletType.Cash,
+			constant.WalletType.BankAccount,
+			constant.WalletType.Credit,
+		)
+	_, err = db.Exec(query)
+	return shouldIgnoreError(err)
+}
+
+func createTransactionTypeEnum() (err error) {
+	query :=
+		fmt.Sprintf(
+			"CREATE TYPE transaction_type AS ENUM ('%s', '%s', '%s');",
+			constant.TransactionType.Income,
+			constant.TransactionType.Expense,
+			constant.TransactionType.Transfer,
+		)
+	_, err = db.Exec(query)
+	return shouldIgnoreError(err)
+}
+
 func createWalletTable() (err error) {
 	query :=
 		`
@@ -90,7 +110,7 @@ func createWalletTable() (err error) {
 		CREATE TABLE IF NOT EXISTS wallet (
 			id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
 			name character varying(20) NOT NULL,
-			type character varying(20) NOT NULL REFERENCES wallet_type,
+			type wallet_type NOT NULL,
 			balance NUMERIC(11, 2) DEFAULT 0.00,
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -110,7 +130,7 @@ func createTransactionTable() (err error) {
 			src_wallet uuid NOT NULL REFERENCES wallet,
 			dst_wallet uuid REFERENCES wallet,
 			amount NUMERIC(11, 2) DEFAULT 0.00,
-			type character varying(20) NOT NULL REFERENCES transaction_type,
+			type transaction_type NOT NULL,
 			category character varying(20) NOT NULL REFERENCES category,
 			description text,
 			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -157,4 +177,11 @@ func deleteExistingTriggers(tableNames []string) string {
 	}
 
 	return query
+}
+
+func shouldIgnoreError(err error) error {
+	if err != nil && strings.Contains(err.Error(), "already exists") {
+		return nil
+	}
+	return err
 }
