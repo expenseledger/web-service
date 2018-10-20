@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/model"
+	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/shopspring/decimal"

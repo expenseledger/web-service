@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/controller"
-	"github.com/ExpenseLedger/expense-ledger-web-service/database"
+	"github.com/expenseledger/web-service/controller"
+	"github.com/expenseledger/web-service/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )

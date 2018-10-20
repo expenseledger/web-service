@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/database"
+	"github.com/expenseledger/web-service/database"
 	"github.com/shopspring/decimal"
 )
 
