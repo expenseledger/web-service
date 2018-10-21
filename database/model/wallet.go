@@ -18,6 +18,9 @@ type Wallet struct {
 	DeletedAt *time.Time      `db:"deleted_at"`
 }
 
+// Wallets is defined just to be used as a receiver
+type Wallets []Wallet
+
 // Insert inserts a wallet into the database
 func (wallet *Wallet) Insert() error {
 	query :=
@@ -49,7 +52,7 @@ func (wallet *Wallet) Insert() error {
 }
 
 // OneByName ...
-func (wallet *Wallet) OneByName(name string) error {
+func (wallet *Wallet) One(name string) error {
 	query :=
 		`
 		SELECT * FROM wallet
@@ -94,4 +97,27 @@ func (wallet *Wallet) Delete(name string) error {
 	}
 
 	return nil
+}
+
+// All gets all wallets
+func (wallets *Wallets) All() (int, error) {
+	query :=
+		`
+		SELECT * FROM wallet
+		WHERE deleted_at IS NULL;
+		`
+	db := database.GetDB()
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting all wallets", err)
+		return 0, err
+	}
+
+	if err := stmt.Select(wallets); err != nil {
+		log.Println("Error selecting all wallets", err)
+		return 0, err
+	}
+
+	return len(*wallets), nil
 }

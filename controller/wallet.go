@@ -19,6 +19,11 @@ type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
+type itemList struct {
+	Length int           `json:"length"`
+	Items  model.Wallets `json:"items"`
+}
+
 func walletCreate(context *gin.Context) {
 	var form walletCreateForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -95,6 +100,29 @@ func walletDelete(context *gin.Context) {
 	context.JSON(
 		http.StatusOK,
 		buildSuccessResponse(wallet),
+	)
+	return
+}
+
+func walletList(context *gin.Context) {
+	var wallets model.Wallets
+	length, err := wallets.List()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	items := itemList{
+		Length: length,
+		Items:  wallets,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
 	)
 	return
 }
