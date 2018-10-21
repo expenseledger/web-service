@@ -1,1 +1,1 @@
-web: expense-ledger-web-service
+web: web-service

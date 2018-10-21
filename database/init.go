@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/constant"
+	"github.com/expenseledger/web-service/constant"
 	"github.com/jmoiron/sqlx"
 )
 

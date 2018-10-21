@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/model"
+	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/shopspring/decimal"
@@ -13,6 +13,10 @@ type walletCreateForm struct {
 	Name    string          `json:"name" binding:"required"`
 	Type    string          `json:"type" binding:"required"`
 	Balance decimal.Decimal `json:"balance"`
+}
+
+type walletGetForm struct {
+	Name string `json:"name" binding:"required"`
 }
 
 func walletCreate(context *gin.Context) {
@@ -28,8 +32,7 @@ func walletCreate(context *gin.Context) {
 	var wallet model.Wallet
 	copier.Copy(&wallet, &form)
 
-	createdWallet, err := wallet.Create()
-	if err != nil {
+	if err := wallet.Create(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -39,7 +42,33 @@ func walletCreate(context *gin.Context) {
 
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(createdWallet),
+		buildSuccessResponse(wallet),
+	)
+	return
+}
+
+func walletGet(context *gin.Context) {
+	var form walletGetForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	var wallet model.Wallet
+	if err := wallet.Get(form.Name); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(wallet),
 	)
 	return
 }

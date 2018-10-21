@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ExpenseLedger/expense-ledger-web-service/database"
+	"github.com/expenseledger/web-service/database"
 	"github.com/shopspring/decimal"
 )
 
@@ -19,7 +19,7 @@ type Wallet struct {
 }
 
 // Insert inserts a wallet into the database
-func (wallet Wallet) Insert() (*Wallet, error) {
+func (wallet *Wallet) Insert() error {
 	query :=
 		`
 		INSERT INTO wallet (name, type, balance)
@@ -31,14 +31,36 @@ func (wallet Wallet) Insert() (*Wallet, error) {
 	stmt, err := db.PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a wallet", err)
-		return nil, err
+		return err
 	}
 
-	var createdWallet Wallet
-	if err := stmt.Get(&createdWallet, &wallet); err != nil {
+	if err := stmt.Get(wallet, wallet); err != nil {
 		log.Println("Error inserting a wallet", err)
-		return nil, err
+		return err
 	}
 
-	return &createdWallet, nil
+	return nil
+}
+
+// OneByName ...
+func (wallet *Wallet) OneByName(name string) error {
+	query :=
+		`
+		SELECT * FROM wallet
+		WHERE name=$1;
+		`
+	db := database.GetDB()
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting a wallet", err)
+		return err
+	}
+
+	if err := stmt.Get(wallet, name); err != nil {
+		log.Println("Error selecting a wallet", err)
+		return err
+	}
+
+	return nil
 }
