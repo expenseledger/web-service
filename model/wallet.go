@@ -22,8 +22,7 @@ func (wallet *Wallet) Create() error {
 
 	copier.Copy(&dbWallet, &wallet)
 
-	err := dbWallet.Insert()
-	if err != nil {
+	if err := dbWallet.Insert(); err != nil {
 		return err
 	}
 
@@ -34,11 +33,18 @@ func (wallet *Wallet) Create() error {
 // Get ...
 func (wallet *Wallet) Get(name string) error {
 	var dbWallet dbmodel.Wallet
+	if err := dbWallet.OneByName(name); err != nil {
+		return err
+	}
 
-	copier.Copy(&dbWallet, &wallet)
+	copier.Copy(wallet, &dbWallet)
+	return nil
+}
 
-	err := dbWallet.OneByName(name)
-	if err != nil {
+// Delete ...
+func (wallet *Wallet) Delete(name string) error {
+	var dbWallet dbmodel.Wallet
+	if err := dbWallet.Delete(name); err != nil {
 		return err
 	}
 

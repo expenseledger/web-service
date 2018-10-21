@@ -24,6 +24,12 @@ func (wallet *Wallet) Insert() error {
 		`
 		INSERT INTO wallet (name, type, balance)
 		VALUES (:name, :type, :balance)
+
+		ON CONFLICT (name)
+			DO UPDATE
+			SET (type, balance, deleted_at)=(:type, :balance, NULL)
+			WHERE wallet.deleted_at IS NOT NULL
+
 		RETURNING *;
 		`
 	db := database.GetDB()
@@ -47,7 +53,7 @@ func (wallet *Wallet) OneByName(name string) error {
 	query :=
 		`
 		SELECT * FROM wallet
-		WHERE name=$1;
+		WHERE name=$1 AND deleted_at IS NULL;
 		`
 	db := database.GetDB()
 
@@ -59,6 +65,31 @@ func (wallet *Wallet) OneByName(name string) error {
 
 	if err := stmt.Get(wallet, name); err != nil {
 		log.Println("Error selecting a wallet", err)
+		return err
+	}
+
+	return nil
+}
+
+// Delete ...
+func (wallet *Wallet) Delete(name string) error {
+	query :=
+		`
+		UPDATE wallet
+		SET deleted_at=now()
+		WHERE name=$1 AND deleted_at IS NULL
+		RETURNING *;
+		`
+	db := database.GetDB()
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error deleting a wallet", err)
+		return err
+	}
+
+	if err := stmt.Get(wallet, name); err != nil {
+		log.Println("Error deleting a wallet", err)
 		return err
 	}
 
