@@ -17,6 +17,7 @@ func InitRoutes() *gin.Engine {
 	walletRoute.POST("/get", walletGet)
 	walletRoute.POST("/delete", walletDelete)
 	walletRoute.POST("/list", walletList)
+	walletRoute.POST("/listTypes", walletListTypes)
 
 	return router
 }

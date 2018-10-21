@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -20,8 +21,8 @@ type walletIdentifyForm struct {
 }
 
 type itemList struct {
-	Length int           `json:"length"`
-	Items  model.Wallets `json:"items"`
+	Length int         `json:"length"`
+	Items  interface{} `json:"items"`
 }
 
 func walletCreate(context *gin.Context) {
@@ -118,6 +119,20 @@ func walletList(context *gin.Context) {
 	items := itemList{
 		Length: length,
 		Items:  wallets,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
+	)
+	return
+}
+
+func walletListTypes(context *gin.Context) {
+	types := constant.ListWalletTypes()
+	items := itemList{
+		Length: len(types),
+		Items:  types,
 	}
 
 	context.JSON(
