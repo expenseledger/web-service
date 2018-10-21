@@ -15,6 +15,10 @@ type walletCreateForm struct {
 	Balance decimal.Decimal `json:"balance"`
 }
 
+type walletGetForm struct {
+	Name string `json:"name" binding:"required"`
+}
+
 func walletCreate(context *gin.Context) {
 	var form walletCreateForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -29,6 +33,32 @@ func walletCreate(context *gin.Context) {
 	copier.Copy(&wallet, &form)
 
 	if err := wallet.Create(); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(wallet),
+	)
+	return
+}
+
+func walletGet(context *gin.Context) {
+	var form walletGetForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	var wallet model.Wallet
+	if err := wallet.Get(form.Name); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),

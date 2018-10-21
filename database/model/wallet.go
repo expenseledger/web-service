@@ -41,3 +41,26 @@ func (wallet *Wallet) Insert() error {
 
 	return nil
 }
+
+// OneByName ...
+func (wallet *Wallet) OneByName(name string) error {
+	query :=
+		`
+		SELECT * FROM wallet
+		WHERE name=$1;
+		`
+	db := database.GetDB()
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting a wallet", err)
+		return err
+	}
+
+	if err := stmt.Get(wallet, name); err != nil {
+		log.Println("Error selecting a wallet", err)
+		return err
+	}
+
+	return nil
+}

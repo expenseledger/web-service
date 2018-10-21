@@ -30,3 +30,18 @@ func (wallet *Wallet) Create() error {
 	copier.Copy(wallet, &dbWallet)
 	return nil
 }
+
+// Get ...
+func (wallet *Wallet) Get(name string) error {
+	var dbWallet dbmodel.Wallet
+
+	copier.Copy(&dbWallet, &wallet)
+
+	err := dbWallet.OneByName(name)
+	if err != nil {
+		return err
+	}
+
+	copier.Copy(wallet, &dbWallet)
+	return nil
+}
