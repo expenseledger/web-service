@@ -16,6 +16,9 @@ type Wallet struct {
 	UpdatedAt time.Time       `json:"updated_at"`
 }
 
+// Wallets is defined just to be used as a receiver
+type Wallets []Wallet
+
 // Create ...
 func (wallet *Wallet) Create() error {
 	var dbWallet dbmodel.Wallet
@@ -33,7 +36,7 @@ func (wallet *Wallet) Create() error {
 // Get ...
 func (wallet *Wallet) Get(name string) error {
 	var dbWallet dbmodel.Wallet
-	if err := dbWallet.OneByName(name); err != nil {
+	if err := dbWallet.One(name); err != nil {
 		return err
 	}
 
@@ -50,4 +53,17 @@ func (wallet *Wallet) Delete(name string) error {
 
 	copier.Copy(wallet, &dbWallet)
 	return nil
+}
+
+// List ...
+func (wallets *Wallets) List() (int, error) {
+	var dbWallets dbmodel.Wallets
+
+	length, err := dbWallets.All()
+	if err != nil {
+		return 0, err
+	}
+
+	copier.Copy(wallets, &dbWallets)
+	return length, nil
 }
