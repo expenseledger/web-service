@@ -141,3 +141,43 @@ func walletListTypes(context *gin.Context) {
 	)
 	return
 }
+
+func walletInit(context *gin.Context) {
+	wallets := model.Wallets{
+		model.Wallet{
+			Name:    "Cash",
+			Type:    constant.WalletType.Cash,
+			Balance: decimalFromStringIgnoreError("0.0"),
+		},
+		model.Wallet{
+			Name:    "My Bank",
+			Type:    constant.WalletType.BankAccount,
+			Balance: decimalFromStringIgnoreError("0.0"),
+		},
+	}
+
+	length, err := wallets.Init()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	items := itemList{
+		Length: length,
+		Items:  wallets,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
+	)
+	return
+}
+
+func decimalFromStringIgnoreError(num string) decimal.Decimal {
+	d, _ := decimal.NewFromString("0.0")
+	return d
+}

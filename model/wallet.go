@@ -67,3 +67,16 @@ func (wallets *Wallets) List() (int, error) {
 	copier.Copy(wallets, &dbWallets)
 	return length, nil
 }
+
+// Init insert default wallets
+func (wallets *Wallets) Init() (int, error) {
+	var dbWallets dbmodel.Wallets
+	copier.Copy(&dbWallets, wallets)
+
+	length, err := dbWallets.BatchInsert()
+	if err != nil {
+		return 0, err
+	}
+
+	return length, nil
+}
