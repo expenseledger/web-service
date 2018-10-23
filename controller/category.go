@@ -3,25 +3,17 @@ package controller
 import (
 	"net/http"
 
-	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
-	"github.com/shopspring/decimal"
 )
 
-type walletCreateForm struct {
-	Name    string          `json:"name" binding:"required"`
-	Type    string          `json:"type" binding:"required"`
-	Balance decimal.Decimal `json:"balance"`
-}
-
-type walletIdentifyForm struct {
+type categoryIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-func walletCreate(context *gin.Context) {
-	var form walletCreateForm
+func categoryCreate(context *gin.Context) {
+	var form categoryIdentifyForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -30,10 +22,10 @@ func walletCreate(context *gin.Context) {
 		return
 	}
 
-	var wallet model.Wallet
-	copier.Copy(&wallet, &form)
+	var category model.Category
+	copier.Copy(&category, &form)
 
-	if err := wallet.Create(); err != nil {
+	if err := category.Create(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -43,13 +35,13 @@ func walletCreate(context *gin.Context) {
 
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(wallet),
+		buildSuccessResponse(category),
 	)
 	return
 }
 
-func walletGet(context *gin.Context) {
-	var form walletIdentifyForm
+func categoryGet(context *gin.Context) {
+	var form categoryIdentifyForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -58,8 +50,8 @@ func walletGet(context *gin.Context) {
 		return
 	}
 
-	var wallet model.Wallet
-	if err := wallet.Get(form.Name); err != nil {
+	var category model.Category
+	if err := category.Get(form.Name); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -69,13 +61,13 @@ func walletGet(context *gin.Context) {
 
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(wallet),
+		buildSuccessResponse(category),
 	)
 	return
 }
 
-func walletDelete(context *gin.Context) {
-	var form walletIdentifyForm
+func categoryDelete(context *gin.Context) {
+	var form categoryIdentifyForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -84,8 +76,8 @@ func walletDelete(context *gin.Context) {
 		return
 	}
 
-	var wallet model.Wallet
-	if err := wallet.Delete(form.Name); err != nil {
+	var category model.Category
+	if err := category.Delete(form.Name); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -95,14 +87,14 @@ func walletDelete(context *gin.Context) {
 
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(wallet),
+		buildSuccessResponse(category),
 	)
 	return
 }
 
-func walletList(context *gin.Context) {
-	var wallets model.Wallets
-	length, err := wallets.List()
+func categoryList(context *gin.Context) {
+	var categories model.Categories
+	length, err := categories.List()
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -113,21 +105,7 @@ func walletList(context *gin.Context) {
 
 	items := itemList{
 		Length: length,
-		Items:  wallets,
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
-	return
-}
-
-func walletListTypes(context *gin.Context) {
-	types := constant.ListWalletTypes()
-	items := itemList{
-		Length: len(types),
-		Items:  types,
+		Items:  categories,
 	}
 
 	context.JSON(
