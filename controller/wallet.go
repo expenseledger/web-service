@@ -173,6 +173,6 @@ func walletInit(context *gin.Context) {
 }
 
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
-	d, _ := decimal.NewFromString("0.0")
+	d, _ := decimal.NewFromString(num)
 	return d
 }
