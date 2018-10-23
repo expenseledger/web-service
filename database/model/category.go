@@ -24,6 +24,12 @@ func (category *Category) Insert() error {
 		`
 		INSERT INTO category (name)
 		VALUES (:name)
+
+		ON CONFLICT (name)
+			DO UPDATE
+			SET deleted_at=NULL
+			WHERE category.deleted_at IS NOT NULL
+
 		RETURNING *;
 		`
 	db := database.GetDB()
@@ -107,6 +113,25 @@ func (categories *Categories) All() (int, error) {
 
 	if err := stmt.Select(categories); err != nil {
 		log.Println("Error selecting all categories", err)
+		return 0, err
+	}
+
+	return len(*categories), nil
+}
+
+// BatchInsert ...
+func (categories *Categories) BatchInsert() (int, error) {
+	var err error
+	for index, category := range *categories {
+		err = category.Insert()
+		if err != nil {
+			break
+		}
+		[]Category(*categories)[index] = category
+	}
+
+	if err != nil {
+		log.Println("Error doing batch insertion categories", err)
 		return 0, err
 	}
 
