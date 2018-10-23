@@ -21,7 +21,7 @@ type Wallet struct {
 // Wallets is defined just to be used as a receiver
 type Wallets []Wallet
 
-// Insert inserts a wallet into the database
+// Insert ...
 func (wallet *Wallet) Insert() error {
 	query :=
 		`
@@ -51,7 +51,7 @@ func (wallet *Wallet) Insert() error {
 	return nil
 }
 
-// OneByName ...
+// One ...
 func (wallet *Wallet) One(name string) error {
 	query :=
 		`
