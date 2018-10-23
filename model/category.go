@@ -61,3 +61,16 @@ func (categories *Categories) List() (int, error) {
 	copier.Copy(categories, &dbCategories)
 	return length, nil
 }
+
+// Init insert default categories
+func (categories *Categories) Init() (int, error) {
+	var dbCategories dbmodel.Categories
+	copier.Copy(&dbCategories, categories)
+
+	length, err := dbCategories.BatchInsert()
+	if err != nil {
+		return 0, err
+	}
+
+	return length, nil
+}

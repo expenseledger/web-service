@@ -25,6 +25,7 @@ func InitRoutes() *gin.Engine {
 	categoryRoute.POST("/get", categoryGet)
 	categoryRoute.POST("/delete", categoryDelete)
 	categoryRoute.POST("/list", categoryList)
+	categoryRoute.POST("/init", categoryInit)
 
 	return router
 }

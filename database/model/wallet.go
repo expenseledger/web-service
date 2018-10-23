@@ -124,7 +124,6 @@ func (wallets *Wallets) All() (int, error) {
 
 // BatchInsert ...
 func (wallets *Wallets) BatchInsert() (int, error) {
-	log.Println(*wallets)
 	var err error
 	for index, wallet := range *wallets {
 		err = wallet.Insert()

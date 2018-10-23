@@ -112,3 +112,22 @@ func (categories *Categories) All() (int, error) {
 
 	return len(*categories), nil
 }
+
+// BatchInsert ...
+func (categories *Categories) BatchInsert() (int, error) {
+	var err error
+	for index, category := range *categories {
+		err = category.Insert()
+		if err != nil {
+			break
+		}
+		[]Category(*categories)[index] = category
+	}
+
+	if err != nil {
+		log.Println("Error doing batch insertion categories", err)
+		return 0, err
+	}
+
+	return len(*categories), nil
+}
