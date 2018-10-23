@@ -24,6 +24,12 @@ func (category *Category) Insert() error {
 		`
 		INSERT INTO category (name)
 		VALUES (:name)
+
+		ON CONFLICT (name)
+			DO UPDATE
+			SET deleted_at=NULL
+			WHERE category.deleted_at IS NOT NULL
+
 		RETURNING *;
 		`
 	db := database.GetDB()
