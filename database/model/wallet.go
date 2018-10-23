@@ -121,3 +121,23 @@ func (wallets *Wallets) All() (int, error) {
 
 	return len(*wallets), nil
 }
+
+// BatchInsert ...
+func (wallets *Wallets) BatchInsert() (int, error) {
+	log.Println(*wallets)
+	var err error
+	for index, wallet := range *wallets {
+		err = wallet.Insert()
+		if err != nil {
+			break
+		}
+		[]Wallet(*wallets)[index] = wallet
+	}
+
+	if err != nil {
+		log.Println("Error doing batch insertion wallets", err)
+		return 0, err
+	}
+
+	return len(*wallets), nil
+}
