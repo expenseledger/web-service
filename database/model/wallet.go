@@ -1,10 +1,9 @@
-package dbmodel
+package model
 
 import (
 	"log"
 	"time"
 
-	"github.com/expenseledger/web-service/database"
 	"github.com/shopspring/decimal"
 )
 
@@ -35,7 +34,6 @@ func (wallet *Wallet) Insert() error {
 
 		RETURNING *;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.PrepareNamed(query)
 	if err != nil {
@@ -58,7 +56,6 @@ func (wallet *Wallet) One(name string) error {
 		SELECT * FROM wallet
 		WHERE name=$1 AND deleted_at IS NULL;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
@@ -83,7 +80,6 @@ func (wallet *Wallet) Delete(name string) error {
 		WHERE name=$1 AND deleted_at IS NULL
 		RETURNING *;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
@@ -106,7 +102,6 @@ func (wallets *Wallets) All() (int, error) {
 		SELECT * FROM wallet
 		WHERE deleted_at IS NULL;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
