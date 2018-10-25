@@ -5,8 +5,13 @@ import (
 	"log"
 	"strings"
 
+	"github.com/expenseledger/web-service/config"
+	configdb "github.com/expenseledger/web-service/config/database"
 	"github.com/expenseledger/web-service/constant"
 	"github.com/jmoiron/sqlx"
+
+	// This is just a PostgreSQL driver for sqlx package
+	_ "github.com/lib/pq"
 )
 
 var db *sqlx.DB
@@ -14,12 +19,28 @@ var db *sqlx.DB
 // Init MUST be called before any package's operations
 // @TODO: fix this lame way to initial a package. It's highly depends on
 // the order of execution because, somehow, it needs dbinfo.
-func Init(dbinfo string) (err error) {
+func init() {
+	var (
+		dbinfo string
+		err    error
+	)
+
+	if config.Mode == "DEVELOPMENT" {
+		dbinfo = fmt.Sprintf(
+			"user=%s password=%s dbname=%s port=%s sslmode=disable",
+			configdb.DBUser,
+			configdb.DBPswd,
+			configdb.DBName,
+			configdb.DBPort,
+		)
+	} else {
+		dbinfo = configdb.DBURL
+	}
+
 	db, err = sqlx.Open("postgres", dbinfo)
 	if err != nil {
-		log.Println("Error opening connection to the database", err)
+		log.Fatal("Error opening connection to the database", err)
 	}
-	return
 }
 
 // GetDB returns an (probably) initialized instance of sqlx.DB

@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/expenseledger/web-service/database/model"
+	dbmodel "github.com/expenseledger/web-service/database/model"
 	"github.com/jinzhu/copier"
 )
 

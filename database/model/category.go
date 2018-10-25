@@ -1,10 +1,8 @@
-package dbmodel
+package model
 
 import (
 	"log"
 	"time"
-
-	"github.com/expenseledger/web-service/database"
 )
 
 // Category the structure represents a stored category on database
@@ -32,7 +30,6 @@ func (category *Category) Insert() error {
 
 		RETURNING *;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.PrepareNamed(query)
 	if err != nil {
@@ -55,7 +52,6 @@ func (category *Category) One(name string) error {
 		SELECT * FROM category
 		WHERE name=$1 AND deleted_at IS NULL;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
@@ -80,7 +76,6 @@ func (category *Category) Delete(name string) error {
 		WHERE name=$1 AND deleted_at IS NULL
 		RETURNING *;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
@@ -103,7 +98,6 @@ func (categories *Categories) All() (int, error) {
 		SELECT * FROM category
 		WHERE deleted_at IS NULL;
 		`
-	db := database.GetDB()
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
