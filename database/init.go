@@ -16,9 +16,6 @@ import (
 
 var db *sqlx.DB
 
-// Init MUST be called before any package's operations
-// @TODO: fix this lame way to initial a package. It's highly depends on
-// the order of execution because, somehow, it needs dbinfo.
 func init() {
 	var (
 		dbinfo string
