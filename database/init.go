@@ -25,7 +25,9 @@ func init() {
 		err    error
 	)
 
-	if config.Mode == "DEVELOPMENT" {
+	if config.Mode == "PRODUCTION" {
+		dbinfo = configdb.DBURL
+	} else {
 		dbinfo = fmt.Sprintf(
 			"user=%s password=%s dbname=%s port=%s sslmode=disable",
 			configdb.DBUser,
@@ -33,8 +35,6 @@ func init() {
 			configdb.DBName,
 			configdb.DBPort,
 		)
-	} else {
-		dbinfo = configdb.DBURL
 	}
 
 	db, err = sqlx.Open("postgres", dbinfo)
