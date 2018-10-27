@@ -135,3 +135,25 @@ func (wallets *Wallets) BatchInsert() (int, error) {
 
 	return len(*wallets), nil
 }
+
+// DeleteAll ...
+func (wallets *Wallets) DeleteAll() (int, error) {
+	query :=
+		`
+		DELETE FROM wallet
+		RETURNING *;
+		`
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting all wallets", err)
+		return 0, err
+	}
+
+	if err := stmt.Select(wallets); err != nil {
+		log.Println("Error selecting all wallets", err)
+		return 0, err
+	}
+
+	return len(*wallets), nil
+}

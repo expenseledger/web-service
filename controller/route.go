@@ -1,6 +1,9 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/expenseledger/web-service/config"
+	"github.com/gin-gonic/gin"
+)
 
 // Route data structure to hold a path and the corresponding handler
 type Route struct {
@@ -19,6 +22,10 @@ func InitRoutes() *gin.Engine {
 	walletRoute.POST("/list", walletList)
 	walletRoute.POST("/listTypes", walletListTypes)
 	walletRoute.POST("/init", walletInit)
+
+	if config.Mode != "PRODUCTION" {
+		walletRoute.POST("/clear", walletClear)
+	}
 
 	categoryRoute := router.Group("/category")
 	categoryRoute.POST("/create", categoryCreate)
