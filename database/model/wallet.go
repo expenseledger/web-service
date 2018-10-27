@@ -146,12 +146,12 @@ func (wallets *Wallets) DeleteAll() (int, error) {
 
 	stmt, err := db.Preparex(query)
 	if err != nil {
-		log.Println("Error selecting all wallets", err)
+		log.Println("Error deleting all wallets", err)
 		return 0, err
 	}
 
 	if err := stmt.Select(wallets); err != nil {
-		log.Println("Error selecting all wallets", err)
+		log.Println("Error deleting all wallets", err)
 		return 0, err
 	}
 

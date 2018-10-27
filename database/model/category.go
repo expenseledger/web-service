@@ -131,3 +131,25 @@ func (categories *Categories) BatchInsert() (int, error) {
 
 	return len(*categories), nil
 }
+
+// DeleteAll ...
+func (categories *Categories) DeleteAll() (int, error) {
+	query :=
+		`
+		DELETE FROM category
+		RETURNING *;
+		`
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error deleting all categories", err)
+		return 0, err
+	}
+
+	if err := stmt.Select(categories); err != nil {
+		log.Println("Error deleting all categories", err)
+		return 0, err
+	}
+
+	return len(*categories), nil
+}
