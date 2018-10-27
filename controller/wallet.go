@@ -172,6 +172,29 @@ func walletInit(context *gin.Context) {
 	return
 }
 
+func walletClear(context *gin.Context) {
+	var wallets model.Wallets
+	length, err := wallets.Clear()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	items := itemList{
+		Length: length,
+		Items:  wallets,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
+	)
+	return
+}
+
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	d, _ := decimal.NewFromString(num)
 	return d

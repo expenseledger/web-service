@@ -1,0 +1,567 @@
+{
+	"info": {
+		"_postman_id": "70a6669a-b98a-4982-af35-7bf97067a535",
+		"name": "expense-ledger-category",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CategoryClear_Always_DeletesAllCetegories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e330f90-a1bd-453c-8887-293cb8fe7e9a",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryInit_WithEmptyTable_Creates4Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83336dcd-99d9-4a93-99eb-4757f2149173",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"4 categories are inserted\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(4);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryCreate_WithNonexistentName_CreatesACategory",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "35036edd-90c9-4de1-9872-e7bace651644",
+						"exec": [
+							"pm.environment.set(\"category_name\", \"Entertainment\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f6a46a2a-b5f9-4eea-a9dc-f805b590bb44",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"category_name\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryCreate_WithExistingName_Fails",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "35036edd-90c9-4de1-9872-e7bace651644",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f6a46a2a-b5f9-4eea-a9dc-f805b590bb44",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryGet_WithExistingName_ReturnsACategory",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "45ccc393-ac51-4b0b-8e94-3d4187b8f7c3",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"Food And Drink\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "90e309cf-05d6-4da3-b00f-2ca74e57fb45",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name, type}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"category_name\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryGet_WithNonexistentName_Fails",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "45ccc393-ac51-4b0b-8e94-3d4187b8f7c3",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"Food And Drink\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "90e309cf-05d6-4da3-b00f-2ca74e57fb45",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"No Category\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryDelete_WithExistingName_DeletesAndReturnsACategory",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b8446c84-ba77-4aa3-bc2c-df06eaeda806",
+						"exec": [
+							"pm.environment.set(\"category_name\", \"Food And Drink\");",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5c9b2fae-ec9b-44a4-a7b2-9724d92180fc",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name, type}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"category_name\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryDelete_WithExistingName_Fails",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b8446c84-ba77-4aa3-bc2c-df06eaeda806",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5c9b2fae-ec9b-44a4-a7b2-9724d92180fc",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryList_Always_ReturnsAllWallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5b1d6e02-8000-4fe1-92cf-6ccd56a2ff0f",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"2 wallets are returned\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(4);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"list"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

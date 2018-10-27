@@ -68,7 +68,7 @@ func (wallets *Wallets) List() (int, error) {
 	return length, nil
 }
 
-// Init insert default wallets
+// Init inserts default wallets
 func (wallets *Wallets) Init() (int, error) {
 	var dbWallets dbmodel.Wallets
 	copier.Copy(&dbWallets, wallets)
@@ -78,5 +78,18 @@ func (wallets *Wallets) Init() (int, error) {
 		return 0, err
 	}
 
+	return length, nil
+}
+
+// Clear ...
+func (wallets *Wallets) Clear() (int, error) {
+	var dbWallets dbmodel.Wallets
+
+	length, err := dbWallets.DeleteAll()
+	if err != nil {
+		return 0, err
+	}
+
+	copier.Copy(wallets, &dbWallets)
 	return length, nil
 }
