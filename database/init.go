@@ -93,8 +93,8 @@ func createConstantTable(tableName string) (err error) {
 	query :=
 		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
 			`name character varying(20) NOT NULL PRIMARY KEY,
-			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			deleted_at timestamp with time zone);`
 	_, err = db.Exec(query)
 	return
@@ -109,7 +109,7 @@ func createWalletTypeEnum() (err error) {
 			constant.WalletType.Credit,
 		)
 	_, err = db.Exec(query)
-	return shouldIgnoreError(err)
+	return filterError(err)
 }
 
 func createTransactionTypeEnum() (err error) {
@@ -121,7 +121,7 @@ func createTransactionTypeEnum() (err error) {
 			constant.TransactionType.Transfer,
 		)
 	_, err = db.Exec(query)
-	return shouldIgnoreError(err)
+	return filterError(err)
 }
 
 func createWalletTable() (err error) {
@@ -130,9 +130,9 @@ func createWalletTable() (err error) {
 		CREATE TABLE IF NOT EXISTS wallet (
 			name character varying(20) NOT NULL PRIMARY KEY,
 			type wallet_type NOT NULL,
-			balance NUMERIC(11, 2) DEFAULT 0.00,
-			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
+			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			deleted_at timestamp with time zone
 		);
 		`
@@ -149,12 +149,13 @@ func createTransactionTable() (err error) {
 			id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
 			src_wallet character varying(20) NOT NULL REFERENCES wallet,
 			dst_wallet character varying(20) REFERENCES wallet,
-			amount NUMERIC(11, 2) DEFAULT 0.00,
+			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			type transaction_type NOT NULL,
 			category character varying(20) NOT NULL REFERENCES category,
-			description text,
-			created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+			description text NOT NULL DEFAULT '',
+			occured_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			deleted_at timestamp with time zone,
 			CHECK (dst_wallet <> src_wallet)
 		);
@@ -199,7 +200,7 @@ func deleteExistingTriggers(tableNames []string) string {
 	return query
 }
 
-func shouldIgnoreError(err error) error {
+func filterError(err error) error {
 	if err != nil && strings.Contains(err.Error(), "already exists") {
 		return nil
 	}
