@@ -536,7 +536,7 @@
 			"response": []
 		},
 		{
-			"name": "WalletList_Always_ReturnsAllWalletTypes",
+			"name": "WalletListTypes_Always_ReturnsAllWalletTypes",
 			"event": [
 				{
 					"listen": "test",
