@@ -74,3 +74,16 @@ func (categories *Categories) Init() (int, error) {
 
 	return length, nil
 }
+
+// Clear ...
+func (categories *Categories) Clear() (int, error) {
+	var dbCategories dbmodel.Categories
+
+	length, err := dbCategories.DeleteAll()
+	if err != nil {
+		return 0, err
+	}
+
+	copier.Copy(categories, &dbCategories)
+	return length, nil
+}

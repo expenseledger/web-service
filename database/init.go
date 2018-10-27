@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/expenseledger/web-service/config"
-	configdb "github.com/expenseledger/web-service/config/database"
+	dbconfig "github.com/expenseledger/web-service/config/database"
 	"github.com/expenseledger/web-service/constant"
 	"github.com/jmoiron/sqlx"
 
@@ -16,25 +16,25 @@ import (
 
 var db *sqlx.DB
 
-// Init MUST be called before any package's operations
-// @TODO: fix this lame way to initial a package. It's highly depends on
-// the order of execution because, somehow, it needs dbinfo.
 func init() {
 	var (
 		dbinfo string
 		err    error
 	)
 
-	if config.Mode == "DEVELOPMENT" {
+	configs := config.GetConfigs()
+	dbconfigs := dbconfig.GetConfigs()
+
+	if configs.Mode == "PRODUCTION" {
+		dbinfo = dbconfigs.DBURL
+	} else {
 		dbinfo = fmt.Sprintf(
 			"user=%s password=%s dbname=%s port=%s sslmode=disable",
-			configdb.DBUser,
-			configdb.DBPswd,
-			configdb.DBName,
-			configdb.DBPort,
+			dbconfigs.DBUser,
+			dbconfigs.DBPswd,
+			dbconfigs.DBName,
+			dbconfigs.DBPort,
 		)
-	} else {
-		dbinfo = configdb.DBURL
 	}
 
 	db, err = sqlx.Open("postgres", dbinfo)

@@ -151,3 +151,26 @@ func categoryInit(context *gin.Context) {
 	)
 	return
 }
+
+func categoryClear(context *gin.Context) {
+	var categories model.Categories
+	length, err := categories.Clear()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	items := itemList{
+		Length: length,
+		Items:  categories,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
+	)
+	return
+}

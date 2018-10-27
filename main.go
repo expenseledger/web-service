@@ -19,8 +19,9 @@ func main() {
 	}
 
 	router := controller.InitRoutes()
+	configs := config.GetConfigs()
 
-	err = router.Run(":" + config.Port)
+	err = router.Run(":" + configs.Port)
 	if err != nil {
 		log.Fatal("Error running the server", err)
 	}
