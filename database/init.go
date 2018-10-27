@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/expenseledger/web-service/config"
-	configdb "github.com/expenseledger/web-service/config/database"
+	dbconfig "github.com/expenseledger/web-service/config/database"
 	"github.com/expenseledger/web-service/constant"
 	"github.com/jmoiron/sqlx"
 
@@ -22,15 +22,18 @@ func init() {
 		err    error
 	)
 
-	if config.Mode == "PRODUCTION" {
-		dbinfo = configdb.DBURL
+	configs := config.GetConfigs()
+	dbconfigs := dbconfig.GetConfigs()
+
+	if configs.Mode == "PRODUCTION" {
+		dbinfo = dbconfigs.DBURL
 	} else {
 		dbinfo = fmt.Sprintf(
 			"user=%s password=%s dbname=%s port=%s sslmode=disable",
-			configdb.DBUser,
-			configdb.DBPswd,
-			configdb.DBName,
-			configdb.DBPort,
+			dbconfigs.DBUser,
+			dbconfigs.DBPswd,
+			dbconfigs.DBName,
+			dbconfigs.DBPort,
 		)
 	}
 

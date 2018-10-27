@@ -7,10 +7,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var (
+type configFields struct {
 	Mode string
 	Port string
-)
+}
+
+var configs configFields
 
 func init() {
 	err := godotenv.Load()
@@ -18,10 +20,15 @@ func init() {
 		log.Fatal("Error loading .env file", err)
 	}
 
-	Mode = os.Getenv("MODE")
-	Port = os.Getenv("PORT")
+	configs.Mode = os.Getenv("MODE")
+	configs.Port = os.Getenv("PORT")
 
-	if Port == "" {
-		Port = "3000"
+	if configs.Port == "" {
+		configs.Port = "3000"
 	}
+}
+
+// GetConfigs ...
+func GetConfigs() configFields {
+	return configs
 }

@@ -13,6 +13,7 @@ type Route struct {
 
 // InitRoutes ...
 func InitRoutes() *gin.Engine {
+	configs := config.GetConfigs()
 	router := gin.Default()
 
 	walletRoute := router.Group("/wallet")
@@ -23,7 +24,7 @@ func InitRoutes() *gin.Engine {
 	walletRoute.POST("/listTypes", walletListTypes)
 	walletRoute.POST("/init", walletInit)
 
-	if config.Mode != "PRODUCTION" {
+	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", walletClear)
 	}
 

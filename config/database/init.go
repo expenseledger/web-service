@@ -6,21 +6,30 @@ import (
 	"github.com/expenseledger/web-service/config"
 )
 
-var (
+type configFields struct {
 	DBUser string
 	DBPswd string
 	DBName string
 	DBPort string
 	DBURL  string
-)
+}
+
+var configs configFields
 
 func init() {
-	if config.Mode == "PRODUCTION" {
-		DBURL = os.Getenv("DATABASE_URL")
+	gConfigs := config.GetConfigs()
+
+	if gConfigs.Mode == "PRODUCTION" {
+		configs.DBURL = os.Getenv("DATABASE_URL")
 	} else {
-		DBUser = os.Getenv("DB_USER")
-		DBPswd = os.Getenv("DB_PASSWORD")
-		DBName = os.Getenv("DB_NAME")
-		DBPort = os.Getenv("DB_PORT")
+		configs.DBUser = os.Getenv("DB_USER")
+		configs.DBPswd = os.Getenv("DB_PASSWORD")
+		configs.DBName = os.Getenv("DB_NAME")
+		configs.DBPort = os.Getenv("DB_PORT")
 	}
+}
+
+// GetConfigs ...
+func GetConfigs() configFields {
+	return configs
 }
