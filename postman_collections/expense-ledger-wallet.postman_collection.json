@@ -1,0 +1,594 @@
+{
+	"info": {
+		"_postman_id": "53a84e82-1c7d-4110-90e1-dff55ee5e628",
+		"name": "expense-ledger-wallet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "WalletClear_Always_DeletesAllWallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "67c81496-29c0-4537-bbb9-8693bf3c3731",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletInit_WithEmptyTable_Creates2Wallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1bc13159-92a0-4053-92fe-b6be42fd1b1d",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"2 wallets are inserted\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(2);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletCreate_WithNonexistentName_CreatesAWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name, type}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(type).to.eql(pm.variables.get(\"wallet_type\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"Cash2\");",
+							"pm.environment.set(\"wallet_type\", \"CASH\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{wallet_name}}\",\n\t\"type\": \"{{wallet_type}}\",\n\t\"balance\": 0\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletCreate_WithExistingName_Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "daf03372-062d-4f9e-a10e-ef4b23723c99",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Cash2\",\n\t\"type\": \"CASH\",\n\t\"balance\": 0\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletGet_WithExistingName_ReturnsTheWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eeb670ac-d62f-4b88-9f55-c79ccc4d94e9",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name, type}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(type).to.eql(pm.variables.get(\"wallet_type\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1aec604a-02f9-4209-83f4-8993bee868ec",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"Cash\");",
+							"pm.environment.set(\"wallet_type\", \"CASH\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{wallet_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletGet_WithNonexistentName_Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4d5bafe7-108c-424f-815e-ef98dbea4454",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"No Cash\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletDelete_WithExistingName_DeletesAndReturnsTheWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8c429fa1-7c07-4a0a-aaf7-f71fbf3f0bd9",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right wallet is returned\", function() {",
+							"    let {data: {name, type}} = pm.response.json();",
+							"    ",
+							"    pm.expect(name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(type).to.eql(pm.variables.get(\"wallet_type\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9c376267-533f-492d-888e-7ad608a8e255",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"My Bank\");",
+							"pm.environment.set(\"wallet_type\", \"BANK_ACCOUNT\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{wallet_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletDelete_WithNonexistentName_DeletesAndReturnsTheWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aa342107-1c50-48dd-b64e-8c3a26b78368",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"My Bank\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletList_Always_ReturnsAllWallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "91ac389a-050a-4574-8d6f-353c4c8e4b90",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"2 wallets are returned\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(2);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletList_Always_ReturnsAllWalletTypes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75d5047d-61b2-49af-b8f1-da0c3bc0f429",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"3 wallet types are returned\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/listTypes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"listTypes"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
