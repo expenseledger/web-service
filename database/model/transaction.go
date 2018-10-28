@@ -122,8 +122,29 @@ func (wallet *Wallet) InsertExpense(tx *Transaction) error {
 	return nil
 }
 
+// One ...
+func (tx *Transaction) One(id string) error {
+	query :=
+		`
+		SELECT * FROM transaction
+		WHERE id=$1;
+		`
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	if err := stmt.Get(tx, id); err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	return nil
+}
+
 // DeleteAll ...
-func (transactions *Transactions) DeleteAll() (int, error) {
+func (txs *Transactions) DeleteAll() (int, error) {
 	query :=
 		`
 		DELETE FROM transaction
@@ -136,10 +157,10 @@ func (transactions *Transactions) DeleteAll() (int, error) {
 		return 0, err
 	}
 
-	if err := stmt.Select(transactions); err != nil {
+	if err := stmt.Select(txs); err != nil {
 		log.Println("Error deleting all transactions", err)
 		return 0, err
 	}
 
-	return len(*transactions), nil
+	return len(*txs), nil
 }

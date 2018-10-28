@@ -105,7 +105,7 @@ func (wallet *Wallet) Expend(tx *Transaction) error {
 		return err
 	}
 
-	*tx = newFromDBCounterpart(dbTx)
+	tx.fromDBCounterpart(dbTx)
 	copier.Copy(wallet, &dbWallet)
 
 	return nil

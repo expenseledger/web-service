@@ -32,14 +32,26 @@ func (txs *Transactions) Clear() (int, error) {
 		return 0, err
 	}
 
+	var tx Transaction
 	transactions := make(Transactions, 0, length)
 	for _, dbTx := range dbTxs {
-		tx := newFromDBCounterpart(&dbTx)
+		tx.fromDBCounterpart(&dbTx)
 		transactions = append(transactions, tx)
 	}
 	*txs = transactions
 
 	return length, nil
+}
+
+// Get ...
+func (tx *Transaction) Get(id string) error {
+	var dbTx dbmodel.Transaction
+	if err := dbTx.One(id); err != nil {
+		return err
+	}
+
+	tx.fromDBCounterpart(&dbTx)
+	return nil
 }
 
 func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
@@ -61,21 +73,19 @@ func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
 	}
 }
 
-func newFromDBCounterpart(dbTx *dbmodel.Transaction) Transaction {
+func (tx *Transaction) fromDBCounterpart(dbTx *dbmodel.Transaction) {
 	var d *date.Date
 	if dbTx.OccuredAt != nil {
 		_d := date.Date(*dbTx.OccuredAt)
 		d = &_d
 	}
 
-	return Transaction{
-		ID:          dbTx.ID,
-		SrcWallet:   dbTx.SrcWallet,
-		DstWallet:   dbTx.DstWallet,
-		Amount:      dbTx.Amount,
-		Type:        dbTx.Type,
-		Category:    dbTx.Category,
-		Description: dbTx.Description,
-		Date:        d,
-	}
+	tx.ID = dbTx.ID
+	tx.SrcWallet = dbTx.SrcWallet
+	tx.DstWallet = dbTx.DstWallet
+	tx.Amount = dbTx.Amount
+	tx.Type = dbTx.Type
+	tx.Category = dbTx.Category
+	tx.Description = dbTx.Description
+	tx.Date = d
 }
