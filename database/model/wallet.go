@@ -69,7 +69,7 @@ func (wallet *Wallet) Delete(name string) error {
 	query :=
 		`
 		DELETE FROM wallet
-		WHERE name=:$1
+		WHERE name=$1
 		RETURNING *;
 		`
 

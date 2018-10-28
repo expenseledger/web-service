@@ -134,7 +134,7 @@ func createWalletTable() (err error) {
 			type wallet_type NOT NULL,
 			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
 		`
 

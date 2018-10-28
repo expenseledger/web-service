@@ -23,17 +23,6 @@ type Transaction struct {
 // Transactions is defined just to be used as a receiver
 type Transactions []Transaction
 
-// Create ...
-func (tx *Transaction) Create() error {
-	dbTx := tx.toDBCounterpart()
-	if err := dbTx.Insert(); err != nil {
-		return err
-	}
-
-	*tx = newFromDBCounterpart(dbTx)
-	return nil
-}
-
 // Clear ...
 func (txs *Transactions) Clear() (int, error) {
 	var dbTxs dbmodel.Transactions

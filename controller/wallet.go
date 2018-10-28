@@ -5,6 +5,7 @@ import (
 
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
+	"github.com/expenseledger/web-service/type/date"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/shopspring/decimal"
@@ -18,6 +19,14 @@ type walletCreateForm struct {
 
 type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
+}
+
+type walletExpendForm struct {
+	Name        string          `json:"name" binding:"required"`
+	Amount      decimal.Decimal `json:"amount" binding:"required"`
+	Category    string          `json:"category" binding:"required"`
+	Description string          `json:"description"`
+	Date        *date.Date      `json:"date"`
 }
 
 func walletCreate(context *gin.Context) {
@@ -195,7 +204,53 @@ func walletClear(context *gin.Context) {
 	return
 }
 
+func walletExpend(context *gin.Context) {
+	var form walletExpendForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	tx := form.toTransaction()
+	wallet := model.Wallet{
+		Name: form.Name,
+	}
+
+	if err := wallet.Expend(tx); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	data := map[string]interface{}{
+		"wallet":      wallet,
+		"transaction": tx,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
+	return
+}
+
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	d, _ := decimal.NewFromString(num)
 	return d
+}
+
+func (form *walletExpendForm) toTransaction() *model.Transaction {
+	return &model.Transaction{
+		SrcWallet:   form.Name,
+		Amount:      form.Amount,
+		Type:        constant.TransactionType.Expense,
+		Category:    form.Category,
+		Description: form.Description,
+		Date:        form.Date,
+	}
 }

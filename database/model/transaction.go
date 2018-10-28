@@ -24,69 +24,98 @@ type Transaction struct {
 // Transactions is defined just to be used as a receiver
 type Transactions []Transaction
 
-// Insert ...
-func (tx *Transaction) Insert() error {
-	var query string
+// InsertExpense ...
+func (wallet *Wallet) InsertExpense(tx *Transaction) error {
+	var txQuery, walletQuery string
 
-	switch {
-	case tx.OccuredAt != nil && tx.DstWallet != nil:
-		query =
-			`
-			INSERT INTO transaction
-			(src_wallet, dst_wallet, amount, type, category, description, occured_at)
-			SELECT
-			w1.name, w2.name, :amount, :type, c.name, :description, :occured_at
-			FROM wallet w1, wallet w2, category c
-			WHERE
-			w1.name=:src_wallet AND	w2.name=:dst_wallet AND	c.name=:category
-			RETURNING *;
-			`
-	case tx.OccuredAt == nil && tx.DstWallet != nil:
-		query =
-			`
-			INSERT INTO transaction
-			(src_wallet, dst_wallet, amount, type, category, description)
-			SELECT
-			w1.name, w2.name, :amount, :type, c.name, :description
-			FROM wallet w1, wallet w2, category c
-			WHERE
-			w1.name=:src_wallet AND	w2.name=:dst_wallet AND	c.name=:category
-			RETURNING *;
-		`
-	case tx.OccuredAt != nil && tx.DstWallet == nil:
-		query =
+	if tx.OccuredAt != nil {
+		txQuery =
 			`
 			INSERT INTO transaction
 			(src_wallet, amount, type, category, description, occured_at)
-			SELECT
-			w.name, :amount, :type, c.name, :description, :occured_at
-			FROM wallet w, category c
-			WHERE
-			w.name=:src_wallet AND c.name=:category
+			VALUES
+			(:src_wallet, :amount, :type, :category, :description, :occured_at)
 			RETURNING *;
 			`
-	case tx.OccuredAt == nil && tx.DstWallet == nil:
-		query =
+	} else {
+		txQuery =
 			`
 			INSERT INTO transaction
 			(src_wallet, amount, type, category, description)
-			SELECT
-			w.name, :amount, :type, c.name, :description
-			FROM wallet w, category c
-			WHERE
-			w.name=:src_wallet AND c.name=:category
+			VALUES
+			(:src_wallet, :amount, :type, :category, :description)
 			RETURNING *;
 			`
 	}
 
-	stmt, err := db.PrepareNamed(query)
+	walletQuery =
+		`
+		UPDATE wallet
+		SET balance=balance-$1
+		WHERE name=$2
+		RETURNING *;
+		`
+
+	dbTx, err := db.Beginx()
 	if err != nil {
-		log.Println("Error inserting a transaction", err)
+		log.Println("Error beginning a transaction", err)
 		return err
 	}
 
-	if err := stmt.Get(tx, tx); err != nil {
+	namedStmt, err := dbTx.PrepareNamed(txQuery)
+	if err != nil {
 		log.Println("Error inserting a transaction", err)
+
+		if err := dbTx.Rollback(); err != nil {
+			log.Println("Error rolling back a transaction", err)
+			return err
+		}
+
+		return err
+	}
+
+	if err := namedStmt.Get(tx, tx); err != nil {
+		log.Println("Error inserting a transaction", err)
+
+		if err := dbTx.Rollback(); err != nil {
+			log.Println("Error rolling back a transaction", err)
+			return err
+		}
+
+		return err
+	}
+
+	stmt, err := dbTx.Preparex(walletQuery)
+	if err != nil {
+		log.Println("Error updating a wallet", err)
+
+		if err := dbTx.Rollback(); err != nil {
+			log.Println("Error rolling back a transaction", err)
+			return err
+		}
+
+		return err
+	}
+
+	if err := stmt.Get(wallet, tx.Amount, wallet.Name); err != nil {
+		log.Println("Error updating a wallet", err)
+
+		if err := dbTx.Rollback(); err != nil {
+			log.Println("Error rolling back a transaction", err)
+			return err
+		}
+
+		return err
+	}
+
+	if err := dbTx.Commit(); err != nil {
+		log.Println("Error committing a transaction", err)
+
+		if err := dbTx.Rollback(); err != nil {
+			log.Println("Error rolling back a transaction", err)
+			return err
+		}
+
 		return err
 	}
 

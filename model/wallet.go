@@ -13,7 +13,7 @@ type Wallet struct {
 	Name      string          `json:"name"`
 	Type      string          `json:"type"`
 	Balance   decimal.Decimal `json:"balance"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	UpdatedAt time.Time       `json:"last_update"`
 }
 
 // Wallets is defined just to be used as a receiver
@@ -92,4 +92,21 @@ func (wallets *Wallets) Clear() (int, error) {
 
 	copier.Copy(wallets, &dbWallets)
 	return length, nil
+}
+
+// Expend ...
+func (wallet *Wallet) Expend(tx *Transaction) error {
+	var dbWallet dbmodel.Wallet
+	copier.Copy(&dbWallet, wallet)
+
+	dbTx := tx.toDBCounterpart()
+
+	if err := dbWallet.InsertExpense(dbTx); err != nil {
+		return err
+	}
+
+	*tx = newFromDBCounterpart(dbTx)
+	copier.Copy(wallet, &dbWallet)
+
+	return nil
 }
