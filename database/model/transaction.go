@@ -26,24 +26,62 @@ type Transaction struct {
 type Transactions []Transaction
 
 // Insert ...
-func (transaction *Transaction) Insert() error {
+func (tx *Transaction) Insert() error {
 	var query string
-	if transaction.OccuredAt == nil {
-		query =
-			`
-			INSERT INTO transaction
-			(src_wallet, dst_wallet, amount, type, category, description)
-			VALUES
-			(:src_wallet, :dst_wallet, :amount, :type, :category, :description)
-			RETURNING *;
-			`
-	} else {
+
+	switch {
+	case tx.OccuredAt != nil && tx.DstWallet != nil:
 		query =
 			`
 			INSERT INTO transaction
 			(src_wallet, dst_wallet, amount, type, category, description, occured_at)
-			VALUES
-			(:src_wallet, :dst_wallet, :amount, :type, :category, :description, :occured_at)
+			SELECT
+			w1.name, w2.name, :amount, :type, c.name, :description, :occured_at
+			FROM wallet w1, wallet w2, category c
+			WHERE
+			w1.name=:src_wallet AND w1.deleted_at IS NULL AND
+			w2.name=:dst_wallet AND w2.deleted_at IS NULL AND
+			c.name=:category AND c.deleted_at IS NULL
+			RETURNING *;
+			`
+	case tx.OccuredAt == nil && tx.DstWallet != nil:
+		query =
+			`
+			INSERT INTO transaction
+			(src_wallet, dst_wallet, amount, type, category, description)
+			SELECT
+			w1.name, w2.name, :amount, :type, c.name, :description
+			FROM wallet w1, wallet w2, category c
+			WHERE
+			w1.name=:src_wallet AND w1.deleted_at IS NULL AND
+			w2.name=:dst_wallet AND w2.deleted_at IS NULL AND
+			c.name=:category AND c.deleted_at IS NULL
+			RETURNING *;
+		`
+	case tx.OccuredAt != nil && tx.DstWallet == nil:
+		query =
+			`
+			INSERT INTO transaction
+			(src_wallet, amount, type, category, description, occured_at)
+			SELECT
+			w.name, :amount, :type, c.name, :description, :occured_at
+			FROM wallet w, category c
+			WHERE
+			w.name=:src_wallet AND w.deleted_at IS NULL AND
+			c.name=:category AND c.deleted_at IS NULL
+			RETURNING *;
+			`
+	case tx.OccuredAt == nil && tx.DstWallet == nil:
+		query =
+			`
+			INSERT INTO transaction
+			(src_wallet, amount, type, category, description)
+			SELECT
+			w.name, :amount, :type, c.name, :description
+			FROM wallet w, category c
+			WHERE
+			w.name=:src_wallet AND w.deleted_at IS NULL AND
+			c.name=:category AND c.deleted_at IS NULL
 			RETURNING *;
 			`
 	}
@@ -54,7 +92,7 @@ func (transaction *Transaction) Insert() error {
 		return err
 	}
 
-	if err := stmt.Get(transaction, transaction); err != nil {
+	if err := stmt.Get(tx, tx); err != nil {
 		log.Println("Error inserting a transaction", err)
 		return err
 	}
