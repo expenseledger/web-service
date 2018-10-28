@@ -47,3 +47,26 @@ func transactionCreate(context *gin.Context) {
 	)
 	return
 }
+
+func transactionClear(context *gin.Context) {
+	var txs model.Transactions
+	length, err := txs.Clear()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	items := itemList{
+		Length: length,
+		Items:  txs,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(items),
+	)
+	return
+}

@@ -61,3 +61,25 @@ func (transaction *Transaction) Insert() error {
 
 	return nil
 }
+
+// DeleteAll ...
+func (transactions *Transactions) DeleteAll() (int, error) {
+	query :=
+		`
+		DELETE FROM transaction
+		RETURNING *;
+		`
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error deleting all transactions", err)
+		return 0, err
+	}
+
+	if err := stmt.Select(transactions); err != nil {
+		log.Println("Error deleting all transactions", err)
+		return 0, err
+	}
+
+	return len(*transactions), nil
+}

@@ -37,6 +37,7 @@ func InitRoutes() *gin.Engine {
 	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
+		transactionRoute.POST("/clear", transactionClear)
 	}
 
 	return router
