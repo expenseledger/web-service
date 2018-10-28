@@ -7,10 +7,9 @@ import (
 
 // Category the structure represents a stored category on database
 type Category struct {
-	Name      string     `db:"name"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
-	DeletedAt *time.Time `db:"deleted_at"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // Categories is defined just to be used as a receiver
@@ -22,12 +21,6 @@ func (category *Category) Insert() error {
 		`
 		INSERT INTO category (name)
 		VALUES (:name)
-
-		ON CONFLICT (name)
-			DO UPDATE
-			SET deleted_at=NULL
-			WHERE category.deleted_at IS NOT NULL
-
 		RETURNING *;
 		`
 
@@ -50,7 +43,7 @@ func (category *Category) One(name string) error {
 	query :=
 		`
 		SELECT * FROM category
-		WHERE name=$1 AND deleted_at IS NULL;
+		WHERE name=$1;
 		`
 
 	stmt, err := db.Preparex(query)
@@ -71,9 +64,8 @@ func (category *Category) One(name string) error {
 func (category *Category) Delete(name string) error {
 	query :=
 		`
-		UPDATE category
-		SET deleted_at=now()
-		WHERE name=$1 AND deleted_at IS NULL
+		DELETE FROM category
+		WHERE name=$1
 		RETURNING *;
 		`
 
@@ -95,8 +87,7 @@ func (category *Category) Delete(name string) error {
 func (categories *Categories) All() (int, error) {
 	query :=
 		`
-		SELECT * FROM category
-		WHERE deleted_at IS NULL;
+		SELECT * FROM category;
 		`
 
 	stmt, err := db.Preparex(query)

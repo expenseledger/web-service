@@ -14,7 +14,6 @@ type Wallet struct {
 	Balance   decimal.Decimal `db:"balance"`
 	CreatedAt time.Time       `db:"created_at"`
 	UpdatedAt time.Time       `db:"updated_at"`
-	DeletedAt *time.Time      `db:"deleted_at"`
 }
 
 // Wallets is defined just to be used as a receiver
@@ -26,12 +25,6 @@ func (wallet *Wallet) Insert() error {
 		`
 		INSERT INTO wallet (name, type, balance)
 		VALUES (:name, :type, :balance)
-
-		ON CONFLICT (name)
-			DO UPDATE
-			SET (type, balance, deleted_at)=(:type, :balance, NULL)
-			WHERE wallet.deleted_at IS NOT NULL
-
 		RETURNING *;
 		`
 
@@ -54,7 +47,7 @@ func (wallet *Wallet) One(name string) error {
 	query :=
 		`
 		SELECT * FROM wallet
-		WHERE name=$1 AND deleted_at IS NULL;
+		WHERE name=$1;
 		`
 
 	stmt, err := db.Preparex(query)
@@ -75,9 +68,8 @@ func (wallet *Wallet) One(name string) error {
 func (wallet *Wallet) Delete(name string) error {
 	query :=
 		`
-		UPDATE wallet
-		SET deleted_at=now()
-		WHERE name=$1 AND deleted_at IS NULL
+		DELETE FROM wallet
+		WHERE name=:$1
 		RETURNING *;
 		`
 
@@ -99,8 +91,7 @@ func (wallet *Wallet) Delete(name string) error {
 func (wallets *Wallets) All() (int, error) {
 	query :=
 		`
-		SELECT * FROM wallet
-		WHERE deleted_at IS NULL;
+		SELECT * FROM wallet;
 		`
 
 	stmt, err := db.Preparex(query)

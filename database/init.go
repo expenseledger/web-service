@@ -90,12 +90,14 @@ func CreateTables() (err error) {
 }
 
 func createConstantTable(tableName string) (err error) {
-	query :=
-		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName) +
-			`name character varying(20) NOT NULL PRIMARY KEY,
-			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone);`
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName)
+	query +=
+		`
+		name character varying(20) PRIMARY KEY,
+		created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		`
 	_, err = db.Exec(query)
 	return
 }
@@ -128,12 +130,11 @@ func createWalletTable() (err error) {
 	query :=
 		`
 		CREATE TABLE IF NOT EXISTS wallet (
-			name character varying(20) NOT NULL PRIMARY KEY,
+			name character varying(20) PRIMARY KEY,
 			type wallet_type NOT NULL,
 			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone
 		);
 		`
 
@@ -146,17 +147,16 @@ func createTransactionTable() (err error) {
 		`
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 		CREATE TABLE IF NOT EXISTS transaction (
-			id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 			src_wallet character varying(20) NOT NULL REFERENCES wallet,
 			dst_wallet character varying(20) REFERENCES wallet,
-			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
+			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
 			type transaction_type NOT NULL,
 			category character varying(20) NOT NULL REFERENCES category,
 			description text NOT NULL DEFAULT '',
 			occured_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			deleted_at timestamp with time zone,
 			CHECK (dst_wallet <> src_wallet)
 		);
 		`

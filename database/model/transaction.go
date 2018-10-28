@@ -19,7 +19,6 @@ type Transaction struct {
 	OccuredAt   *time.Time      `db:"occured_at"`
 	CreatedAt   time.Time       `db:"created_at"`
 	UpdatedAt   time.Time       `db:"updated_at"`
-	DeletedAt   *time.Time      `db:"deleted_at"`
 }
 
 // Transactions is defined just to be used as a receiver
@@ -39,9 +38,7 @@ func (tx *Transaction) Insert() error {
 			w1.name, w2.name, :amount, :type, c.name, :description, :occured_at
 			FROM wallet w1, wallet w2, category c
 			WHERE
-			w1.name=:src_wallet AND w1.deleted_at IS NULL AND
-			w2.name=:dst_wallet AND w2.deleted_at IS NULL AND
-			c.name=:category AND c.deleted_at IS NULL
+			w1.name=:src_wallet AND	w2.name=:dst_wallet AND	c.name=:category
 			RETURNING *;
 			`
 	case tx.OccuredAt == nil && tx.DstWallet != nil:
@@ -53,9 +50,7 @@ func (tx *Transaction) Insert() error {
 			w1.name, w2.name, :amount, :type, c.name, :description
 			FROM wallet w1, wallet w2, category c
 			WHERE
-			w1.name=:src_wallet AND w1.deleted_at IS NULL AND
-			w2.name=:dst_wallet AND w2.deleted_at IS NULL AND
-			c.name=:category AND c.deleted_at IS NULL
+			w1.name=:src_wallet AND	w2.name=:dst_wallet AND	c.name=:category
 			RETURNING *;
 		`
 	case tx.OccuredAt != nil && tx.DstWallet == nil:
@@ -67,8 +62,7 @@ func (tx *Transaction) Insert() error {
 			w.name, :amount, :type, c.name, :description, :occured_at
 			FROM wallet w, category c
 			WHERE
-			w.name=:src_wallet AND w.deleted_at IS NULL AND
-			c.name=:category AND c.deleted_at IS NULL
+			w.name=:src_wallet AND c.name=:category
 			RETURNING *;
 			`
 	case tx.OccuredAt == nil && tx.DstWallet == nil:
@@ -80,8 +74,7 @@ func (tx *Transaction) Insert() error {
 			w.name, :amount, :type, c.name, :description
 			FROM wallet w, category c
 			WHERE
-			w.name=:src_wallet AND w.deleted_at IS NULL AND
-			c.name=:category AND c.deleted_at IS NULL
+			w.name=:src_wallet AND c.name=:category
 			RETURNING *;
 			`
 	}
