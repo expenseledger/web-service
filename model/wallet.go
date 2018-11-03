@@ -34,9 +34,12 @@ func (wallet *Wallet) Create() error {
 }
 
 // Get ...
-func (wallet *Wallet) Get(name string) error {
-	var dbWallet dbmodel.Wallet
-	if err := dbWallet.One(name); err != nil {
+func (wallet *Wallet) Get() error {
+	dbWallet := dbmodel.Wallet{
+		Name: wallet.Name,
+	}
+
+	if err := dbWallet.One(); err != nil {
 		return err
 	}
 
@@ -94,19 +97,22 @@ func (wallets *Wallets) Clear() (int, error) {
 	return length, nil
 }
 
-// Expend ...
-func (wallet *Wallet) Expend(tx *Transaction) error {
+// Update ...
+func (wallet *Wallet) Update(replacing bool) error {
 	var dbWallet dbmodel.Wallet
 	copier.Copy(&dbWallet, wallet)
 
-	dbTx := tx.toDBCounterpart()
+	var err error
+	if replacing {
+		err = dbWallet.Save()
+	} else {
+		err = dbWallet.Update()
+	}
 
-	if err := dbWallet.InsertExpense(dbTx); err != nil {
+	if err != nil {
 		return err
 	}
 
-	tx.fromDBCounterpart(dbTx)
 	copier.Copy(wallet, &dbWallet)
-
 	return nil
 }

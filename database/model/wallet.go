@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -43,20 +44,20 @@ func (wallet *Wallet) Insert() error {
 }
 
 // One ...
-func (wallet *Wallet) One(name string) error {
+func (wallet *Wallet) One() error {
 	query :=
 		`
 		SELECT * FROM wallet
-		WHERE name=$1;
+		WHERE name=:name;
 		`
 
-	stmt, err := db.Preparex(query)
+	namedStmt, err := db.PrepareNamed(query)
 	if err != nil {
 		log.Println("Error selecting a wallet", err)
 		return err
 	}
 
-	if err := stmt.Get(wallet, name); err != nil {
+	if err := namedStmt.Get(wallet, wallet); err != nil {
 		log.Println("Error selecting a wallet", err)
 		return err
 	}
@@ -147,4 +148,74 @@ func (wallets *Wallets) DeleteAll() (int, error) {
 	}
 
 	return len(*wallets), nil
+}
+
+// Save replaces old fields with new ones
+func (wallet *Wallet) Save() error {
+	query :=
+		`
+		UPDATE wallet
+		SET (balance, type)=(:balance, :type)
+		WHERE name=:name
+		RETURNING *;
+		`
+
+	namedStmt, err := db.PrepareNamed(query)
+	if err != nil {
+		log.Println("Error saving a wallet", err)
+		return err
+	}
+
+	if err := namedStmt.Get(wallet, wallet); err != nil {
+		log.Println("Error saving a wallet", err)
+		return err
+	}
+
+	return nil
+}
+
+// Update updates only non-zero value
+func (wallet *Wallet) Update() error {
+	fields, names := wallet.buildUpdatingSQLStmt()
+	query := fmt.Sprintf(
+		`
+		UPDATE wallet
+		SET %s=%s
+		WHERE name=:name
+		RETURNING *;
+		`,
+		fields,
+		names,
+	)
+
+	namedStmt, err := db.PrepareNamed(query)
+	if err != nil {
+		log.Println("Error updating a wallet", err)
+		return err
+	}
+
+	if err := namedStmt.Get(wallet, wallet); err != nil {
+		log.Println("Error updating a wallet", err)
+	}
+
+	return nil
+}
+
+func (wallet *Wallet) buildUpdatingSQLStmt() (fields, names string) {
+	fields, names = "(", "("
+
+	if !wallet.Balance.IsZero() {
+		fields += "balance"
+		names += ":balance"
+	}
+
+	if wallet.Type != "" {
+		fields += ", type"
+		names += ", :type"
+	}
+
+	fields += ")"
+	names += ")"
+
+	return
 }

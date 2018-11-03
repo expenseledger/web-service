@@ -8,5 +8,5 @@ import (
 var db *sqlx.DB
 
 func init() {
-	db = database.GetDB()
+	db = database.DB()
 }

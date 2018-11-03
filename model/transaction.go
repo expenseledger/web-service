@@ -44,15 +44,37 @@ func (txs *Transactions) Clear() (int, error) {
 }
 
 // Get ...
-func (tx *Transaction) Get(id string) error {
-	var dbTx dbmodel.Transaction
-	if err := dbTx.One(id); err != nil {
+func (tx *Transaction) Get() error {
+	dbTx := tx.toDBCounterpart()
+	if err := dbTx.One(); err != nil {
 		return err
 	}
 
-	tx.fromDBCounterpart(&dbTx)
+	tx.fromDBCounterpart(dbTx)
 	return nil
 }
+
+// Create ...
+func (tx *Transaction) Create() error {
+	dbTx := tx.toDBCounterpart()
+	if err := dbTx.Insert(); err != nil {
+		return err
+	}
+
+	tx.fromDBCounterpart(dbTx)
+	return nil
+}
+
+// Delete ...
+// func (tx *Transaction) Delete(id string) error {
+// 	var dbTx dbmodel.Transaction
+// 	if err := dbTx.Delete(id); err != nil {
+// 		return err
+// 	}
+
+// 	tx.fromDBCounterpart(&dbTx)
+// 	return nil
+// }
 
 func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
 	var t *time.Time

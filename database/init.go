@@ -43,8 +43,8 @@ func init() {
 	}
 }
 
-// GetDB returns an (probably) initialized instance of sqlx.DB
-func GetDB() *sqlx.DB {
+// DB returns an (probably) initialized instance of sqlx.DB
+func DB() *sqlx.DB {
 	return db
 }
 

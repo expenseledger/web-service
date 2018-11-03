@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/expenseledger/web-service/business"
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 	"github.com/expenseledger/web-service/type/date"
@@ -67,8 +68,11 @@ func walletGet(context *gin.Context) {
 		return
 	}
 
-	var wallet model.Wallet
-	if err := wallet.Get(form.Name); err != nil {
+	wallet := model.Wallet{
+		Name: form.Name,
+	}
+
+	if err := wallet.Get(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -214,12 +218,10 @@ func walletExpend(context *gin.Context) {
 		return
 	}
 
-	tx := form.toTransaction()
-	wallet := model.Wallet{
-		Name: form.Name,
-	}
+	tx := form.toTransaction(constant.TransactionType.Expense)
 
-	if err := wallet.Expend(tx); err != nil {
+	wallet, err := business.InsertExpense(tx)
+	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -244,11 +246,11 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	return d
 }
 
-func (form *walletExpendForm) toTransaction() *model.Transaction {
+func (form *walletExpendForm) toTransaction(txType string) *model.Transaction {
 	return &model.Transaction{
 		SrcWallet:   form.Name,
 		Amount:      form.Amount,
-		Type:        constant.TransactionType.Expense,
+		Type:        txType,
 		Category:    form.Category,
 		Description: form.Description,
 		Date:        form.Date,

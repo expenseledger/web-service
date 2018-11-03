@@ -24,12 +24,19 @@ type Transaction struct {
 // Transactions is defined just to be used as a receiver
 type Transactions []Transaction
 
-// InsertExpense ...
-func (wallet *Wallet) InsertExpense(tx *Transaction) error {
-	var txQuery, walletQuery string
+// Insert ...
+func (tx *Transaction) Insert() error {
+	query :=
+		`
+		INSERT INTO transaction
+		(src_wallet, amount, type, category, description)
+		VALUES
+		(:src_wallet, :amount, :type, :category, :description)
+		RETURNING *;
+		`
 
 	if tx.OccuredAt != nil {
-		txQuery =
+		query =
 			`
 			INSERT INTO transaction
 			(src_wallet, amount, type, category, description, occured_at)
@@ -37,85 +44,16 @@ func (wallet *Wallet) InsertExpense(tx *Transaction) error {
 			(:src_wallet, :amount, :type, :category, :description, :occured_at)
 			RETURNING *;
 			`
-	} else {
-		txQuery =
-			`
-			INSERT INTO transaction
-			(src_wallet, amount, type, category, description)
-			VALUES
-			(:src_wallet, :amount, :type, :category, :description)
-			RETURNING *;
-			`
 	}
 
-	walletQuery =
-		`
-		UPDATE wallet
-		SET balance=balance-$1
-		WHERE name=$2
-		RETURNING *;
-		`
-
-	dbTx, err := db.Beginx()
-	if err != nil {
-		log.Println("Error beginning a transaction", err)
-		return err
-	}
-
-	namedStmt, err := dbTx.PrepareNamed(txQuery)
+	namedStmt, err := db.PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a transaction", err)
-
-		if err := dbTx.Rollback(); err != nil {
-			log.Println("Error rolling back a transaction", err)
-			return err
-		}
-
 		return err
 	}
 
 	if err := namedStmt.Get(tx, tx); err != nil {
 		log.Println("Error inserting a transaction", err)
-
-		if err := dbTx.Rollback(); err != nil {
-			log.Println("Error rolling back a transaction", err)
-			return err
-		}
-
-		return err
-	}
-
-	stmt, err := dbTx.Preparex(walletQuery)
-	if err != nil {
-		log.Println("Error updating a wallet", err)
-
-		if err := dbTx.Rollback(); err != nil {
-			log.Println("Error rolling back a transaction", err)
-			return err
-		}
-
-		return err
-	}
-
-	if err := stmt.Get(wallet, tx.Amount, wallet.Name); err != nil {
-		log.Println("Error updating a wallet", err)
-
-		if err := dbTx.Rollback(); err != nil {
-			log.Println("Error rolling back a transaction", err)
-			return err
-		}
-
-		return err
-	}
-
-	if err := dbTx.Commit(); err != nil {
-		log.Println("Error committing a transaction", err)
-
-		if err := dbTx.Rollback(); err != nil {
-			log.Println("Error rolling back a transaction", err)
-			return err
-		}
-
 		return err
 	}
 
@@ -123,19 +61,19 @@ func (wallet *Wallet) InsertExpense(tx *Transaction) error {
 }
 
 // One ...
-func (tx *Transaction) One(id string) error {
+func (tx *Transaction) One() error {
 	query :=
 		`
 		SELECT * FROM transaction
-		WHERE id=$1;
+		WHERE id=:id;
 		`
-	stmt, err := db.Preparex(query)
+	namedStmt, err := db.PrepareNamed(query)
 	if err != nil {
 		log.Println("Error selecting a transaction", err)
 		return err
 	}
 
-	if err := stmt.Get(tx, id); err != nil {
+	if err := namedStmt.Get(tx, tx); err != nil {
 		log.Println("Error selecting a transaction", err)
 		return err
 	}
