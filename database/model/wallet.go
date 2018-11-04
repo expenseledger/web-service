@@ -112,12 +112,15 @@ func (wallets *Wallets) All() (int, error) {
 // BatchInsert ...
 func (wallets *Wallets) BatchInsert() (int, error) {
 	var err error
-	for index, wallet := range *wallets {
+
+	length := len(*wallets)
+	insertedWallets := make(Wallets, length)
+	for i, wallet := range *wallets {
 		err = wallet.Insert()
 		if err != nil {
 			break
 		}
-		[]Wallet(*wallets)[index] = wallet
+		insertedWallets[i] = wallet
 	}
 
 	if err != nil {
@@ -125,7 +128,8 @@ func (wallets *Wallets) BatchInsert() (int, error) {
 		return 0, err
 	}
 
-	return len(*wallets), nil
+	*wallets = insertedWallets
+	return length, nil
 }
 
 // DeleteAll ...

@@ -107,12 +107,14 @@ func (categories *Categories) All() (int, error) {
 // BatchInsert ...
 func (categories *Categories) BatchInsert() (int, error) {
 	var err error
-	for index, category := range *categories {
+	length := len(*categories)
+	insertedCategories := make(Categories, length)
+	for i, category := range *categories {
 		err = category.Insert()
 		if err != nil {
 			break
 		}
-		[]Category(*categories)[index] = category
+		insertedCategories[i] = category
 	}
 
 	if err != nil {
@@ -120,7 +122,8 @@ func (categories *Categories) BatchInsert() (int, error) {
 		return 0, err
 	}
 
-	return len(*categories), nil
+	*categories = insertedCategories
+	return length, nil
 }
 
 // DeleteAll ...

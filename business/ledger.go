@@ -117,15 +117,15 @@ func ClearTransactions() (int, []view.Transaction, error) {
 
 	length := eisLength + tfsLength
 	txs := make([]view.Transaction, length)
-	for _, ei := range eis {
+	for i, ei := range eis {
 		var tx view.Transaction
 		tx.FromExpenseIncome(&ei)
-		txs = append(txs, tx)
+		txs[i] = tx
 	}
-	for _, tf := range tfs {
+	for i, tf := range tfs {
 		var tx view.Transaction
 		tx.FromTransfer(&tf)
-		txs = append(txs, tx)
+		txs[eisLength+i] = tx
 	}
 
 	return length, txs, nil
