@@ -22,12 +22,16 @@ type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-type walletExpendForm struct {
-	Name        string          `json:"name" binding:"required"`
+type txCreateCommonForm struct {
 	Amount      decimal.Decimal `json:"amount" binding:"required"`
-	Category    string          `json:"category" binding:"required"`
 	Description string          `json:"description"`
 	Date        *date.Date      `json:"date"`
+}
+
+type walletExpendForm struct {
+	Name     string `json:"name" binding:"required"`
+	Category string `json:"category" binding:"required"`
+	txCreateCommonForm
 }
 
 func walletCreate(context *gin.Context) {
@@ -218,7 +222,7 @@ func walletExpend(context *gin.Context) {
 		return
 	}
 
-	tx := form.toTransaction(constant.TransactionType.Expense)
+	tx := form.toExpenseTransaction()
 
 	wallet, err := business.InsertExpense(tx)
 	if err != nil {
@@ -246,12 +250,19 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	return d
 }
 
-func (form *walletExpendForm) toTransaction(txType string) *model.Transaction {
+func (form *walletExpendForm) toExpenseTransaction() *model.Transaction {
+	tx := form.toTransaction(constant.TransactionType.Expense)
+	tx.SrcWallet = form.Name
+	tx.Category = &form.Category
+	return tx
+}
+
+func (form *txCreateCommonForm) toTransaction(
+	txType string,
+) *model.Transaction {
 	return &model.Transaction{
-		SrcWallet:   form.Name,
 		Amount:      form.Amount,
 		Type:        txType,
-		Category:    form.Category,
 		Description: form.Description,
 		Date:        form.Date,
 	}

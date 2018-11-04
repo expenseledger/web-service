@@ -15,7 +15,7 @@ type Transaction struct {
 	DstWallet   *string         `json:"dst_wallet"`
 	Amount      decimal.Decimal `json:"amount"`
 	Type        string          `json:"type"`
-	Category    string          `json:"category"`
+	Category    *string         `json:"category"`
 	Description string          `json:"description"`
 	Date        *date.Date      `json:"date"`
 }

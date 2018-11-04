@@ -14,7 +14,7 @@ type Transaction struct {
 	DstWallet   *string         `db:"dst_wallet"`
 	Amount      decimal.Decimal `db:"amount"`
 	Type        string          `db:"type"`
-	Category    string          `db:"category"`
+	Category    *string         `db:"category"`
 	Description string          `db:"description"`
 	OccuredAt   *time.Time      `db:"occured_at"`
 	CreatedAt   time.Time       `db:"created_at"`
