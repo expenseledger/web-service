@@ -176,7 +176,7 @@ func (wallet *Wallet) Save() error {
 
 // Update updates only non-zero value
 func (wallet *Wallet) Update() error {
-	fields, names := wallet.buildUpdatingSQLStmt()
+	fields, names := wallet.buildUpdateSQLStmt()
 	query := fmt.Sprintf(
 		`
 		UPDATE wallet
@@ -201,7 +201,7 @@ func (wallet *Wallet) Update() error {
 	return nil
 }
 
-func (wallet *Wallet) buildUpdatingSQLStmt() (fields, names string) {
+func (wallet *Wallet) buildUpdateSQLStmt() (fields, names string) {
 	fields, names = "(", "("
 
 	if !wallet.Balance.IsZero() {

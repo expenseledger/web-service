@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 )
@@ -11,63 +12,12 @@ type transactionIdentifyForm struct {
 	ID string `json:"id" binding:"required"`
 }
 
-func transactionGet(context *gin.Context) {
-	var form transactionIdentifyForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	tx := model.Transaction{
-		ID: form.ID,
-	}
-	if err := tx.Get(); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(tx),
-	)
-	return
-}
-
-// func transactionDelete(context *gin.Context) {
-// 	var form transactionIdentifyForm
-// 	if err := context.ShouldBindJSON(&form); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	var tx model.Transaction
-// 	if err := tx.Delete(form.ID); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(tx),
-// 	)
-// 	return
-// }
-
 func transactionClear(context *gin.Context) {
-	var txs model.Transactions
-	length, err := txs.Clear()
+	var (
+		eis model.ExpenseIncomes
+		tfs model.Transfers
+	)
+	eisLength, err := eis.Clear()
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -76,9 +26,36 @@ func transactionClear(context *gin.Context) {
 		return
 	}
 
+	tfsLength, err := tfs.Clear()
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	var (
+		expenses model.ExpenseIncomes
+		incomes  model.ExpenseIncomes
+	)
+	for _, ei := range eis {
+		switch ei.Type {
+		case constant.TransactionType.Expense:
+			expenses = append(expenses, ei)
+		case constant.TransactionType.Income:
+			incomes = append(incomes, ei)
+		}
+	}
+
+	data := map[string]interface{}{
+		"transfers": tfs,
+		"expenses":  expenses,
+		"incomes":   incomes,
+	}
 	items := itemList{
-		Length: length,
-		Items:  txs,
+		Length: eisLength + tfsLength,
+		Items:  data,
 	}
 
 	context.JSON(

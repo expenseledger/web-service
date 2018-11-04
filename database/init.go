@@ -14,6 +14,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Table names
+const (
+	ExpenseIncome   = "expense_income"
+	Transfer        = "transfer"
+	Category        = "category"
+	Wallet          = "wallet"
+	WalletType      = "wallet_type"
+	TransactionType = "transaction_type"
+)
+
 var db *sqlx.DB
 
 func init() {
@@ -52,35 +62,46 @@ func DB() *sqlx.DB {
 func CreateTables() (err error) {
 	err = createWalletTypeEnum()
 	if err != nil {
-		log.Println("Error creating enum: wallet_type", err)
+		log.Println("Error creating enum:", WalletType, err)
 		return
 	}
 
 	err = createTransactionTypeEnum()
 	if err != nil {
-		log.Println("Error creating enum: transaction_type", err)
+		log.Println("Error creating enum:", TransactionType, err)
 		return
 	}
 
 	err = createWalletTable()
 	if err != nil {
-		log.Println("Error creating table: wallet", err)
+		log.Println("Error creating table:", Wallet, err)
 		return
 	}
 
-	err = createConstantTable("category")
+	err = createConstantTable(Category)
 	if err != nil {
-		log.Println("Error creating table: category", err)
+		log.Println("Error creating table:", Category, err)
 		return
 	}
 
-	err = createTransactionTable()
+	err = createExpenseIncomeTable()
 	if err != nil {
-		log.Println("Error creating table: transaction", err)
+		log.Println("Error creating table:", ExpenseIncome, err)
 		return
 	}
 
-	err = createTriggerSetUpdatedAt("wallet", "category", "transaction")
+	err = createTransferTable()
+	if err != nil {
+		log.Println("Error creating table:", Transfer, err)
+		return
+	}
+
+	err = createTriggerSetUpdatedAt(
+		Wallet,
+		Category,
+		ExpenseIncome,
+		Transfer,
+	)
 	if err != nil {
 		log.Println("Error creating trigger for updated_at", err)
 		return
@@ -105,7 +126,8 @@ func createConstantTable(tableName string) (err error) {
 func createWalletTypeEnum() (err error) {
 	query :=
 		fmt.Sprintf(
-			"CREATE TYPE wallet_type AS ENUM ('%s', '%s', '%s');",
+			"CREATE TYPE %s AS ENUM ('%s', '%s', '%s');",
+			WalletType,
 			constant.WalletType.Cash,
 			constant.WalletType.BankAccount,
 			constant.WalletType.Credit,
@@ -117,49 +139,80 @@ func createWalletTypeEnum() (err error) {
 func createTransactionTypeEnum() (err error) {
 	query :=
 		fmt.Sprintf(
-			"CREATE TYPE transaction_type AS ENUM ('%s', '%s', '%s');",
+			"CREATE TYPE %s AS ENUM ('%s', '%s');",
+			TransactionType,
 			constant.TransactionType.Income,
 			constant.TransactionType.Expense,
-			constant.TransactionType.Transfer,
 		)
 	_, err = db.Exec(query)
 	return filterError(err)
 }
 
 func createWalletTable() (err error) {
-	query :=
+	query := fmt.Sprintf(
 		`
-		CREATE TABLE IF NOT EXISTS wallet (
+		CREATE TABLE IF NOT EXISTS %s (
 			name character varying(20) PRIMARY KEY,
-			type wallet_type NOT NULL,
+			type %s NOT NULL,
 			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
-		`
+		`,
+		Wallet,
+		WalletType,
+	)
 
 	_, err = db.Exec(query)
 	return
 }
 
-func createTransactionTable() (err error) {
-	query :=
+func createExpenseIncomeTable() (err error) {
+	query := fmt.Sprintf(
 		`
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-		CREATE TABLE IF NOT EXISTS transaction (
+		CREATE TABLE IF NOT EXISTS %s (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			src_wallet character varying(20) NOT NULL REFERENCES wallet,
-			dst_wallet character varying(20) REFERENCES wallet,
+			wallet character varying(20) NOT NULL REFERENCES %s,
 			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
-			type transaction_type NOT NULL,
-			category character varying(20) NOT NULL REFERENCES category,
+			type %s NOT NULL,
+			category character varying(20) NOT NULL REFERENCES %s,
 			description text NOT NULL DEFAULT '',
-			occured_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			occurred_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		`,
+		ExpenseIncome,
+		Wallet,
+		TransactionType,
+		Category,
+	)
+
+	_, err = db.Exec(query)
+	return
+}
+
+func createTransferTable() (err error) {
+	query := fmt.Sprintf(
+		`
+		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+		CREATE TABLE IF NOT EXISTS %s (
+			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+			src_wallet character varying(20) NOT NULL REFERENCES %s,
+			dst_wallet character varying(20) REFERENCES %s,
+			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
+			description text NOT NULL DEFAULT '',
+			occurred_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			CHECK (dst_wallet <> src_wallet)
 		);
-		`
+		`,
+		Transfer,
+		Wallet,
+		Wallet,
+	)
 
 	_, err = db.Exec(query)
 	return

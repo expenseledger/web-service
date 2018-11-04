@@ -28,7 +28,7 @@ type txCreateCommonForm struct {
 	Date        *date.Date      `json:"date"`
 }
 
-type walletExpendForm struct {
+type walletTxRxForm struct {
 	Name     string `json:"name" binding:"required"`
 	Category string `json:"category" binding:"required"`
 	txCreateCommonForm
@@ -213,7 +213,7 @@ func walletClear(context *gin.Context) {
 }
 
 func walletExpend(context *gin.Context) {
-	var form walletExpendForm
+	var form walletTxRxForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -222,9 +222,9 @@ func walletExpend(context *gin.Context) {
 		return
 	}
 
-	tx := form.toExpenseTransaction()
+	expense := form.toExpense()
 
-	wallet, err := business.InsertExpense(tx)
+	wallet, err := business.InsertExpense(expense)
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -234,8 +234,41 @@ func walletExpend(context *gin.Context) {
 	}
 
 	data := map[string]interface{}{
-		"wallet":      wallet,
-		"transaction": tx,
+		"wallet":  wallet,
+		"expense": expense,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
+	return
+}
+
+func walletReceive(context *gin.Context) {
+	var form walletTxRxForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	income := form.toIncome()
+
+	wallet, err := business.InsertIncome(income)
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	data := map[string]interface{}{
+		"wallet": wallet,
+		"income": income,
 	}
 
 	context.JSON(
@@ -250,17 +283,24 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	return d
 }
 
-func (form *walletExpendForm) toExpenseTransaction() *model.Transaction {
-	tx := form.toTransaction(constant.TransactionType.Expense)
-	tx.SrcWallet = form.Name
-	tx.Category = &form.Category
-	return tx
+func (form *walletTxRxForm) toExpense() *model.ExpenseIncome {
+	ei := form.toExpenseIncome(constant.TransactionType.Expense)
+	ei.Wallet = form.Name
+	ei.Category = form.Category
+	return ei
 }
 
-func (form *txCreateCommonForm) toTransaction(
+func (form *walletTxRxForm) toIncome() *model.ExpenseIncome {
+	ei := form.toExpenseIncome(constant.TransactionType.Income)
+	ei.Wallet = form.Name
+	ei.Category = form.Category
+	return ei
+}
+
+func (form *txCreateCommonForm) toExpenseIncome(
 	txType string,
-) *model.Transaction {
-	return &model.Transaction{
+) *model.ExpenseIncome {
+	return &model.ExpenseIncome{
 		Amount:      form.Amount,
 		Type:        txType,
 		Description: form.Description,
