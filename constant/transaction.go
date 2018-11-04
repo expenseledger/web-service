@@ -8,7 +8,7 @@ type transactionType struct {
 
 // TransactionType ...
 var TransactionType = transactionType{
-	Income:  "INCOME",
-	Expense: "EXPENSE",
-	// Transfer: "TRANSFER",
+	Income:   "INCOME",
+	Expense:  "EXPENSE",
+	Transfer: "TRANSFER",
 }

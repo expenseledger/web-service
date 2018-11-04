@@ -52,6 +52,30 @@ func (tf *Transfer) Insert() error {
 	return nil
 }
 
+// One ...
+func (tf *Transfer) One() error {
+	query := fmt.Sprintf(
+		`
+		SELECT * FROM %s
+		WHERE id=:id;
+		`,
+		database.Transfer,
+	)
+
+	namedStmt, err := db.PrepareNamed(query)
+	if err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	if err := namedStmt.Get(tf, tf); err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	return nil
+}
+
 // DeleteAll ...
 func (tfs *Transfers) DeleteAll() (int, error) {
 	query := fmt.Sprintf(

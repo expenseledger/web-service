@@ -53,6 +53,30 @@ func (ei *ExpenseIncome) Insert() error {
 	return nil
 }
 
+// One ...
+func (ei *ExpenseIncome) One() error {
+	query := fmt.Sprintf(
+		`
+		SELECT * FROM %s
+		WHERE id=:id;
+		`,
+		database.ExpenseIncome,
+	)
+
+	namedStmt, err := db.PrepareNamed(query)
+	if err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	if err := namedStmt.Get(ei, ei); err != nil {
+		log.Println("Error selecting a transaction", err)
+		return err
+	}
+
+	return nil
+}
+
 // DeleteAll ...
 func (eis *ExpenseIncomes) DeleteAll() (int, error) {
 	query := fmt.Sprintf(

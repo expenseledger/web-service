@@ -53,6 +53,17 @@ func (ei *ExpenseIncome) Create() error {
 	return nil
 }
 
+// Get ...
+func (ei *ExpenseIncome) Get() error {
+	dbEi := ei.toDBCounterpart()
+	if err := dbEi.One(); err != nil {
+		return err
+	}
+
+	ei.fromDBCounterpart(dbEi)
+	return nil
+}
+
 func (ei *ExpenseIncome) toDBCounterpart() *dbmodel.ExpenseIncome {
 	var t *time.Time
 	if ei.Date != nil {

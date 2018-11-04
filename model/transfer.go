@@ -52,6 +52,17 @@ func (tf *Transfer) Create() error {
 	return nil
 }
 
+// Get ...
+func (tf *Transfer) Get() error {
+	dbTf := tf.toDBCounterpart()
+	if err := dbTf.One(); err != nil {
+		return err
+	}
+
+	tf.fromDBCounterpart(dbTf)
+	return nil
+}
+
 func (tf *Transfer) toDBCounterpart() *dbmodel.Transfer {
 	var t *time.Time
 	if tf.Date != nil {

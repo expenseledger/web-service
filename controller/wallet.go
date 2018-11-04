@@ -230,7 +230,7 @@ func walletExpend(context *gin.Context) {
 
 	expense := form.toExpense()
 
-	wallet, err := business.InsertExpense(expense)
+	tx, wallet, err := business.InsertExpense(expense)
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -240,8 +240,8 @@ func walletExpend(context *gin.Context) {
 	}
 
 	data := map[string]interface{}{
-		"wallet":  wallet,
-		"expense": expense,
+		"wallet":      wallet,
+		"transaction": tx,
 	}
 
 	context.JSON(
@@ -263,7 +263,7 @@ func walletReceive(context *gin.Context) {
 
 	income := form.toIncome()
 
-	wallet, err := business.InsertIncome(income)
+	tx, wallet, err := business.InsertIncome(income)
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -273,8 +273,8 @@ func walletReceive(context *gin.Context) {
 	}
 
 	data := map[string]interface{}{
-		"wallet": wallet,
-		"income": income,
+		"wallet":      wallet,
+		"transaction": tx,
 	}
 
 	context.JSON(
@@ -296,7 +296,7 @@ func walletTransfer(context *gin.Context) {
 
 	transfer := form.toTransfer()
 
-	srcWallet, dstWallet, err := business.Transfer(transfer)
+	tx, srcWallet, dstWallet, err := business.Transfer(transfer)
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -306,9 +306,9 @@ func walletTransfer(context *gin.Context) {
 	}
 
 	data := map[string]interface{}{
-		"src_wallet": srcWallet,
-		"dst_wallet": dstWallet,
-		"transfer":   transfer,
+		"src_wallet":  srcWallet,
+		"dst_wallet":  dstWallet,
+		"transaction": tx,
 	}
 
 	context.JSON(
