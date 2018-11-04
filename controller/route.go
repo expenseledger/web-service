@@ -25,6 +25,7 @@ func InitRoutes() *gin.Engine {
 	walletRoute.POST("/init", walletInit)
 	walletRoute.POST("/expend", walletExpend)
 	walletRoute.POST("/receive", walletReceive)
+	walletRoute.POST("/transfer", walletTransfer)
 
 	categoryRoute := router.Group("/category")
 	categoryRoute.POST("/create", categoryCreate)

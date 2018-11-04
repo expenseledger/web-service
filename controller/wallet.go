@@ -34,6 +34,12 @@ type walletTxRxForm struct {
 	txCreateCommonForm
 }
 
+type walletTransferForm struct {
+	From string `json:"from" binding:"required"`
+	To   string `json:"to" binding:"required"`
+	txCreateCommonForm
+}
+
 func walletCreate(context *gin.Context) {
 	var form walletCreateForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -278,6 +284,40 @@ func walletReceive(context *gin.Context) {
 	return
 }
 
+func walletTransfer(context *gin.Context) {
+	var form walletTransferForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	transfer := form.toTransfer()
+
+	srcWallet, dstWallet, err := business.Transfer(transfer)
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	data := map[string]interface{}{
+		"src_wallet": srcWallet,
+		"dst_wallet": dstWallet,
+		"transfer":   transfer,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
+	return
+}
+
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	d, _ := decimal.NewFromString(num)
 	return d
@@ -295,6 +335,16 @@ func (form *walletTxRxForm) toIncome() *model.ExpenseIncome {
 	ei.Wallet = form.Name
 	ei.Category = form.Category
 	return ei
+}
+
+func (form *walletTransferForm) toTransfer() *model.Transfer {
+	return &model.Transfer{
+		SrcWallet:   form.From,
+		DstWallet:   form.To,
+		Amount:      form.Amount,
+		Description: form.Description,
+		Date:        form.Date,
+	}
 }
 
 func (form *txCreateCommonForm) toExpenseIncome(
