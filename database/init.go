@@ -16,12 +16,13 @@ import (
 
 // Table names
 const (
-	ExpenseIncome   = "expense_income"
-	Transfer        = "transfer"
+	Transaction     = "transaction"
+	AffectedWallet  = "affected_wallet"
 	Category        = "category"
 	Wallet          = "wallet"
 	WalletType      = "wallet_type"
 	TransactionType = "transaction_type"
+	WalletRole      = "wallet_role"
 )
 
 var db *sqlx.DB
@@ -72,6 +73,12 @@ func CreateTables() (err error) {
 		return
 	}
 
+	err = createWalletRoleEnum()
+	if err != nil {
+		log.Println("Error creating enum:", WalletRole, err)
+		return
+	}
+
 	err = createWalletTable()
 	if err != nil {
 		log.Println("Error creating table:", Wallet, err)
@@ -84,23 +91,23 @@ func CreateTables() (err error) {
 		return
 	}
 
-	err = createExpenseIncomeTable()
+	err = createTransactionTable()
 	if err != nil {
-		log.Println("Error creating table:", ExpenseIncome, err)
+		log.Println("Error creating table:", Transaction, err)
 		return
 	}
 
-	err = createTransferTable()
+	err = createAffectedWalletTable()
 	if err != nil {
-		log.Println("Error creating table:", Transfer, err)
+		log.Println("Error creating table:", AffectedWallet, err)
 		return
 	}
 
 	err = createTriggerSetUpdatedAt(
 		Wallet,
 		Category,
-		ExpenseIncome,
-		Transfer,
+		Transaction,
+		AffectedWallet,
 	)
 	if err != nil {
 		log.Println("Error creating trigger for updated_at", err)
@@ -124,25 +131,40 @@ func createConstantTable(tableName string) (err error) {
 }
 
 func createWalletTypeEnum() (err error) {
+	walletType := constant.WalletType()
 	query :=
 		fmt.Sprintf(
 			"CREATE TYPE %s AS ENUM ('%s', '%s', '%s');",
 			WalletType,
-			constant.WalletType.Cash,
-			constant.WalletType.BankAccount,
-			constant.WalletType.Credit,
+			walletType.Cash,
+			walletType.BankAccount,
+			walletType.Credit,
 		)
 	_, err = db.Exec(query)
 	return filterError(err)
 }
 
 func createTransactionTypeEnum() (err error) {
+	transactionType := constant.TransactionType()
 	query :=
 		fmt.Sprintf(
 			"CREATE TYPE %s AS ENUM ('%s', '%s');",
 			TransactionType,
-			constant.TransactionType.Income,
-			constant.TransactionType.Expense,
+			transactionType.Income,
+			transactionType.Expense,
+		)
+	_, err = db.Exec(query)
+	return filterError(err)
+}
+
+func createWalletRoleEnum() (err error) {
+	walletRole := constant.WalletRole()
+	query :=
+		fmt.Sprintf(
+			"CREATE TYPE %s AS ENUM ('%s', '%s');",
+			WalletRole,
+			walletRole.SrcWallet,
+			walletRole.DstWallet,
 		)
 	_, err = db.Exec(query)
 	return filterError(err)
@@ -167,13 +189,14 @@ func createWalletTable() (err error) {
 	return
 }
 
-func createExpenseIncomeTable() (err error) {
+//wallet character varying(20) NOT NULL REFERENCES %s,
+
+func createTransactionTable() (err error) {
 	query := fmt.Sprintf(
 		`
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 		CREATE TABLE IF NOT EXISTS %s (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			wallet character varying(20) NOT NULL REFERENCES %s,
 			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
 			type %s NOT NULL,
 			category character varying(20) NOT NULL REFERENCES %s,
@@ -183,8 +206,7 @@ func createExpenseIncomeTable() (err error) {
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
 		`,
-		ExpenseIncome,
-		Wallet,
+		Transaction,
 		TransactionType,
 		Category,
 	)
@@ -193,25 +215,22 @@ func createExpenseIncomeTable() (err error) {
 	return
 }
 
-func createTransferTable() (err error) {
+func createAffectedWalletTable() (err error) {
 	query := fmt.Sprintf(
 		`
-		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 		CREATE TABLE IF NOT EXISTS %s (
-			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			src_wallet character varying(20) NOT NULL REFERENCES %s,
-			dst_wallet character varying(20) REFERENCES %s,
-			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
-			description text NOT NULL DEFAULT '',
-			occurred_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			transaction_id uuid NOT NULL REFERENCES %s,
+			wallet character varying(20) NOT NULL REFERENCES %s,
+			role %s NOT NULL,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			CHECK (dst_wallet <> src_wallet)
+			PRIMARY KEY (transaction_id, wallet, role)
 		);
 		`,
-		Transfer,
+		AffectedWallet,
+		Transaction,
 		Wallet,
-		Wallet,
+		WalletRole,
 	)
 
 	_, err = db.Exec(query)
