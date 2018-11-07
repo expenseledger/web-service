@@ -129,6 +129,9 @@ func categoryInit(context *gin.Context) {
 		model.Category{
 			Name: "Bill",
 		},
+		model.Category{
+			Name: "Withdraw",
+		},
 	}
 
 	length, err := categories.Init()
