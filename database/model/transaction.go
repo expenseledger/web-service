@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -46,24 +45,68 @@ func (tx *Transaction) Insert() error {
 		return err
 	}
 
-	var results []affectedWallet
+	walletRole := constant.WalletRole()
+	transactionType := constant.TransactionType()
+	var affectedWallets []affectedWallet
 	switch {
 	case !tx.OccurredAt.IsZero() &&
-		tx.Type == constant.TransactionType().Transfer:
+		tx.Type == transactionType.Transfer:
 		err = stmt.Select(
-			&results,
+			&affectedWallets,
 			tx.Amount,
 			tx.Type,
 			tx.Category,
 			tx.Description,
 			tx.OccurredAt,
 			tx.SrcWallet,
-			constant.WalletRole().SrcWallet,
+			walletRole.SrcWallet,
 			tx.DstWallet,
-			constant.WalletRole().DstWallet,
+			walletRole.DstWallet,
 		)
+
+	case !tx.OccurredAt.IsZero():
+		wallet, role := tx.SrcWallet, walletRole.SrcWallet
+		if tx.Type == transactionType.Income {
+			wallet, role = tx.DstWallet, walletRole.DstWallet
+		}
+		err = stmt.Select(
+			&affectedWallets,
+			tx.Amount,
+			tx.Type,
+			tx.Category,
+			tx.Description,
+			tx.OccurredAt,
+			wallet,
+			role,
+		)
+
+	case tx.Type == constant.TransactionType().Transfer:
+		err = stmt.Select(
+			&affectedWallets,
+			tx.Amount,
+			tx.Type,
+			tx.Category,
+			tx.Description,
+			tx.SrcWallet,
+			walletRole.SrcWallet,
+			tx.DstWallet,
+			walletRole.DstWallet,
+		)
+
 	default:
-		err = errors.New("Nahnah")
+		wallet, role := tx.SrcWallet, walletRole.SrcWallet
+		if tx.Type == transactionType.Income {
+			wallet, role = tx.DstWallet, walletRole.DstWallet
+		}
+		err = stmt.Select(
+			&affectedWallets,
+			tx.Amount,
+			tx.Type,
+			tx.Category,
+			tx.Description,
+			wallet,
+			role,
+		)
 	}
 
 	if err != nil {
@@ -71,7 +114,7 @@ func (tx *Transaction) Insert() error {
 		return err
 	}
 
-	tx.ID = results[0].TransactionID
+	tx.ID = affectedWallets[0].TransactionID
 	return nil
 }
 
@@ -92,13 +135,78 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			)
 			INSERT INTO %s
 			(transaction_id, wallet, role)
-			SELECT id, $6, CAST ($7 AS wallet_role) FROM inserted_tx
+			SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
 			UNION ALL
-			SELECT id, $8, CAST ($9 AS wallet_role) FROM inserted_tx
+			SELECT id, $8, CAST ($9 AS %s) FROM inserted_tx
 			RETURNING *;
 			`,
 			database.Transaction,
 			database.AffectedWallet,
+			database.WalletRole,
+			database.WalletRole,
+		)
+
+	case !tx.OccurredAt.IsZero():
+		query = fmt.Sprintf(
+			`
+			WITH inserted_tx AS (
+				INSERT INTO %s
+				(amount, type, category, description, occurred_at)
+				VALUES
+				($1, $2, $3, $4, $5)
+				RETURNING *
+			)
+			INSERT INTO %s
+			(transaction_id, wallet, role)
+			SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
+			RETURNING *;
+			`,
+			database.Transaction,
+			database.AffectedWallet,
+			database.WalletRole,
+		)
+
+	case tx.Type == constant.TransactionType().Transfer:
+		query = fmt.Sprintf(
+			`
+			WITH inserted_tx AS (
+				INSERT INTO %s
+				(amount, type, category, description)
+				VALUES
+				($1, $2, $3, $4)
+				RETURNING *
+			)
+			INSERT INTO %s
+			(transaction_id, wallet, role)
+			SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
+			UNION ALL
+			SELECT id, $7, CAST ($8 AS %s) FROM inserted_tx
+			RETURNING *;
+			`,
+			database.Transaction,
+			database.AffectedWallet,
+			database.WalletRole,
+			database.WalletRole,
+		)
+
+	default:
+		query = fmt.Sprintf(
+			`
+			WITH inserted_tx AS (
+				INSERT INTO %s
+				(amount, type, category, description)
+				VALUES
+				($1, $2, $3, $4)
+				RETURNING *
+			)
+			INSERT INTO %s
+			(transaction_id, wallet, role)
+			SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
+			RETURNING *;
+			`,
+			database.Transaction,
+			database.AffectedWallet,
+			database.WalletRole,
 		)
 	}
 
