@@ -22,22 +22,17 @@ type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-type txCreateCommonForm struct {
+type txCreateForm struct {
 	Amount      decimal.Decimal `json:"amount" binding:"required"`
+	Category    string          `json:"category" binding:"required"`
 	Description string          `json:"description"`
-	Date        *date.Date      `json:"date"`
-}
-
-type walletTxRxForm struct {
-	Name     string `json:"name" binding:"required"`
-	Category string `json:"category" binding:"required"`
-	txCreateCommonForm
+	Date        date.Date       `json:"date"`
 }
 
 type walletTransferForm struct {
 	From string `json:"from" binding:"required"`
 	To   string `json:"to" binding:"required"`
-	txCreateCommonForm
+	txCreateForm
 }
 
 func walletCreate(context *gin.Context) {
@@ -164,12 +159,12 @@ func walletInit(context *gin.Context) {
 	wallets := model.Wallets{
 		model.Wallet{
 			Name:    "Cash",
-			Type:    constant.WalletType.Cash,
+			Type:    constant.WalletType().Cash,
 			Balance: decimalFromStringIgnoreError("0.0"),
 		},
 		model.Wallet{
 			Name:    "My Bank",
-			Type:    constant.WalletType.BankAccount,
+			Type:    constant.WalletType().BankAccount,
 			Balance: decimalFromStringIgnoreError("0.0"),
 		},
 	}
@@ -218,72 +213,6 @@ func walletClear(context *gin.Context) {
 	return
 }
 
-func walletExpend(context *gin.Context) {
-	var form walletTxRxForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	expense := form.toExpense()
-
-	tx, wallet, err := business.InsertExpense(expense)
-	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	data := map[string]interface{}{
-		"wallet":      wallet,
-		"transaction": tx,
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(data),
-	)
-	return
-}
-
-func walletReceive(context *gin.Context) {
-	var form walletTxRxForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	income := form.toIncome()
-
-	tx, wallet, err := business.InsertIncome(income)
-	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	data := map[string]interface{}{
-		"wallet":      wallet,
-		"transaction": tx,
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(data),
-	)
-	return
-}
-
 func walletTransfer(context *gin.Context) {
 	var form walletTransferForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -294,9 +223,9 @@ func walletTransfer(context *gin.Context) {
 		return
 	}
 
-	transfer := form.toTransfer()
+	tx := form.toTransaction()
 
-	tx, srcWallet, dstWallet, err := business.Transfer(transfer)
+	srcWallet, dstWallet, err := business.Transfer(tx)
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -323,37 +252,25 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	return d
 }
 
-func (form *walletTxRxForm) toExpense() *model.ExpenseIncome {
-	ei := form.toExpenseIncome(constant.TransactionType.Expense)
-	ei.Wallet = form.Name
-	ei.Category = form.Category
-	return ei
-}
-
-func (form *walletTxRxForm) toIncome() *model.ExpenseIncome {
-	ei := form.toExpenseIncome(constant.TransactionType.Income)
-	ei.Wallet = form.Name
-	ei.Category = form.Category
-	return ei
-}
-
-func (form *walletTransferForm) toTransfer() *model.Transfer {
-	return &model.Transfer{
+func (form *walletTransferForm) toTransaction() *model.Transaction {
+	return &model.Transaction{
 		SrcWallet:   form.From,
 		DstWallet:   form.To,
 		Amount:      form.Amount,
+		Type:        constant.TransactionType().Transfer,
+		Category:    form.Category,
 		Description: form.Description,
 		Date:        form.Date,
 	}
 }
 
-func (form *txCreateCommonForm) toExpenseIncome(
-	txType string,
-) *model.ExpenseIncome {
-	return &model.ExpenseIncome{
-		Amount:      form.Amount,
-		Type:        txType,
-		Description: form.Description,
-		Date:        form.Date,
-	}
-}
+// func (form *txCreateCommonForm) toExpenseIncome(
+// 	txType string,
+// ) *model.ExpenseIncome {
+// 	return &model.ExpenseIncome{
+// 		Amount:      form.Amount,
+// 		Type:        txType,
+// 		Description: form.Description,
+// 		Date:        form.Date,
+// 	}
+// }
