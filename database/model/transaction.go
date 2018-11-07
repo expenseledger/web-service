@@ -47,12 +47,11 @@ func (tx *Transaction) Insert() error {
 
 	walletRole := constant.WalletRole()
 	transactionType := constant.TransactionType()
-	var affectedWallets []affectedWallet
 	switch {
 	case !tx.OccurredAt.IsZero() &&
 		tx.Type == transactionType.Transfer:
-		err = stmt.Select(
-			&affectedWallets,
+		err = stmt.Get(
+			tx,
 			tx.Amount,
 			tx.Type,
 			tx.Category,
@@ -69,8 +68,8 @@ func (tx *Transaction) Insert() error {
 		if tx.Type == transactionType.Income {
 			wallet, role = tx.DstWallet, walletRole.DstWallet
 		}
-		err = stmt.Select(
-			&affectedWallets,
+		err = stmt.Get(
+			tx,
 			tx.Amount,
 			tx.Type,
 			tx.Category,
@@ -81,8 +80,8 @@ func (tx *Transaction) Insert() error {
 		)
 
 	case tx.Type == constant.TransactionType().Transfer:
-		err = stmt.Select(
-			&affectedWallets,
+		err = stmt.Get(
+			tx,
 			tx.Amount,
 			tx.Type,
 			tx.Category,
@@ -98,8 +97,8 @@ func (tx *Transaction) Insert() error {
 		if tx.Type == transactionType.Income {
 			wallet, role = tx.DstWallet, walletRole.DstWallet
 		}
-		err = stmt.Select(
-			&affectedWallets,
+		err = stmt.Get(
+			tx,
 			tx.Amount,
 			tx.Type,
 			tx.Category,
@@ -113,8 +112,6 @@ func (tx *Transaction) Insert() error {
 		log.Println("Error inserting a transaction", err)
 		return err
 	}
-
-	tx.ID = affectedWallets[0].TransactionID
 	return nil
 }
 
@@ -132,13 +129,15 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 				VALUES
 				($1, $2, $3, $4, $5)
 				RETURNING *
+			), tx_wallet AS (
+				INSERT INTO %s
+				(transaction_id, wallet, role)
+				SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
+				UNION ALL
+				SELECT id, $8, CAST ($9 AS %s) FROM inserted_tx
+				RETURNING *
 			)
-			INSERT INTO %s
-			(transaction_id, wallet, role)
-			SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
-			UNION ALL
-			SELECT id, $8, CAST ($9 AS %s) FROM inserted_tx
-			RETURNING *;
+			SELECT id, occurred_at FROM inserted_tx;
 			`,
 			database.Transaction,
 			database.AffectedWallet,
@@ -155,11 +154,13 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 				VALUES
 				($1, $2, $3, $4, $5)
 				RETURNING *
+			), tx_wallet AS (
+				INSERT INTO %s
+				(transaction_id, wallet, role)
+				SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
+				RETURNING *
 			)
-			INSERT INTO %s
-			(transaction_id, wallet, role)
-			SELECT id, $6, CAST ($7 AS %s) FROM inserted_tx
-			RETURNING *;
+			SELECT id, occurred_at FROM inserted_tx;
 			`,
 			database.Transaction,
 			database.AffectedWallet,
@@ -175,13 +176,15 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 				VALUES
 				($1, $2, $3, $4)
 				RETURNING *
+			), tx_wallet AS (
+				INSERT INTO %s
+				(transaction_id, wallet, role)
+				SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
+				UNION ALL
+				SELECT id, $7, CAST ($8 AS %s) FROM inserted_tx
+				RETURNING *
 			)
-			INSERT INTO %s
-			(transaction_id, wallet, role)
-			SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
-			UNION ALL
-			SELECT id, $7, CAST ($8 AS %s) FROM inserted_tx
-			RETURNING *;
+			SELECT id, occurred_at FROM inserted_tx;
 			`,
 			database.Transaction,
 			database.AffectedWallet,
@@ -198,11 +201,13 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 				VALUES
 				($1, $2, $3, $4)
 				RETURNING *
+			), tx_wallet AS (
+				INSERT INTO %s
+				(transaction_id, wallet, role)
+				SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
+				RETURNING transaction_id, wallet, role
 			)
-			INSERT INTO %s
-			(transaction_id, wallet, role)
-			SELECT id, $5, CAST ($6 AS %s) FROM inserted_tx
-			RETURNING *;
+			SELECT id, occurred_at FROM inserted_tx;
 			`,
 			database.Transaction,
 			database.AffectedWallet,

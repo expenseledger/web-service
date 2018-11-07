@@ -29,6 +29,11 @@ type txCreateForm struct {
 	Date        date.Date       `json:"date"`
 }
 
+type walletTxRxForm struct {
+	Name string `json:"name" binding:"required"`
+	txCreateForm
+}
+
 type walletTransferForm struct {
 	From string `json:"from" binding:"required"`
 	To   string `json:"to" binding:"required"`
@@ -213,6 +218,72 @@ func walletClear(context *gin.Context) {
 	return
 }
 
+func walletExpend(context *gin.Context) {
+	var form walletTxRxForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	tx := form.toExpenseTransaction()
+
+	srcWallet, err := business.Expend(tx)
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	data := map[string]interface{}{
+		"src_wallet":  srcWallet,
+		"transaction": tx,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
+	return
+}
+
+func walletReceive(context *gin.Context) {
+	var form walletTxRxForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	tx := form.toIncomeTransaction()
+
+	dstWallet, err := business.Receive(tx)
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	data := map[string]interface{}{
+		"dst_wallet":  dstWallet,
+		"transaction": tx,
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
+	return
+}
+
 func walletTransfer(context *gin.Context) {
 	var form walletTransferForm
 	if err := context.ShouldBindJSON(&form); err != nil {
@@ -223,7 +294,7 @@ func walletTransfer(context *gin.Context) {
 		return
 	}
 
-	tx := form.toTransaction()
+	tx := form.toTransferTransaction()
 
 	srcWallet, dstWallet, err := business.Transfer(tx)
 	if err != nil {
@@ -252,25 +323,33 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	return d
 }
 
-func (form *walletTransferForm) toTransaction() *model.Transaction {
+func (form *walletTransferForm) toTransferTransaction() *model.Transaction {
+	tx := form.toTransaction(constant.TransactionType().Transfer)
+	tx.SrcWallet = form.From
+	tx.DstWallet = form.To
+	return tx
+}
+
+func (form *walletTxRxForm) toExpenseTransaction() *model.Transaction {
+	tx := form.toTransaction(constant.TransactionType().Expense)
+	tx.SrcWallet = form.Name
+	return tx
+}
+
+func (form *walletTxRxForm) toIncomeTransaction() *model.Transaction {
+	tx := form.toTransaction(constant.TransactionType().Income)
+	tx.DstWallet = form.Name
+	return tx
+}
+
+func (form *txCreateForm) toTransaction(
+	txType string,
+) *model.Transaction {
 	return &model.Transaction{
-		SrcWallet:   form.From,
-		DstWallet:   form.To,
 		Amount:      form.Amount,
-		Type:        constant.TransactionType().Transfer,
+		Type:        txType,
 		Category:    form.Category,
 		Description: form.Description,
 		Date:        form.Date,
 	}
 }
-
-// func (form *txCreateCommonForm) toExpenseIncome(
-// 	txType string,
-// ) *model.ExpenseIncome {
-// 	return &model.ExpenseIncome{
-// 		Amount:      form.Amount,
-// 		Type:        txType,
-// 		Description: form.Description,
-// 		Date:        form.Date,
-// 	}
-// }
