@@ -29,14 +29,14 @@ func (d Date) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON ...
-func (d Date) UnmarshalJSON(data []byte) error {
+func (d *Date) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
 	}
 
 	layout := "2006-01-02"
 	t, err := time.Parse(`"`+layout+`"`, string(data))
-	d = Date(t)
+	*d = Date(t)
 
 	return err
 }
