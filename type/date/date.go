@@ -9,8 +9,8 @@ import (
 type Date time.Time
 
 // MarshalJSON ...
-func (d *Date) MarshalJSON() ([]byte, error) {
-	t := time.Time(*d)
+func (d Date) MarshalJSON() ([]byte, error) {
+	t := time.Time(d)
 
 	if y := t.Year(); y < 0 || y >= 10000 {
 		return nil, errors.New(
@@ -29,14 +29,19 @@ func (d *Date) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON ...
-func (d *Date) UnmarshalJSON(data []byte) error {
+func (d Date) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
 	}
 
 	layout := "2006-01-02"
 	t, err := time.Parse(`"`+layout+`"`, string(data))
-	*d = Date(t)
+	d = Date(t)
 
 	return err
+}
+
+func (d Date) String() string {
+	t := time.Time(d)
+	return t.String()
 }
