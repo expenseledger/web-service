@@ -10,14 +10,14 @@ import (
 
 // Transaction the structure represents a transaction in application layer
 type Transaction struct {
-	ID          string          `db:"id"`
-	SrcWallet   string          `db:"src_wallet"`
-	DstWallet   string          `db:"dst_wallet"`
-	Amount      decimal.Decimal `db:"amount"`
-	Type        string          `db:"type"`
-	Category    string          `db:"category"`
-	Description string          `db:"description"`
-	Date        date.Date       `db:"date"`
+	ID          string          `json:"id"`
+	SrcWallet   string          `json:"src_wallet"`
+	DstWallet   string          `json:"dst_wallet"`
+	Amount      decimal.Decimal `json:"amount"`
+	Type        string          `json:"type"`
+	Category    string          `json:"category"`
+	Description string          `json:"description"`
+	Date        date.Date       `json:"date"`
 }
 
 // Transactions is defined just to be used as a receiver
@@ -51,6 +51,17 @@ func (txs *Transactions) Clear() (int, error) {
 
 	*txs = transactions
 	return length, nil
+}
+
+// Get ...
+func (tx *Transaction) Get() error {
+	dbTx := tx.toDBCounterpart()
+	if err := dbTx.One(); err != nil {
+		return err
+	}
+
+	tx.fromDBCounterpart(dbTx)
+	return nil
 }
 
 func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {

@@ -192,6 +192,71 @@ func (txs *Transactions) DeleteAll() error {
 	return nil
 }
 
+// One ...
+func (tx *Transaction) One() error {
+	query := fmt.Sprintf(
+		`
+		SELECT
+			t.id AS id,
+			w1.wallet AS src_wallet,
+			w2.wallet AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM %s t, %s w1, %s w2
+			WHERE t.id=$1 AND t.type='TRANSFER' AND t.id=w1.transaction_id AND
+			t.id=w2.transaction_id AND w1.wallet<>w2.wallet AND
+			w1.role='SRC_WALLET'
+		UNION ALL
+		SELECT
+			t.id AS id,
+			'' AS src_wallet,
+			w.wallet AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM %s t, %s w
+			WHERE t.id=$2 AND t.type='INCOME' AND t.id=w.transaction_id
+		UNION ALL
+		SELECT
+			t.id AS id,
+			w.wallet AS src_wallet,
+			'' AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM %s t, %s w
+			WHERE t.id=$3 AND t.type='EXPENSE' AND t.id=w.transaction_id;
+		`,
+		database.Transaction,
+		database.AffectedWallet,
+		database.AffectedWallet,
+		database.Transaction,
+		database.AffectedWallet,
+		database.Transaction,
+		database.AffectedWallet,
+	)
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error selecting a transactions", err)
+		return err
+	}
+
+	if err := stmt.Get(tx, tx.ID, tx.ID, tx.ID); err != nil {
+		log.Println("Error selecting a transactions", err)
+		return err
+	}
+
+	return nil
+}
+
 func (tx *Transaction) buildInsertSQLStmt() string {
 	var query string
 
@@ -294,3 +359,9 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 
 	return query
 }
+
+// func (tx *Transaction) buildSelectSQLStmt() string {
+// 	switch tx.Type {
+
+// 	}
+// }

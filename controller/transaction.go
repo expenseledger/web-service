@@ -33,3 +33,32 @@ func transactionClear(context *gin.Context) {
 	)
 	return
 }
+
+func transactionGet(context *gin.Context) {
+	var form transactionIdentifyForm
+	if err := context.ShouldBindJSON(&form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	tx := model.Transaction{
+		ID: form.ID,
+	}
+
+	if err := tx.Get(); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(tx),
+	)
+	return
+}
