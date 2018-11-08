@@ -148,10 +148,11 @@ func createTransactionTypeEnum() (err error) {
 	transactionType := constant.TransactionType()
 	query :=
 		fmt.Sprintf(
-			"CREATE TYPE %s AS ENUM ('%s', '%s');",
+			"CREATE TYPE %s AS ENUM ('%s', '%s', '%s');",
 			TransactionType,
 			transactionType.Income,
 			transactionType.Expense,
+			transactionType.Transfer,
 		)
 	_, err = db.Exec(query)
 	return filterError(err)

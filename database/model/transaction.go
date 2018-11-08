@@ -115,6 +115,83 @@ func (tx *Transaction) Insert() error {
 	return nil
 }
 
+// DeleteAll ...
+func (txs *Transactions) DeleteAll() error {
+	query := fmt.Sprintf(
+		`
+		WITH deleted_transfer AS (
+			DELETE FROM %s
+			WHERE type='TRANSFER'
+			RETURNING *
+		), deleted_income AS (
+			DELETE FROM %s
+			WHERE type='INCOME'
+			RETURNING *
+		), deleted_expense AS (
+			DELETE FROM %s
+			WHERE type='EXPENSE'
+			RETURNING *
+		), deleted_tx_wallet AS (
+			DELETE FROM %s
+			RETURNING *
+		)
+		SELECT
+			t.id AS id,
+			w1.wallet AS src_wallet,
+			w2.wallet AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM deleted_transfer t, deleted_tx_wallet w1, deleted_tx_wallet w2
+			WHERE t.id=w1.transaction_id AND t.id=w2.transaction_id AND
+			w1.wallet<>w2.wallet AND w1.role='SRC_WALLET'
+		UNION ALL
+		SELECT
+			t.id AS id,
+			'' AS src_wallet,
+			w.wallet AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM deleted_income t, deleted_tx_wallet w
+			WHERE t.id=w.transaction_id
+		UNION ALL
+		SELECT
+			t.id AS id,
+			w.wallet AS src_wallet,
+			'' AS dst_wallet,
+			t.amount AS amount,
+			t.type AS type,
+			t.category AS category,
+			t.description AS description,
+			t.occurred_at AS occurred_at
+			FROM deleted_expense t, deleted_tx_wallet w
+			WHERE t.id=w.transaction_id;
+		`,
+		database.Transaction,
+		database.Transaction,
+		database.Transaction,
+		database.AffectedWallet,
+	)
+
+	stmt, err := db.Preparex(query)
+	if err != nil {
+		log.Println("Error deleting all transactions", err)
+		return err
+	}
+
+	if err := stmt.Select(txs); err != nil {
+		log.Println("Error deleting all transactions", err)
+		return err
+	}
+
+	return nil
+}
+
 func (tx *Transaction) buildInsertSQLStmt() string {
 	var query string
 

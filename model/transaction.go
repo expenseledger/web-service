@@ -34,6 +34,25 @@ func (tx *Transaction) Create() error {
 	return nil
 }
 
+// Clear ...
+func (txs *Transactions) Clear() (int, error) {
+	var dbTxs dbmodel.Transactions
+	if err := dbTxs.DeleteAll(); err != nil {
+		return 0, err
+	}
+
+	length := len(dbTxs)
+	transactions := make(Transactions, length)
+	for i, dbTx := range dbTxs {
+		var tx Transaction
+		tx.fromDBCounterpart(&dbTx)
+		transactions[i] = tx
+	}
+
+	*txs = transactions
+	return length, nil
+}
+
 func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
 
 	return &dbmodel.Transaction{

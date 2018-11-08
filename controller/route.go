@@ -34,12 +34,12 @@ func InitRoutes() *gin.Engine {
 	categoryRoute.POST("/list", categoryList)
 	categoryRoute.POST("/init", categoryInit)
 
-	// transactionRoute := router.Group("/transaction")
+	transactionRoute := router.Group("/transaction")
 
 	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
-		// transactionRoute.POST("/clear", transactionClear)
+		transactionRoute.POST("/clear", transactionClear)
 	}
 
 	return router
