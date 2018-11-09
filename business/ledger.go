@@ -1,6 +1,7 @@
 package business
 
 import (
+	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 )
 
@@ -81,4 +82,63 @@ func Transfer(tx *model.Transaction) (*model.Wallet, *model.Wallet, error) {
 	}
 
 	return &srcWallet, &dstWallet, nil
+}
+
+// DeleteTransaction deletes a transaction and rebalances wallets
+func DeleteTransaction(
+	tx *model.Transaction,
+) (*model.Wallet, *model.Wallet, error) {
+	if err := tx.Delete(); err != nil {
+		return nil, nil, err
+	}
+
+	transactionType := constant.TransactionType()
+	srcWallet := &model.Wallet{
+		Name: tx.SrcWallet,
+	}
+	dstWallet := &model.Wallet{
+		Name: tx.DstWallet,
+	}
+
+	switch tx.Type {
+	case transactionType.Transfer:
+		if err := srcWallet.Get(); err != nil {
+			return nil, nil, err
+		}
+		if err := dstWallet.Get(); err != nil {
+			return nil, nil, err
+		}
+		srcWallet.Balance = srcWallet.Balance.Add(tx.Amount)
+		if err := srcWallet.Update(true); err != nil {
+			// @TODO: Roll back
+			return nil, nil, err
+		}
+		dstWallet.Balance = dstWallet.Balance.Sub(tx.Amount)
+		if err := dstWallet.Update(true); err != nil {
+			// @TODO: Roll back
+			return nil, nil, err
+		}
+	case transactionType.Expense:
+		if err := srcWallet.Get(); err != nil {
+			return nil, nil, err
+		}
+		srcWallet.Balance = srcWallet.Balance.Add(tx.Amount)
+		if err := srcWallet.Update(true); err != nil {
+			// @TODO: Roll back
+			return nil, nil, err
+		}
+		dstWallet = nil
+	case transactionType.Income:
+		if err := dstWallet.Get(); err != nil {
+			return nil, nil, err
+		}
+		dstWallet.Balance = dstWallet.Balance.Sub(tx.Amount)
+		if err := dstWallet.Update(true); err != nil {
+			// @TODO: Roll back
+			return nil, nil, err
+		}
+		srcWallet = nil
+	}
+
+	return srcWallet, dstWallet, nil
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/expenseledger/web-service/business"
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 )
@@ -77,7 +78,8 @@ func transactionDelete(context *gin.Context) {
 		ID: form.ID,
 	}
 
-	if err := tx.Delete(); err != nil {
+	srcWallet, dstWallet, err := business.DeleteTransaction(&tx)
+	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -85,9 +87,19 @@ func transactionDelete(context *gin.Context) {
 		return
 	}
 
+	data := map[string]interface{}{
+		"transaction": tx,
+	}
+	if srcWallet != nil {
+		data["src_wallet"] = srcWallet
+	}
+	if dstWallet != nil {
+		data["dst_wallet"] = dstWallet
+	}
+
 	context.JSON(
 		http.StatusOK,
-		buildSuccessResponse(tx),
+		buildSuccessResponse(data),
 	)
 	return
 }
