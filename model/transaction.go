@@ -64,6 +64,17 @@ func (tx *Transaction) Get() error {
 	return nil
 }
 
+// Delete ...
+func (tx *Transaction) Delete() error {
+	dbTx := tx.toDBCounterpart()
+	if err := dbTx.Delete(); err != nil {
+		return err
+	}
+
+	tx.fromDBCounterpart(dbTx)
+	return nil
+}
+
 func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
 
 	return &dbmodel.Transaction{
