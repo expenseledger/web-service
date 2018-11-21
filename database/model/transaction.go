@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -15,6 +16,17 @@ type Transaction struct {
 	ID          string          `db:"id"`
 	SrcWallet   string          `db:"src_wallet"`
 	DstWallet   string          `db:"dst_wallet"`
+	Amount      decimal.Decimal `db:"amount"`
+	Type        string          `db:"type"`
+	Category    string          `db:"category"`
+	Description string          `db:"description"`
+	OccurredAt  time.Time       `db:"occurred_at"`
+}
+
+type transaction struct {
+	ID          string          `db:"id"`
+	Wallet      string          `db:"wallet"`
+	WalletRole  string          `db:"role"`
 	Amount      decimal.Decimal `db:"amount"`
 	Type        string          `db:"type"`
 	Category    string          `db:"category"`
@@ -126,41 +138,15 @@ func (txs *Transactions) DeleteAll() error {
 		)
 		SELECT
 			t.id AS id,
-			w1.wallet AS src_wallet,
-			w2.wallet AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM deleted_tx t, deleted_tx_wallet w1, deleted_tx_wallet w2
-			WHERE t.type='TRANSFER' AND t.id=w1.transaction_id AND
-			t.id=w2.transaction_id AND w1.wallet<>w2.wallet AND
-			w1.role='SRC_WALLET'
-		UNION ALL
-		SELECT
-			t.id AS id,
-			'' AS src_wallet,
-			w.wallet AS dst_wallet,
+			w.wallet AS wallet,
+			w.role AS role,
 			t.amount AS amount,
 			t.type AS type,
 			t.category AS category,
 			t.description AS description,
 			t.occurred_at AS occurred_at
 			FROM deleted_tx t, deleted_tx_wallet w
-			WHERE t.type='INCOME' AND t.id=w.transaction_id
-		UNION ALL
-		SELECT
-			t.id AS id,
-			w.wallet AS src_wallet,
-			'' AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM deleted_tx t, deleted_tx_wallet w
-			WHERE t.type='EXPENSE' AND t.id=w.transaction_id;
+			WHERE t.id=w.transaction_id;
 		`,
 		database.Transaction,
 		database.AffectedWallet,
@@ -172,10 +158,36 @@ func (txs *Transactions) DeleteAll() error {
 		return err
 	}
 
-	if err := stmt.Select(txs); err != nil {
+	var _txs []transaction
+	if err := stmt.Select(&_txs); err != nil {
 		log.Println("Error deleting all transactions", err)
 		return err
 	}
+
+	role := constant.WalletRole()
+	mapTx := make(map[string]*Transaction)
+	for _, _tx := range _txs {
+		tx, ok := mapTx[_tx.ID]
+		if !ok {
+			tx = _tx.toExtTx()
+			mapTx[_tx.ID] = tx
+		}
+
+		if _tx.WalletRole == role.SrcWallet {
+			tx.SrcWallet = _tx.Wallet
+		} else {
+			tx.DstWallet = _tx.Wallet
+		}
+	}
+
+	transactions := make(Transactions, len(mapTx))
+	i := 0
+	for _, tx := range mapTx {
+		transactions[i] = *tx
+		i++
+	}
+
+	*txs = transactions
 
 	return nil
 }
@@ -186,47 +198,16 @@ func (tx *Transaction) One() error {
 		`
 		SELECT
 			t.id AS id,
-			w1.wallet AS src_wallet,
-			w2.wallet AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM %s t, %s w1, %s w2
-			WHERE t.id=$1 AND t.type='TRANSFER' AND t.id=w1.transaction_id AND
-			t.id=w2.transaction_id AND w1.wallet<>w2.wallet AND
-			w1.role='SRC_WALLET'
-		UNION ALL
-		SELECT
-			t.id AS id,
-			'' AS src_wallet,
-			w.wallet AS dst_wallet,
+			w.wallet AS wallet,
+			w.role AS role,
 			t.amount AS amount,
 			t.type AS type,
 			t.category AS category,
 			t.description AS description,
 			t.occurred_at AS occurred_at
 			FROM %s t, %s w
-			WHERE t.id=$2 AND t.type='INCOME' AND t.id=w.transaction_id
-		UNION ALL
-		SELECT
-			t.id AS id,
-			w.wallet AS src_wallet,
-			'' AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM %s t, %s w
-			WHERE t.id=$3 AND t.type='EXPENSE' AND t.id=w.transaction_id;
+			WHERE t.id=$1 AND t.id=w.transaction_id;
 		`,
-		database.Transaction,
-		database.AffectedWallet,
-		database.AffectedWallet,
-		database.Transaction,
-		database.AffectedWallet,
 		database.Transaction,
 		database.AffectedWallet,
 	)
@@ -237,9 +218,25 @@ func (tx *Transaction) One() error {
 		return err
 	}
 
-	if err := stmt.Get(tx, tx.ID, tx.ID, tx.ID); err != nil {
+	var _txs []transaction
+	if err := stmt.Select(&_txs, tx.ID); err != nil {
 		log.Println("Error selecting a transactions", err)
 		return err
+	}
+
+	if len(_txs) < 1 {
+		log.Println("Error selecting a transactions record not found")
+		return errors.New("record not found")
+	}
+
+	*tx = *_txs[0].toExtTx()
+	if len(_txs) > 1 {
+		role := constant.WalletRole()
+		if _tx := _txs[1]; _tx.WalletRole == role.SrcWallet {
+			tx.SrcWallet = _tx.Wallet
+		} else {
+			tx.DstWallet = _tx.Wallet
+		}
 	}
 
 	return nil
@@ -260,41 +257,15 @@ func (tx *Transaction) Delete() error {
 		)
 		SELECT
 			t.id AS id,
-			w1.wallet AS src_wallet,
-			w2.wallet AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM deleted_tx t, deleted_aw w1, deleted_aw w2
-			WHERE t.type='TRANSFER' AND t.id=w1.transaction_id AND
-			t.id=w2.transaction_id AND w1.wallet<>w2.wallet AND
-			w1.role='SRC_WALLET'
-		UNION ALL
-		SELECT
-			t.id AS id,
-			'' AS src_wallet,
-			w.wallet AS dst_wallet,
+			w.wallet AS wallet,
+			w.role AS role,
 			t.amount AS amount,
 			t.type AS type,
 			t.category AS category,
 			t.description AS description,
 			t.occurred_at AS occurred_at
 			FROM deleted_tx t, deleted_aw w
-			WHERE t.type='INCOME' AND t.id=w.transaction_id
-		UNION ALL
-		SELECT
-			t.id AS id,
-			w.wallet AS src_wallet,
-			'' AS dst_wallet,
-			t.amount AS amount,
-			t.type AS type,
-			t.category AS category,
-			t.description AS description,
-			t.occurred_at AS occurred_at
-			FROM deleted_tx t, deleted_aw w
-			WHERE t.type='EXPENSE' AND t.id=w.transaction_id;
+			WHERE t.id=w.transaction_id;
 		`,
 		database.AffectedWallet,
 		database.Transaction,
@@ -306,9 +277,25 @@ func (tx *Transaction) Delete() error {
 		return err
 	}
 
-	if err := stmt.Get(tx, tx.ID); err != nil {
+	var _txs []transaction
+	if err := stmt.Select(&_txs, tx.ID); err != nil {
 		log.Println("Error deleting a transactions", err)
 		return err
+	}
+
+	if len(_txs) < 1 {
+		log.Println("Error selecting a transactions record not found")
+		return errors.New("record not found")
+	}
+
+	*tx = *_txs[0].toExtTx()
+	if len(_txs) > 1 {
+		role := constant.WalletRole()
+		if _tx := _txs[1]; _tx.WalletRole == role.SrcWallet {
+			tx.SrcWallet = _tx.Wallet
+		} else {
+			tx.DstWallet = _tx.Wallet
+		}
 	}
 
 	return nil
@@ -417,8 +404,21 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 	return query
 }
 
-// func (tx *Transaction) buildSelectSQLStmt() string {
-// 	switch tx.Type {
+func (tx *transaction) toExtTx() *Transaction {
+	_tx := &Transaction{
+		ID:          tx.ID,
+		Amount:      tx.Amount,
+		Type:        tx.Type,
+		Category:    tx.Category,
+		Description: tx.Description,
+		OccurredAt:  tx.OccurredAt,
+	}
 
-// 	}
-// }
+	if role := constant.WalletRole(); tx.WalletRole == role.SrcWallet {
+		_tx.SrcWallet = tx.Wallet
+	} else {
+		_tx.DstWallet = tx.Wallet
+	}
+
+	return _tx
+}
