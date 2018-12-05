@@ -5,13 +5,13 @@ import (
 
 	"github.com/expenseledger/web-service/config"
 	"github.com/expenseledger/web-service/controller"
-	"github.com/expenseledger/web-service/database"
+	"github.com/expenseledger/web-service/db"
 )
 
 func main() {
 	var err error
 
-	err = database.CreateTables()
+	err = db.CreateTables()
 	if err != nil {
 		log.Fatal("Error creating tables")
 	} else {

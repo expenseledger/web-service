@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	dbmodel "github.com/expenseledger/web-service/database/model"
+	dbmodel "github.com/expenseledger/web-service/db/model"
 	"github.com/jinzhu/copier"
 	"github.com/shopspring/decimal"
 )

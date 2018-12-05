@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/expenseledger/web-service/constant"
-	"github.com/expenseledger/web-service/database"
+	"github.com/expenseledger/web-service/db"
 	"github.com/shopspring/decimal"
 )
 
-// Transaction the structure represents a stored transaction on database
+// Transaction the structure represents a stored transaction on db
 type Transaction struct {
 	ID          string          `db:"id"`
 	SrcWallet   string          `db:"src_wallet"`
@@ -49,7 +49,7 @@ type Transactions []Transaction
 func (tx *Transaction) Insert() error {
 	query := tx.buildInsertSQLStmt()
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error inserting a transaction", err)
 		return err
@@ -148,11 +148,11 @@ func (txs *Transactions) DeleteAll() error {
 			FROM deleted_tx t, deleted_tx_wallet w
 			WHERE t.id=w.transaction_id;
 		`,
-		database.Transaction,
-		database.AffectedWallet,
+		db.Transaction,
+		db.AffectedWallet,
 	)
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting all transactions", err)
 		return err
@@ -208,11 +208,11 @@ func (tx *Transaction) One() error {
 			FROM %s t, %s w
 			WHERE t.id=$1 AND t.id=w.transaction_id;
 		`,
-		database.Transaction,
-		database.AffectedWallet,
+		db.Transaction,
+		db.AffectedWallet,
 	)
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting a transactions", err)
 		return err
@@ -267,11 +267,11 @@ func (tx *Transaction) Delete() error {
 			FROM deleted_tx t, deleted_aw w
 			WHERE t.id=w.transaction_id;
 		`,
-		database.AffectedWallet,
-		database.Transaction,
+		db.AffectedWallet,
+		db.Transaction,
 	)
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting a transactions", err)
 		return err
@@ -325,10 +325,10 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			)
 			SELECT id, occurred_at FROM inserted_tx;
 			`,
-			database.Transaction,
-			database.AffectedWallet,
-			database.WalletRole,
-			database.WalletRole,
+			db.Transaction,
+			db.AffectedWallet,
+			db.WalletRole,
+			db.WalletRole,
 		)
 
 	case !tx.OccurredAt.IsZero():
@@ -348,9 +348,9 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			)
 			SELECT id, occurred_at FROM inserted_tx;
 			`,
-			database.Transaction,
-			database.AffectedWallet,
-			database.WalletRole,
+			db.Transaction,
+			db.AffectedWallet,
+			db.WalletRole,
 		)
 
 	case tx.Type == constant.TransactionType().Transfer:
@@ -372,10 +372,10 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			)
 			SELECT id, occurred_at FROM inserted_tx;
 			`,
-			database.Transaction,
-			database.AffectedWallet,
-			database.WalletRole,
-			database.WalletRole,
+			db.Transaction,
+			db.AffectedWallet,
+			db.WalletRole,
+			db.WalletRole,
 		)
 
 	default:
@@ -395,9 +395,9 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			)
 			SELECT id, occurred_at FROM inserted_tx;
 			`,
-			database.Transaction,
-			database.AffectedWallet,
-			database.WalletRole,
+			db.Transaction,
+			db.AffectedWallet,
+			db.WalletRole,
 		)
 	}
 

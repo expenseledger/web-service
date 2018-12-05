@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/expenseledger/web-service/database"
+	"github.com/expenseledger/web-service/db"
 	"github.com/shopspring/decimal"
 )
 
-// Wallet the structure represents a stored wallet on database
+// Wallet the structure represents a stored wallet on db
 type Wallet struct {
 	Name      string          `db:"name"`
 	Type      string          `db:"type"`
@@ -30,7 +30,7 @@ func (wallet *Wallet) Insert() error {
 		RETURNING *;
 		`
 
-	stmt, err := database.DB().PrepareNamed(query)
+	stmt, err := db.Conn().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a wallet", err)
 		return err
@@ -52,7 +52,7 @@ func (wallet *Wallet) One() error {
 		WHERE name=:name;
 		`
 
-	namedStmt, err := database.DB().PrepareNamed(query)
+	namedStmt, err := db.Conn().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error selecting a wallet", err)
 		return err
@@ -75,7 +75,7 @@ func (wallet *Wallet) Delete(name string) error {
 		RETURNING *;
 		`
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting a wallet", err)
 		return err
@@ -96,7 +96,7 @@ func (wallets *Wallets) All() (int, error) {
 		SELECT * FROM wallet;
 		`
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting all wallets", err)
 		return 0, err
@@ -141,7 +141,7 @@ func (wallets *Wallets) DeleteAll() (int, error) {
 		RETURNING *;
 		`
 
-	stmt, err := database.DB().Preparex(query)
+	stmt, err := db.Conn().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting all wallets", err)
 		return 0, err
@@ -165,7 +165,7 @@ func (wallet *Wallet) Save() error {
 		RETURNING *;
 		`
 
-	namedStmt, err := database.DB().PrepareNamed(query)
+	namedStmt, err := db.Conn().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error saving a wallet", err)
 		return err
@@ -193,7 +193,7 @@ func (wallet *Wallet) Update() error {
 		names,
 	)
 
-	namedStmt, err := database.DB().PrepareNamed(query)
+	namedStmt, err := db.Conn().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error updating a wallet", err)
 		return err

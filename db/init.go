@@ -1,4 +1,4 @@
-package database
+package db
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ const (
 	WalletRole      = "wallet_role"
 )
 
-var db *sqlx.DB
+var conn *sqlx.DB
 
 // @TODO: this should be singleton
 func init() {
@@ -49,15 +49,15 @@ func init() {
 		)
 	}
 
-	db, err = sqlx.Open("postgres", dbinfo)
+	conn, err = sqlx.Open("postgres", dbinfo)
 	if err != nil {
 		log.Fatal("Error opening connection to the database", err)
 	}
 }
 
-// DB returns an (probably) initialized instance of sqlx.DB
-func DB() *sqlx.DB {
-	return db
+// Conn returns an SQL connection
+func Conn() *sqlx.DB {
+	return conn
 }
 
 // CreateTables creates (if not exists) all the required tables
@@ -127,7 +127,7 @@ func createConstantTable(tableName string) (err error) {
 		updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
 		`
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return
 }
 
@@ -141,7 +141,7 @@ func createWalletTypeEnum() (err error) {
 			walletType.BankAccount,
 			walletType.Credit,
 		)
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return filterError(err)
 }
 
@@ -155,7 +155,7 @@ func createTransactionTypeEnum() (err error) {
 			transactionType.Expense,
 			transactionType.Transfer,
 		)
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return filterError(err)
 }
 
@@ -168,7 +168,7 @@ func createWalletRoleEnum() (err error) {
 			walletRole.SrcWallet,
 			walletRole.DstWallet,
 		)
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return filterError(err)
 }
 
@@ -187,7 +187,7 @@ func createWalletTable() (err error) {
 		WalletType,
 	)
 
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return
 }
 
@@ -213,7 +213,7 @@ func createTransactionTable() (err error) {
 		Category,
 	)
 
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return
 }
 
@@ -235,7 +235,7 @@ func createAffectedWalletTable() (err error) {
 		WalletRole,
 	)
 
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return
 }
 
@@ -256,7 +256,7 @@ func createTriggerSetUpdatedAt(tableNames ...string) (err error) {
 		)
 	}
 
-	_, err = db.Exec(query)
+	_, err = conn.Exec(query)
 	return
 }
 
