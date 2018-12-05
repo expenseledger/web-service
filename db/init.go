@@ -16,13 +16,13 @@ import (
 
 // Table names
 const (
-	Transaction     = "transaction"
-	AffectedWallet  = "affected_wallet"
-	Category        = "category"
-	Wallet          = "wallet"
-	WalletType      = "wallet_type"
-	TransactionType = "transaction_type"
-	WalletRole      = "wallet_role"
+	Transaction      = "transaction"
+	AffectedWallet   = "affected_wallet"
+	Category         = "category"
+	Wallet           = "wallet"
+	WalletTypes      = "wallet_type"
+	TransactionTypes = "transaction_type"
+	WalletRoles      = "wallet_role"
 )
 
 var conn *sqlx.DB
@@ -64,19 +64,19 @@ func Conn() *sqlx.DB {
 func CreateTables() (err error) {
 	err = createWalletTypeEnum()
 	if err != nil {
-		log.Println("Error creating enum:", WalletType, err)
+		log.Println("Error creating enum:", WalletTypes, err)
 		return
 	}
 
 	err = createTransactionTypeEnum()
 	if err != nil {
-		log.Println("Error creating enum:", TransactionType, err)
+		log.Println("Error creating enum:", TransactionTypes, err)
 		return
 	}
 
 	err = createWalletRoleEnum()
 	if err != nil {
-		log.Println("Error creating enum:", WalletRole, err)
+		log.Println("Error creating enum:", WalletRoles, err)
 		return
 	}
 
@@ -132,11 +132,11 @@ func createConstantTable(tableName string) (err error) {
 }
 
 func createWalletTypeEnum() (err error) {
-	walletType := constant.WalletType()
+	walletType := constant.WalletTypes()
 	query :=
 		fmt.Sprintf(
 			"CREATE TYPE %s AS ENUM ('%s', '%s', '%s');",
-			WalletType,
+			WalletTypes,
 			walletType.Cash,
 			walletType.BankAccount,
 			walletType.Credit,
@@ -146,11 +146,11 @@ func createWalletTypeEnum() (err error) {
 }
 
 func createTransactionTypeEnum() (err error) {
-	transactionType := constant.TransactionType()
+	transactionType := constant.TransactionTypes()
 	query :=
 		fmt.Sprintf(
 			"CREATE TYPE %s AS ENUM ('%s', '%s', '%s');",
-			TransactionType,
+			TransactionTypes,
 			transactionType.Income,
 			transactionType.Expense,
 			transactionType.Transfer,
@@ -160,11 +160,11 @@ func createTransactionTypeEnum() (err error) {
 }
 
 func createWalletRoleEnum() (err error) {
-	walletRole := constant.WalletRole()
+	walletRole := constant.WalletRoles()
 	query :=
 		fmt.Sprintf(
 			"CREATE TYPE %s AS ENUM ('%s', '%s');",
-			WalletRole,
+			WalletRoles,
 			walletRole.SrcWallet,
 			walletRole.DstWallet,
 		)
@@ -184,7 +184,7 @@ func createWalletTable() (err error) {
 		);
 		`,
 		Wallet,
-		WalletType,
+		WalletTypes,
 	)
 
 	_, err = conn.Exec(query)
@@ -209,7 +209,7 @@ func createTransactionTable() (err error) {
 		);
 		`,
 		Transaction,
-		TransactionType,
+		TransactionTypes,
 		Category,
 	)
 
@@ -232,7 +232,7 @@ func createAffectedWalletTable() (err error) {
 		AffectedWallet,
 		Transaction,
 		Wallet,
-		WalletRole,
+		WalletRoles,
 	)
 
 	_, err = conn.Exec(query)

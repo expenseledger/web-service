@@ -164,12 +164,12 @@ func walletInit(context *gin.Context) {
 	wallets := model.Wallets{
 		model.Wallet{
 			Name:    "Cash",
-			Type:    constant.WalletType().Cash,
+			Type:    constant.WalletTypes().Cash,
 			Balance: decimalFromStringIgnoreError("0.0"),
 		},
 		model.Wallet{
 			Name:    "My Bank",
-			Type:    constant.WalletType().BankAccount,
+			Type:    constant.WalletTypes().BankAccount,
 			Balance: decimalFromStringIgnoreError("0.0"),
 		},
 	}
@@ -324,20 +324,20 @@ func decimalFromStringIgnoreError(num string) decimal.Decimal {
 }
 
 func (form *walletTransferForm) toTransferTransaction() *model.Transaction {
-	tx := form.toTransaction(constant.TransactionType().Transfer)
+	tx := form.toTransaction(constant.TransactionTypes().Transfer)
 	tx.SrcWallet = form.From
 	tx.DstWallet = form.To
 	return tx
 }
 
 func (form *walletTxRxForm) toExpenseTransaction() *model.Transaction {
-	tx := form.toTransaction(constant.TransactionType().Expense)
+	tx := form.toTransaction(constant.TransactionTypes().Expense)
 	tx.SrcWallet = form.Name
 	return tx
 }
 
 func (form *walletTxRxForm) toIncomeTransaction() *model.Transaction {
-	tx := form.toTransaction(constant.TransactionType().Income)
+	tx := form.toTransaction(constant.TransactionTypes().Income)
 	tx.DstWallet = form.Name
 	return tx
 }

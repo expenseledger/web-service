@@ -26,7 +26,7 @@ type Transaction struct {
 type transaction struct {
 	ID          string          `db:"id"`
 	Wallet      string          `db:"wallet"`
-	WalletRole  string          `db:"role"`
+	WalletRoles string          `db:"role"`
 	Amount      decimal.Decimal `db:"amount"`
 	Type        string          `db:"type"`
 	Category    string          `db:"category"`
@@ -55,8 +55,8 @@ func (tx *Transaction) Insert() error {
 		return err
 	}
 
-	walletRole := constant.WalletRole()
-	transactionType := constant.TransactionType()
+	walletRole := constant.WalletRoles()
+	transactionType := constant.TransactionTypes()
 	switch {
 	case !tx.OccurredAt.IsZero() &&
 		tx.Type == transactionType.Transfer:
@@ -89,7 +89,7 @@ func (tx *Transaction) Insert() error {
 			role,
 		)
 
-	case tx.Type == constant.TransactionType().Transfer:
+	case tx.Type == constant.TransactionTypes().Transfer:
 		err = stmt.Get(
 			tx,
 			tx.Amount,
@@ -164,7 +164,7 @@ func (txs *Transactions) DeleteAll() error {
 		return err
 	}
 
-	role := constant.WalletRole()
+	role := constant.WalletRoles()
 	mapTx := make(map[string]*Transaction)
 	for _, _tx := range _txs {
 		tx, ok := mapTx[_tx.ID]
@@ -173,7 +173,7 @@ func (txs *Transactions) DeleteAll() error {
 			mapTx[_tx.ID] = tx
 		}
 
-		if _tx.WalletRole == role.SrcWallet {
+		if _tx.WalletRoles == role.SrcWallet {
 			tx.SrcWallet = _tx.Wallet
 		} else {
 			tx.DstWallet = _tx.Wallet
@@ -231,8 +231,8 @@ func (tx *Transaction) One() error {
 
 	*tx = *_txs[0].toExtTx()
 	if len(_txs) > 1 {
-		role := constant.WalletRole()
-		if _tx := _txs[1]; _tx.WalletRole == role.SrcWallet {
+		role := constant.WalletRoles()
+		if _tx := _txs[1]; _tx.WalletRoles == role.SrcWallet {
 			tx.SrcWallet = _tx.Wallet
 		} else {
 			tx.DstWallet = _tx.Wallet
@@ -290,8 +290,8 @@ func (tx *Transaction) Delete() error {
 
 	*tx = *_txs[0].toExtTx()
 	if len(_txs) > 1 {
-		role := constant.WalletRole()
-		if _tx := _txs[1]; _tx.WalletRole == role.SrcWallet {
+		role := constant.WalletRoles()
+		if _tx := _txs[1]; _tx.WalletRoles == role.SrcWallet {
 			tx.SrcWallet = _tx.Wallet
 		} else {
 			tx.DstWallet = _tx.Wallet
@@ -306,7 +306,7 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 
 	switch {
 	case !tx.OccurredAt.IsZero() &&
-		tx.Type == constant.TransactionType().Transfer:
+		tx.Type == constant.TransactionTypes().Transfer:
 		query = fmt.Sprintf(
 			`
 			WITH inserted_tx AS (
@@ -327,8 +327,8 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			`,
 			db.Transaction,
 			db.AffectedWallet,
-			db.WalletRole,
-			db.WalletRole,
+			db.WalletRoles,
+			db.WalletRoles,
 		)
 
 	case !tx.OccurredAt.IsZero():
@@ -350,10 +350,10 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			`,
 			db.Transaction,
 			db.AffectedWallet,
-			db.WalletRole,
+			db.WalletRoles,
 		)
 
-	case tx.Type == constant.TransactionType().Transfer:
+	case tx.Type == constant.TransactionTypes().Transfer:
 		query = fmt.Sprintf(
 			`
 			WITH inserted_tx AS (
@@ -374,8 +374,8 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			`,
 			db.Transaction,
 			db.AffectedWallet,
-			db.WalletRole,
-			db.WalletRole,
+			db.WalletRoles,
+			db.WalletRoles,
 		)
 
 	default:
@@ -397,7 +397,7 @@ func (tx *Transaction) buildInsertSQLStmt() string {
 			`,
 			db.Transaction,
 			db.AffectedWallet,
-			db.WalletRole,
+			db.WalletRoles,
 		)
 	}
 
@@ -414,7 +414,7 @@ func (tx *transaction) toExtTx() *Transaction {
 		OccurredAt:  tx.OccurredAt,
 	}
 
-	if role := constant.WalletRole(); tx.WalletRole == role.SrcWallet {
+	if role := constant.WalletRoles(); tx.WalletRoles == role.SrcWallet {
 		_tx.SrcWallet = tx.Wallet
 	} else {
 		_tx.DstWallet = tx.Wallet

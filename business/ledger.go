@@ -92,7 +92,7 @@ func DeleteTransaction(
 		return nil, nil, err
 	}
 
-	transactionType := constant.TransactionType()
+	transactionType := constant.TransactionTypes()
 	srcWallet := &model.Wallet{
 		Name: tx.SrcWallet,
 	}

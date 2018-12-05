@@ -19,9 +19,9 @@ type walletType struct {
 	Credit      string `db:"credit"`
 }
 
-// TransactionType returns the types of an transaction
+// TransactionTypes returns the types of an transaction
 // @TODO: this should be singleton
-func TransactionType() *transactionType {
+func TransactionTypes() *transactionType {
 	return &transactionType{
 		Expense:  "EXPENSE",
 		Income:   "INCOME",
@@ -29,8 +29,8 @@ func TransactionType() *transactionType {
 	}
 }
 
-// WalletType ...
-func WalletType() *walletType {
+// WalletTypes ...
+func WalletTypes() *walletType {
 	return &walletType{
 		Cash:        "CASH",
 		BankAccount: "BANK_ACCOUNT",
@@ -38,8 +38,8 @@ func WalletType() *walletType {
 	}
 }
 
-// WalletRole ...
-func WalletRole() *walletRole {
+// WalletRoles ...
+func WalletRoles() *walletRole {
 	return &walletRole{
 		SrcWallet: "SRC_WALLET",
 		DstWallet: "DST_WALLET",
@@ -48,7 +48,7 @@ func WalletRole() *walletRole {
 
 // ListWalletTypes returns all possible types of a wallet
 func ListWalletTypes() []string {
-	wt := WalletType()
+	wt := WalletTypes()
 	v := reflect.ValueOf(*wt)
 	types := make([]string, v.NumField())
 
