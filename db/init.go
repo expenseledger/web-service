@@ -27,7 +27,6 @@ const (
 
 var conn *sqlx.DB
 
-// @TODO: this should be singleton
 func init() {
 	var (
 		dbinfo string
