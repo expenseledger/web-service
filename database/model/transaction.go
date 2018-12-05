@@ -49,7 +49,7 @@ type Transactions []Transaction
 func (tx *Transaction) Insert() error {
 	query := tx.buildInsertSQLStmt()
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error inserting a transaction", err)
 		return err
@@ -152,7 +152,7 @@ func (txs *Transactions) DeleteAll() error {
 		database.AffectedWallet,
 	)
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting all transactions", err)
 		return err
@@ -212,7 +212,7 @@ func (tx *Transaction) One() error {
 		database.AffectedWallet,
 	)
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting a transactions", err)
 		return err
@@ -271,7 +271,7 @@ func (tx *Transaction) Delete() error {
 		database.Transaction,
 	)
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting a transactions", err)
 		return err

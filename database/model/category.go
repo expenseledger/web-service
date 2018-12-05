@@ -3,6 +3,8 @@ package model
 import (
 	"log"
 	"time"
+
+	"github.com/expenseledger/web-service/database"
 )
 
 // Category the structure represents a stored category on database
@@ -24,7 +26,7 @@ func (category *Category) Insert() error {
 		RETURNING *;
 		`
 
-	stmt, err := db.PrepareNamed(query)
+	stmt, err := database.DB().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a category", err)
 		return err
@@ -46,7 +48,7 @@ func (category *Category) One(name string) error {
 		WHERE name=$1;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting a category", err)
 		return err
@@ -69,7 +71,7 @@ func (category *Category) Delete(name string) error {
 		RETURNING *;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting a category", err)
 		return err
@@ -90,7 +92,7 @@ func (categories *Categories) All() (int, error) {
 		SELECT * FROM category;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting all categories", err)
 		return 0, err
@@ -134,7 +136,7 @@ func (categories *Categories) DeleteAll() (int, error) {
 		RETURNING *;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting all categories", err)
 		return 0, err

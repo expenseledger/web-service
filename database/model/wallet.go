@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/expenseledger/web-service/database"
 	"github.com/shopspring/decimal"
 )
 
@@ -29,7 +30,7 @@ func (wallet *Wallet) Insert() error {
 		RETURNING *;
 		`
 
-	stmt, err := db.PrepareNamed(query)
+	stmt, err := database.DB().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error inserting a wallet", err)
 		return err
@@ -51,7 +52,7 @@ func (wallet *Wallet) One() error {
 		WHERE name=:name;
 		`
 
-	namedStmt, err := db.PrepareNamed(query)
+	namedStmt, err := database.DB().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error selecting a wallet", err)
 		return err
@@ -74,7 +75,7 @@ func (wallet *Wallet) Delete(name string) error {
 		RETURNING *;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting a wallet", err)
 		return err
@@ -95,7 +96,7 @@ func (wallets *Wallets) All() (int, error) {
 		SELECT * FROM wallet;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error selecting all wallets", err)
 		return 0, err
@@ -140,7 +141,7 @@ func (wallets *Wallets) DeleteAll() (int, error) {
 		RETURNING *;
 		`
 
-	stmt, err := db.Preparex(query)
+	stmt, err := database.DB().Preparex(query)
 	if err != nil {
 		log.Println("Error deleting all wallets", err)
 		return 0, err
@@ -164,7 +165,7 @@ func (wallet *Wallet) Save() error {
 		RETURNING *;
 		`
 
-	namedStmt, err := db.PrepareNamed(query)
+	namedStmt, err := database.DB().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error saving a wallet", err)
 		return err
@@ -192,7 +193,7 @@ func (wallet *Wallet) Update() error {
 		names,
 	)
 
-	namedStmt, err := db.PrepareNamed(query)
+	namedStmt, err := database.DB().PrepareNamed(query)
 	if err != nil {
 		log.Println("Error updating a wallet", err)
 		return err
