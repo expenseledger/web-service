@@ -4,7 +4,7 @@ import (
 	"time"
 
 	dbmodel "github.com/expenseledger/web-service/db/model"
-	"github.com/expenseledger/web-service/type/date"
+	"github.com/expenseledger/web-service/pkg/type/date"
 	"github.com/shopspring/decimal"
 )
 

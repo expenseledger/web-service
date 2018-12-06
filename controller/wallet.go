@@ -6,7 +6,7 @@ import (
 	"github.com/expenseledger/web-service/business"
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
-	"github.com/expenseledger/web-service/type/date"
+	"github.com/expenseledger/web-service/pkg/type/date"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/shopspring/decimal"
