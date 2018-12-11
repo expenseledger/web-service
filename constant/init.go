@@ -32,32 +32,32 @@ var (
 )
 
 // TransactionTypes returns the types of a transaction
-func TransactionTypes() *transactionType {
+func TransactionTypes() transactionType {
 	tt.once.Do(func() {
 		tt.Expense = "EXPENSE"
 		tt.Income = "INCOME"
 		tt.Transfer = "TRANSFER"
 	})
-	return &tt
+	return tt
 }
 
 // WalletTypes returns the types of a wallet
-func WalletTypes() *walletType {
+func WalletTypes() walletType {
 	wt.once.Do(func() {
 		wt.Cash = "CASH"
 		wt.BankAccount = "BANK_ACCOUNT"
 		wt.Credit = "CREDIT"
 	})
-	return &wt
+	return wt
 }
 
 // WalletRoles returns roles of a wallet
-func WalletRoles() *walletRole {
+func WalletRoles() walletRole {
 	wr.once.Do(func() {
 		wr.SrcWallet = "SRC_WALLET"
 		wr.DstWallet = "DST_WALLET"
 	})
-	return &wr
+	return wr
 }
 
 // ListWalletTypes returns the types of a wallet as a slice of strings
