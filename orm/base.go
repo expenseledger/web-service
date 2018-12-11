@@ -3,12 +3,14 @@ package orm
 import (
 	"log"
 	"reflect"
+	"sync"
 
 	"github.com/expenseledger/web-service/db"
 )
 
 // BaseMapper ...
 type BaseMapper struct {
+	once       sync.Once
 	modelType  reflect.Type
 	insertStmt string
 	deleteStmt string

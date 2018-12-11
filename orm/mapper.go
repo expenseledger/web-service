@@ -11,30 +11,35 @@ type Mapper interface {
 	Clear() (interface{}, error)
 }
 
+var baseMapper BaseMapper
+
 // NewCategoryMapper ...
 func NewCategoryMapper(modelType reflect.Type) Mapper {
-	return &BaseMapper{
-		modelType: modelType,
-		insertStmt: `
+	baseMapper.once.Do(func() {
+		baseMapper.insertStmt = `
 			INSERT INTO category (name)
 			VALUES (:name)
 			RETURNING name;
-		`,
-		deleteStmt: `
+		`
+		baseMapper.deleteStmt = `
 			DELETE FROM category
 			WHERE name=:name
 			RETURNING name;
-		`,
-		oneStmt: `
+		`
+		baseMapper.oneStmt = `
 			SELECT name FROM category
 			WHERE name=:name;
-		`,
-		manyStmt: `
+		`
+		baseMapper.manyStmt = `
 			SELECT name FROM category;
-		`,
-		clearStmt: `
+		`
+		baseMapper.clearStmt = `
 			DELETE FROM category
 			RETURNING name;
-		`,
-	}
+		`
+	})
+
+	baseMapper.modelType = modelType
+
+	return &baseMapper
 }
