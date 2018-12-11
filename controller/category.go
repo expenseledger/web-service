@@ -5,15 +5,10 @@ import (
 
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 )
 
-type categoryIdentifyForm struct {
-	Name string `json:"name" binding:"required"`
-}
-
 func categoryCreate(context *gin.Context) {
-	var form categoryIdentifyForm
+	var form CategoryIDForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -22,10 +17,8 @@ func categoryCreate(context *gin.Context) {
 		return
 	}
 
-	var category model.Category
-	copier.Copy(&category, &form)
-
-	if err := category.Create(); err != nil {
+	category, err := MakeCategory(&form, Create)
+	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -41,7 +34,7 @@ func categoryCreate(context *gin.Context) {
 }
 
 func categoryGet(context *gin.Context) {
-	var form categoryIdentifyForm
+	var form CategoryIDForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -50,8 +43,8 @@ func categoryGet(context *gin.Context) {
 		return
 	}
 
-	category := &model.Category{Name: form.Name}
-	if err := category.Get(); err != nil {
+	category, err := MakeCategory(&form, Get)
+	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -67,7 +60,7 @@ func categoryGet(context *gin.Context) {
 }
 
 func categoryDelete(context *gin.Context) {
-	var form categoryIdentifyForm
+	var form CategoryIDForm
 	if err := context.ShouldBindJSON(&form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -76,8 +69,17 @@ func categoryDelete(context *gin.Context) {
 		return
 	}
 
-	category := &model.Category{Name: form.Name}
-	if err := category.Delete(); err != nil {
+	iCategory, err := MakeCategory(&form, Get)
+	if err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+
+	category := iCategory.(*model.Category)
+	if err = category.Delete(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
