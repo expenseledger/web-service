@@ -79,7 +79,7 @@ func categoryDelete(context *gin.Context) {
 	}
 
 	category := iCategory.(*model.Category)
-	if err = category.Delete(); err != nil {
+	if _, err = model.DeleteCategory(category); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -95,8 +95,7 @@ func categoryDelete(context *gin.Context) {
 }
 
 func categoryList(context *gin.Context) {
-	var categories model.Categories
-	length, err := categories.List()
+	categories, err := model.ListCategories()
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -106,7 +105,7 @@ func categoryList(context *gin.Context) {
 	}
 
 	items := itemList{
-		Length: length,
+		Length: len(categories),
 		Items:  categories,
 	}
 
@@ -118,31 +117,36 @@ func categoryList(context *gin.Context) {
 }
 
 func categoryInit(context *gin.Context) {
-	categories := model.Categories{
-		model.Category{
+	recipes := []CategoryIDForm{
+		CategoryIDForm{
 			Name: "Food And Drink",
 		},
-		model.Category{
+		CategoryIDForm{
 			Name: "Transportation",
 		},
-		model.Category{
+		CategoryIDForm{
 			Name: "Shopping",
 		},
-		model.Category{
+		CategoryIDForm{
 			Name: "Bill",
 		},
-		model.Category{
+		CategoryIDForm{
 			Name: "Withdraw",
 		},
 	}
 
-	length, err := categories.Init()
-	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
+	length := len(recipes)
+	categories := make([]model.Category, length)
+	for i := 0; i < length; i++ {
+		category, err := MakeCategory(&recipes[i], Create)
+		if err != nil {
+			context.JSON(
+				http.StatusBadRequest,
+				buildNonsuccessResponse(err, nil),
+			)
+			return
+		}
+		categories[i] = *category.(*model.Category)
 	}
 
 	items := itemList{
@@ -158,8 +162,7 @@ func categoryInit(context *gin.Context) {
 }
 
 func categoryClear(context *gin.Context) {
-	var categories model.Categories
-	length, err := categories.Clear()
+	categories, err := model.ClearCategories()
 	if err != nil {
 		context.JSON(
 			http.StatusBadRequest,
@@ -169,7 +172,7 @@ func categoryClear(context *gin.Context) {
 	}
 
 	items := itemList{
-		Length: length,
+		Length: len(categories),
 		Items:  categories,
 	}
 
