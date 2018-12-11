@@ -1,106 +1,69 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
 )
 
 func categoryCreate(context *gin.Context) {
 	var form CategoryIDForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+	if err := bindJSON(context, &form); err != nil {
 		return
 	}
 
 	category, err := MakeCategory(&form, Create)
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
+	buildSuccessContext(context, category)
 	return
 }
 
 func categoryGet(context *gin.Context) {
 	var form CategoryIDForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+	if err := bindJSON(context, &form); err != nil {
 		return
 	}
 
 	category, err := MakeCategory(&form, Get)
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
+	buildSuccessContext(context, category)
 	return
 }
 
 func categoryDelete(context *gin.Context) {
 	var form CategoryIDForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+	if err := bindJSON(context, &form); err != nil {
+		buildFailedContext(context, err)
 		return
 	}
 
 	iCategory, err := MakeCategory(&form, Get)
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
 	category := iCategory.(*model.Category)
 	if _, err = model.DeleteCategory(category); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
+	buildSuccessContext(context, category)
 	return
 }
 
 func categoryList(context *gin.Context) {
 	categories, err := model.ListCategories()
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
@@ -109,10 +72,7 @@ func categoryList(context *gin.Context) {
 		Items:  categories,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }
 
@@ -140,10 +100,7 @@ func categoryInit(context *gin.Context) {
 	for i := 0; i < length; i++ {
 		category, err := MakeCategory(&recipes[i], Create)
 		if err != nil {
-			context.JSON(
-				http.StatusBadRequest,
-				buildNonsuccessResponse(err, nil),
-			)
+			buildFailedContext(context, err)
 			return
 		}
 		categories[i] = *category.(*model.Category)
@@ -154,20 +111,14 @@ func categoryInit(context *gin.Context) {
 		Items:  categories,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }
 
 func categoryClear(context *gin.Context) {
 	categories, err := model.ClearCategories()
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
@@ -176,9 +127,6 @@ func categoryClear(context *gin.Context) {
 		Items:  categories,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }
