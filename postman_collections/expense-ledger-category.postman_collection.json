@@ -75,11 +75,11 @@
 							"    pm.expect(success).to.eql(true);",
 							"});",
 							"",
-							"pm.test(\"4 categories are inserted\", function() {",
+							"pm.test(\"5 categories are inserted\", function() {",
 							"    let {data: {length, items}} = pm.response.json();",
 							"    ",
 							"    pm.expect(length).to.eql(items.length);",
-							"    pm.expect(length).to.eql(4);",
+							"    pm.expect(length).to.eql(5);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -530,11 +530,11 @@
 							"    pm.expect(success).to.eql(true);",
 							"});",
 							"",
-							"pm.test(\"2 wallets are returned\", function() {",
+							"pm.test(\"5 categories are returned\", function() {",
 							"    let {data: {length, items}} = pm.response.json();",
 							"    ",
 							"    pm.expect(length).to.eql(items.length);",
-							"    pm.expect(length).to.eql(4);",
+							"    pm.expect(length).to.eql(5);",
 							"});"
 						],
 						"type": "text/javascript"

@@ -1,8 +1,9 @@
 package model
 
 import (
-	dbmodel "github.com/expenseledger/web-service/db/model"
-	"github.com/jinzhu/copier"
+	"reflect"
+
+	"github.com/expenseledger/web-service/orm"
 )
 
 // Category the structure represents a category in presentation layer
@@ -15,75 +16,86 @@ type Categories []Category
 
 // Create ...
 func (category *Category) Create() error {
-	var dbCategory dbmodel.Category
+	mapper := orm.NewCategoryMapper(reflect.TypeOf(*category))
 
-	copier.Copy(&dbCategory, &category)
-
-	if err := dbCategory.Insert(); err != nil {
+	tmp, err := mapper.Insert(category)
+	if err != nil {
 		return err
 	}
 
-	copier.Copy(category, &dbCategory)
+	c := tmp.(*Category)
+	*category = *c
+
 	return nil
 }
 
 // Get ...
-func (category *Category) Get(name string) error {
-	var dbCategory dbmodel.Category
-	if err := dbCategory.One(name); err != nil {
+func (category *Category) Get() error {
+	mapper := orm.NewCategoryMapper(reflect.TypeOf(*category))
+
+	tmp, err := mapper.One(category)
+	if err != nil {
 		return err
 	}
 
-	copier.Copy(category, &dbCategory)
+	c := tmp.(*Category)
+	*category = *c
+
 	return nil
 }
 
 // Delete ...
-func (category *Category) Delete(name string) error {
-	var dbCategory dbmodel.Category
-	if err := dbCategory.Delete(name); err != nil {
+func (category *Category) Delete() error {
+	mapper := orm.NewCategoryMapper(reflect.TypeOf(*category))
+
+	tmp, err := mapper.Delete(category)
+	if err != nil {
 		return err
 	}
 
-	copier.Copy(category, &dbCategory)
+	c := tmp.(*Category)
+	*category = *c
+
 	return nil
 }
 
 // List ...
 func (categories *Categories) List() (int, error) {
-	var dbCategories dbmodel.Categories
+	mapper := orm.NewCategoryMapper(reflect.TypeOf(Category{}))
 
-	length, err := dbCategories.All()
+	tmp, err := mapper.Many()
 	if err != nil {
 		return 0, err
 	}
 
-	copier.Copy(categories, &dbCategories)
-	return length, nil
+	c := tmp.(*[]Category)
+	*categories = *c
+
+	return len(*categories), nil
 }
 
 // Init insert default categories
 func (categories *Categories) Init() (int, error) {
-	var dbCategories dbmodel.Categories
-	copier.Copy(&dbCategories, categories)
-
-	length, err := dbCategories.BatchInsert()
-	if err != nil {
-		return 0, err
+	for _, c := range *categories {
+		err := c.Create()
+		if err != nil {
+			return 0, err
+		}
 	}
-
-	return length, nil
+	return len(*categories), nil
 }
 
 // Clear ...
 func (categories *Categories) Clear() (int, error) {
-	var dbCategories dbmodel.Categories
+	mapper := orm.NewCategoryMapper(reflect.TypeOf(Category{}))
 
-	length, err := dbCategories.DeleteAll()
+	tmp, err := mapper.Clear()
 	if err != nil {
 		return 0, err
 	}
 
-	copier.Copy(categories, &dbCategories)
-	return length, nil
+	c := tmp.(*[]Category)
+	*categories = *c
+
+	return len(*categories), nil
 }

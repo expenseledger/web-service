@@ -16,16 +16,16 @@ func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
 
-	walletRoute := router.Group("/wallet")
-	walletRoute.POST("/create", walletCreate)
-	walletRoute.POST("/get", walletGet)
-	walletRoute.POST("/delete", walletDelete)
-	walletRoute.POST("/list", walletList)
-	walletRoute.POST("/listTypes", walletListTypes)
-	walletRoute.POST("/init", walletInit)
-	walletRoute.POST("/expend", walletExpend)
-	walletRoute.POST("/receive", walletReceive)
-	walletRoute.POST("/transfer", walletTransfer)
+	// walletRoute := router.Group("/wallet")
+	// walletRoute.POST("/create", walletCreate)
+	// walletRoute.POST("/get", walletGet)
+	// walletRoute.POST("/delete", walletDelete)
+	// walletRoute.POST("/list", walletList)
+	// walletRoute.POST("/listTypes", walletListTypes)
+	// walletRoute.POST("/init", walletInit)
+	// walletRoute.POST("/expend", walletExpend)
+	// walletRoute.POST("/receive", walletReceive)
+	// walletRoute.POST("/transfer", walletTransfer)
 
 	categoryRoute := router.Group("/category")
 	categoryRoute.POST("/create", categoryCreate)
@@ -34,14 +34,14 @@ func InitRoutes() *gin.Engine {
 	categoryRoute.POST("/list", categoryList)
 	categoryRoute.POST("/init", categoryInit)
 
-	transactionRoute := router.Group("/transaction")
-	transactionRoute.POST("/get", transactionGet)
-	transactionRoute.POST("/delete", transactionDelete)
+	// transactionRoute := router.Group("/transaction")
+	// transactionRoute.POST("/get", transactionGet)
+	// transactionRoute.POST("/delete", transactionDelete)
 
 	if configs.Mode != "PRODUCTION" {
-		walletRoute.POST("/clear", walletClear)
+		// walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
-		transactionRoute.POST("/clear", transactionClear)
+		// transactionRoute.POST("/clear", transactionClear)
 	}
 
 	return router

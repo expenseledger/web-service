@@ -1,9 +1,8 @@
 package model
 
 import (
-	"time"
 
-	dbmodel "github.com/expenseledger/web-service/db/model"
+	// dbmodel "github.com/expenseledger/web-service/db/model"
 	"github.com/expenseledger/web-service/pkg/type/date"
 	"github.com/shopspring/decimal"
 )
@@ -24,78 +23,78 @@ type Transaction struct {
 type Transactions []Transaction
 
 // Create ...
-func (tx *Transaction) Create() error {
-	dbTx := tx.toDBCounterpart()
-	if err := dbTx.Insert(); err != nil {
-		return err
-	}
+// func (tx *Transaction) Create() error {
+// 	dbTx := tx.toDBCounterpart()
+// 	if err := dbTx.Insert(); err != nil {
+// 		return err
+// 	}
 
-	tx.fromDBCounterpart(dbTx)
-	return nil
-}
+// 	tx.fromDBCounterpart(dbTx)
+// 	return nil
+// }
 
-// Clear ...
-func (txs *Transactions) Clear() (int, error) {
-	var dbTxs dbmodel.Transactions
-	if err := dbTxs.DeleteAll(); err != nil {
-		return 0, err
-	}
+// // Clear ...
+// func (txs *Transactions) Clear() (int, error) {
+// 	var dbTxs dbmodel.Transactions
+// 	if err := dbTxs.DeleteAll(); err != nil {
+// 		return 0, err
+// 	}
 
-	length := len(dbTxs)
-	transactions := make(Transactions, length)
-	for i, dbTx := range dbTxs {
-		var tx Transaction
-		tx.fromDBCounterpart(&dbTx)
-		transactions[i] = tx
-	}
+// 	length := len(dbTxs)
+// 	transactions := make(Transactions, length)
+// 	for i, dbTx := range dbTxs {
+// 		var tx Transaction
+// 		tx.fromDBCounterpart(&dbTx)
+// 		transactions[i] = tx
+// 	}
 
-	*txs = transactions
-	return length, nil
-}
+// 	*txs = transactions
+// 	return length, nil
+// }
 
-// Get ...
-func (tx *Transaction) Get() error {
-	dbTx := tx.toDBCounterpart()
-	if err := dbTx.One(); err != nil {
-		return err
-	}
+// // Get ...
+// func (tx *Transaction) Get() error {
+// 	dbTx := tx.toDBCounterpart()
+// 	if err := dbTx.One(); err != nil {
+// 		return err
+// 	}
 
-	tx.fromDBCounterpart(dbTx)
-	return nil
-}
+// 	tx.fromDBCounterpart(dbTx)
+// 	return nil
+// }
 
-// Delete ...
-func (tx *Transaction) Delete() error {
-	dbTx := tx.toDBCounterpart()
-	if err := dbTx.Delete(); err != nil {
-		return err
-	}
+// // Delete ...
+// func (tx *Transaction) Delete() error {
+// 	dbTx := tx.toDBCounterpart()
+// 	if err := dbTx.Delete(); err != nil {
+// 		return err
+// 	}
 
-	tx.fromDBCounterpart(dbTx)
-	return nil
-}
+// 	tx.fromDBCounterpart(dbTx)
+// 	return nil
+// }
 
-func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
+// func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
 
-	return &dbmodel.Transaction{
-		ID:          tx.ID,
-		SrcWallet:   tx.SrcWallet,
-		DstWallet:   tx.DstWallet,
-		Type:        tx.Type,
-		Category:    tx.Category,
-		Amount:      tx.Amount,
-		Description: tx.Description,
-		OccurredAt:  time.Time(tx.Date),
-	}
-}
+// 	return &dbmodel.Transaction{
+// 		ID:          tx.ID,
+// 		SrcWallet:   tx.SrcWallet,
+// 		DstWallet:   tx.DstWallet,
+// 		Type:        tx.Type,
+// 		Category:    tx.Category,
+// 		Amount:      tx.Amount,
+// 		Description: tx.Description,
+// 		OccurredAt:  time.Time(tx.Date),
+// 	}
+// }
 
-func (tx *Transaction) fromDBCounterpart(dbTx *dbmodel.Transaction) {
-	tx.ID = dbTx.ID
-	tx.SrcWallet = dbTx.SrcWallet
-	tx.DstWallet = dbTx.DstWallet
-	tx.Amount = dbTx.Amount
-	tx.Type = dbTx.Type
-	tx.Category = dbTx.Category
-	tx.Description = dbTx.Description
-	tx.Date = date.Date(dbTx.OccurredAt)
-}
+// func (tx *Transaction) fromDBCounterpart(dbTx *dbmodel.Transaction) {
+// 	tx.ID = dbTx.ID
+// 	tx.SrcWallet = dbTx.SrcWallet
+// 	tx.DstWallet = dbTx.DstWallet
+// 	tx.Amount = dbTx.Amount
+// 	tx.Type = dbTx.Type
+// 	tx.Category = dbTx.Category
+// 	tx.Description = dbTx.Description
+// 	tx.Date = date.Date(dbTx.OccurredAt)
+// }

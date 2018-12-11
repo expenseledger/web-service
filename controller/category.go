@@ -50,8 +50,8 @@ func categoryGet(context *gin.Context) {
 		return
 	}
 
-	var category model.Category
-	if err := category.Get(form.Name); err != nil {
+	category := &model.Category{Name: form.Name}
+	if err := category.Get(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
@@ -76,8 +76,8 @@ func categoryDelete(context *gin.Context) {
 		return
 	}
 
-	var category model.Category
-	if err := category.Delete(form.Name); err != nil {
+	category := &model.Category{Name: form.Name}
+	if err := category.Delete(); err != nil {
 		context.JSON(
 			http.StatusBadRequest,
 			buildNonsuccessResponse(err, nil),
