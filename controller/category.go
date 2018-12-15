@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func categoryCreate(context *gin.Context) {
+func createCategory(context *gin.Context) {
 	var form CategoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		return
@@ -21,7 +21,7 @@ func categoryCreate(context *gin.Context) {
 	return
 }
 
-func categoryGet(context *gin.Context) {
+func getCategory(context *gin.Context) {
 	var form CategoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		return
@@ -37,7 +37,7 @@ func categoryGet(context *gin.Context) {
 	return
 }
 
-func categoryDelete(context *gin.Context) {
+func deleteCategory(context *gin.Context) {
 	var form CategoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		buildFailedContext(context, err)
@@ -60,7 +60,7 @@ func categoryDelete(context *gin.Context) {
 	return
 }
 
-func categoryList(context *gin.Context) {
+func listCategories(context *gin.Context) {
 	categories, err := model.ListCategories()
 	if err != nil {
 		buildFailedContext(context, err)
@@ -76,7 +76,7 @@ func categoryList(context *gin.Context) {
 	return
 }
 
-func categoryInit(context *gin.Context) {
+func initCategories(context *gin.Context) {
 	recipes := []CategoryIDForm{
 		CategoryIDForm{
 			Name: "Food And Drink",
