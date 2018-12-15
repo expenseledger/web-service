@@ -5,13 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type categoryIDForm struct {
+	Name string `json:"name" binding:"required"`
+}
+
 func createCategory(context *gin.Context) {
-	var form CategoryIDForm
+	var form categoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		return
 	}
 
-	category, err := MakeCategory(&form, Create)
+	category, err := model.CreateCategory(form.Name)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -22,12 +26,12 @@ func createCategory(context *gin.Context) {
 }
 
 func getCategory(context *gin.Context) {
-	var form CategoryIDForm
+	var form categoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		return
 	}
 
-	category, err := MakeCategory(&form, Get)
+	category, err := model.GetCategory(form.Name)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -38,20 +42,14 @@ func getCategory(context *gin.Context) {
 }
 
 func deleteCategory(context *gin.Context) {
-	var form CategoryIDForm
+	var form categoryIDForm
 	if err := bindJSON(context, &form); err != nil {
 		buildFailedContext(context, err)
 		return
 	}
 
-	iCategory, err := MakeCategory(&form, Get)
+	category, err := model.DeleteCategory(form.Name)
 	if err != nil {
-		buildFailedContext(context, err)
-		return
-	}
-
-	category := iCategory.(*model.Category)
-	if _, err = model.DeleteCategory(category); err != nil {
 		buildFailedContext(context, err)
 		return
 	}
@@ -77,33 +75,23 @@ func listCategories(context *gin.Context) {
 }
 
 func initCategories(context *gin.Context) {
-	recipes := []CategoryIDForm{
-		CategoryIDForm{
-			Name: "Food And Drink",
-		},
-		CategoryIDForm{
-			Name: "Transportation",
-		},
-		CategoryIDForm{
-			Name: "Shopping",
-		},
-		CategoryIDForm{
-			Name: "Bill",
-		},
-		CategoryIDForm{
-			Name: "Withdraw",
-		},
+	names := []string{
+		"Food And Drink",
+		"Transportation",
+		"Shopping",
+		"Bill",
+		"Withdraw",
 	}
 
-	length := len(recipes)
-	categories := make([]model.Category, length)
-	for i := 0; i < length; i++ {
-		category, err := MakeCategory(&recipes[i], Create)
+	length := len(names)
+	categories := make([]*model.Category, length)
+	for i, name := range names {
+		category, err := model.CreateCategory(name)
 		if err != nil {
 			buildFailedContext(context, err)
 			return
 		}
-		categories[i] = *category.(*model.Category)
+		categories[i] = category
 	}
 
 	items := itemList{
@@ -115,7 +103,7 @@ func initCategories(context *gin.Context) {
 	return
 }
 
-func categoryClear(context *gin.Context) {
+func clearCategories(context *gin.Context) {
 	categories, err := model.ClearCategories()
 	if err != nil {
 		buildFailedContext(context, err)

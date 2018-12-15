@@ -29,7 +29,7 @@ func buildNonsuccessResponse(
 	}
 }
 
-func bindJSON(context *gin.Context, form Modeler) (err error) {
+func bindJSON(context *gin.Context, form interface{}) (err error) {
 	if err = context.ShouldBindJSON(form); err != nil {
 		context.JSON(
 			http.StatusBadRequest,

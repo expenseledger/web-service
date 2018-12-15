@@ -14,7 +14,7 @@ type Mapper interface {
 var baseMapper BaseMapper
 
 // NewCategoryMapper ...
-func NewCategoryMapper(modelType reflect.Type) Mapper {
+func NewCategoryMapper(model interface{}) Mapper {
 	baseMapper.once.Do(func() {
 		baseMapper.insertStmt = `
 			INSERT INTO category (name)
@@ -39,7 +39,7 @@ func NewCategoryMapper(modelType reflect.Type) Mapper {
 		`
 	})
 
-	baseMapper.modelType = modelType
+	baseMapper.modelType = reflect.TypeOf(model)
 
 	return &baseMapper
 }
