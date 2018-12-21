@@ -17,9 +17,6 @@ func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
 
-	router.Use(cors.Default())
-	router.Run()
-
 	walletRoute := router.Group("/wallet")
 	walletRoute.POST("/create", walletCreate)
 	walletRoute.POST("/get", walletGet)
@@ -39,6 +36,8 @@ func InitRoutes() *gin.Engine {
 		walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
 	}
+
+	router.Use(cors.Default())
 
 	return router
 }
