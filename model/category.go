@@ -9,27 +9,17 @@ type Category struct {
 	Name string `json:"name" db:"name"`
 }
 
-type operation int
-
-const (
-	insert operation = iota
-	delete
-	one
-	list
-	clear
-)
-
 // CreateCategory inserts category to DB
 func CreateCategory(name string) (*Category, error) {
 	return applyToCategory(name, insert)
 }
 
-// GetCategory inserts category to DB
+// GetCategory returns matching category from DB
 func GetCategory(name string) (*Category, error) {
 	return applyToCategory(name, one)
 }
 
-// DeleteCategory remove category from DB
+// DeleteCategory removes category from DB
 func DeleteCategory(name string) (*Category, error) {
 	return applyToCategory(name, delete)
 }

@@ -3,7 +3,6 @@ package orm
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/expenseledger/web-service/db"
 	"github.com/shopspring/decimal"
@@ -11,11 +10,9 @@ import (
 
 // Wallet the structure represents a stored wallet on db
 type Wallet struct {
-	Name      string          `db:"name"`
-	Type      string          `db:"type"`
-	Balance   decimal.Decimal `db:"balance"`
-	CreatedAt time.Time       `db:"created_at"`
-	UpdatedAt time.Time       `db:"updated_at"`
+	Name    string          `db:"name"`
+	Type    string          `db:"type"`
+	Balance decimal.Decimal `db:"balance"`
 }
 
 // Wallets is defined just to be used as a receiver

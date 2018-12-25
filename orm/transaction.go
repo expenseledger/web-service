@@ -13,25 +13,25 @@ import (
 
 // Transaction the structure represents a stored transaction on db
 type Transaction struct {
-	ID          string          `db:"id"`
-	SrcWallet   string          `db:"src_wallet"`
-	DstWallet   string          `db:"dst_wallet"`
-	Amount      decimal.Decimal `db:"amount"`
-	Type        string          `db:"type"`
-	Category    string          `db:"category"`
-	Description string          `db:"description"`
-	OccurredAt  time.Time       `db:"occurred_at"`
+	ID          string                   `db:"id"`
+	SrcWallet   string                   `db:"src_wallet"`
+	DstWallet   string                   `db:"dst_wallet"`
+	Amount      decimal.Decimal          `db:"amount"`
+	Type        constant.TransactionType `db:"type"`
+	Category    string                   `db:"category"`
+	Description string                   `db:"description"`
+	OccurredAt  time.Time                `db:"occurred_at"`
 }
 
 type transaction struct {
-	ID          string          `db:"id"`
-	Wallet      string          `db:"wallet"`
-	WalletRoles string          `db:"role"`
-	Amount      decimal.Decimal `db:"amount"`
-	Type        string          `db:"type"`
-	Category    string          `db:"category"`
-	Description string          `db:"description"`
-	OccurredAt  time.Time       `db:"occurred_at"`
+	ID          string                   `db:"id"`
+	Wallet      string                   `db:"wallet"`
+	WalletRoles constant.WalletRole      `db:"role"`
+	Amount      decimal.Decimal          `db:"amount"`
+	Type        constant.TransactionType `db:"type"`
+	Category    string                   `db:"category"`
+	Description string                   `db:"description"`
+	OccurredAt  time.Time                `db:"occurred_at"`
 }
 
 type affectedWallet struct {

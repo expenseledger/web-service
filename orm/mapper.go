@@ -11,35 +11,69 @@ type Mapper interface {
 	Clear() (interface{}, error)
 }
 
-var baseMapper BaseMapper
+var (
+	categoryMapper BaseMapper
+	walletMapper   BaseMapper
+)
 
 // NewCategoryMapper ...
 func NewCategoryMapper(model interface{}) Mapper {
-	baseMapper.once.Do(func() {
-		baseMapper.insertStmt = `
+	categoryMapper.once.Do(func() {
+		categoryMapper.insertStmt = `
 			INSERT INTO category (name)
 			VALUES (:name)
 			RETURNING name;
 		`
-		baseMapper.deleteStmt = `
+		categoryMapper.deleteStmt = `
 			DELETE FROM category
 			WHERE name=:name
 			RETURNING name;
 		`
-		baseMapper.oneStmt = `
+		categoryMapper.oneStmt = `
 			SELECT name FROM category
 			WHERE name=:name;
 		`
-		baseMapper.manyStmt = `
+		categoryMapper.manyStmt = `
 			SELECT name FROM category;
 		`
-		baseMapper.clearStmt = `
+		categoryMapper.clearStmt = `
 			DELETE FROM category
 			RETURNING name;
 		`
 	})
 
-	baseMapper.modelType = reflect.TypeOf(model)
+	categoryMapper.modelType = reflect.TypeOf(model)
 
-	return &baseMapper
+	return &categoryMapper
+}
+
+// NewWalletMapper ...
+func NewWalletMapper(model interface{}) Mapper {
+	walletMapper.once.Do(func() {
+		walletMapper.insertStmt = `
+			INSERT INTO wallet (name, type, balance)
+			VALUES (:name, :type, :balance)
+			RETURNING name, type, balance;
+		`
+		walletMapper.deleteStmt = `
+			DELETE FROM wallet
+			WHERE name=:name
+			RETURNING name, type, balance;
+		`
+		walletMapper.oneStmt = `
+			SELECT name, type, balance FROM wallet
+			WHERE name=:name;
+		`
+		walletMapper.manyStmt = `
+			SELECT name, type, balance FROM wallet;
+		`
+		walletMapper.clearStmt = `
+			DELETE FROM wallet
+			RETURNING name, type, balance;
+		`
+	})
+
+	walletMapper.modelType = reflect.TypeOf(model)
+
+	return &walletMapper
 }

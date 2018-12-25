@@ -1,62 +1,44 @@
 package model
 
 import (
-	"time"
-
-	// dbmodel "github.com/expenseledger/web-service/db/model"
-
+	"github.com/expenseledger/web-service/constant"
+	"github.com/expenseledger/web-service/orm"
 	"github.com/shopspring/decimal"
 )
 
 // Wallet the structure represents a wallet in presentation layer
 type Wallet struct {
-	Name      string          `json:"name"`
-	Type      string          `json:"type"`
-	Balance   decimal.Decimal `json:"balance"`
-	UpdatedAt time.Time       `json:"last_update"`
+	Name    string              `json:"name" db:"name"`
+	Type    constant.WalletType `json:"type" db:"type"`
+	Balance decimal.Decimal     `json:"balance" db:"balance"`
 }
 
-// Wallets is defined just to be used as a receiver
-type Wallets []Wallet
+// CreateWallet inserts wallet to DB
+func CreateWallet(
+	name string,
+	t constant.WalletType,
+	balance decimal.Decimal,
+) (*Wallet, error) {
+	w := Wallet{Name: name, Type: t, Balance: balance}
+	mapper := orm.NewWalletMapper(w)
 
-// Create ...
-// func (wallet *Wallet) Create() error {
-// 	var dbWallet dbmodel.Wallet
+	tmp, err := mapper.Insert(&w)
+	if err != nil {
+		return nil, err
+	}
 
-// 	copier.Copy(&dbWallet, &wallet)
+	return tmp.(*Wallet), nil
+}
 
-// 	if err := dbWallet.Insert(); err != nil {
-// 		return err
-// 	}
+// GetWallet returns matching wallet from DB
+func GetWallet(name string) (*Wallet, error) {
+	return applyToWallet(name, one)
+}
 
-// 	copier.Copy(wallet, &dbWallet)
-// 	return nil
-// }
-
-// // Get ...
-// func (wallet *Wallet) Get() error {
-// 	dbWallet := dbmodel.Wallet{
-// 		Name: wallet.Name,
-// 	}
-
-// 	if err := dbWallet.One(); err != nil {
-// 		return err
-// 	}
-
-// 	copier.Copy(wallet, &dbWallet)
-// 	return nil
-// }
-
-// // Delete ...
-// func (wallet *Wallet) Delete(name string) error {
-// 	var dbWallet dbmodel.Wallet
-// 	if err := dbWallet.Delete(name); err != nil {
-// 		return err
-// 	}
-
-// 	copier.Copy(wallet, &dbWallet)
-// 	return nil
-// }
+// DeleteWallet removes wallet from DB
+func DeleteWallet(name string) (*Wallet, error) {
+	return applyToWallet(name, delete)
+}
 
 // // List ...
 // func (wallets *Wallets) List() (int, error) {
@@ -116,3 +98,23 @@ type Wallets []Wallet
 // 	copier.Copy(wallet, &dbWallet)
 // 	return nil
 // }
+
+func applyToWallet(name string, op operation) (*Wallet, error) {
+	w := Wallet{Name: name}
+	mapper := orm.NewWalletMapper(w)
+
+	var tmp interface{}
+	var err error
+	switch op {
+	case delete:
+		tmp, err = mapper.Delete(&w)
+	case one:
+		tmp, err = mapper.One(&w)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tmp.(*Wallet), nil
+}

@@ -5,24 +5,28 @@ import (
 	"sync"
 )
 
+type TransactionType string
+type WalletRole string
+type WalletType string
+
 type transactionType struct {
 	once     sync.Once
-	Income   string
-	Expense  string
-	Transfer string
+	Income   TransactionType
+	Expense  TransactionType
+	Transfer TransactionType
 }
 
 type walletRole struct {
 	once      sync.Once
-	SrcWallet string
-	DstWallet string
+	SrcWallet WalletRole
+	DstWallet WalletRole
 }
 
 type walletType struct {
 	once        sync.Once
-	Cash        string
-	BankAccount string
-	Credit      string
+	Cash        WalletType
+	BankAccount WalletType
+	Credit      WalletType
 }
 
 var (
@@ -64,10 +68,10 @@ func WalletRoles() walletRole {
 func ListWalletTypes() []string {
 	wt := WalletTypes()
 	v := reflect.ValueOf(wt)
-	types := make([]string, v.NumField())
+	types := make([]string, v.NumField()-1)
 
-	for i := 0; i < v.NumField(); i++ {
-		types[i] = v.Field(i).String()
+	for i := 1; i < v.NumField(); i++ {
+		types[i-1] = v.Field(i).String()
 	}
 
 	return types
