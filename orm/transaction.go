@@ -1,26 +1,31 @@
 package orm
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/expenseledger/web-service/constant"
+)
 
 type TxMapper struct {
 	BaseMapper
 	transferStmt string
-	txType       string
+	txType       constant.TransactionType
 }
 
 // Insert ...
 func (mapper *TxMapper) Insert(obj interface{}) (interface{}, error) {
+	txType := constant.TransactionTypes()
 	switch mapper.txType {
-	case "TRANSFER":
+	case txType.Transfer:
 		return worker(
 			obj,
 			mapper.modelType,
 			mapper.transferStmt,
 			"Error inserting",
 		)
-	case "EXPENSE":
+	case txType.Expense:
 		fallthrough
-	case "INCOME":
+	case txType.Income:
 		return worker(
 			obj,
 			mapper.modelType,

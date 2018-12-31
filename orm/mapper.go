@@ -1,6 +1,10 @@
 package orm
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/expenseledger/web-service/constant"
+)
 
 type Mapper interface {
 	Insert(obj interface{}) (interface{}, error)
@@ -76,7 +80,7 @@ func NewWalletMapper(model interface{}) Mapper {
 	return &walletMapper
 }
 
-func NewTxMapper(model interface{}, txType string) Mapper {
+func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 	txMapper.once.Do(func() {
 		txMapper.insertStmt = `
 			WITH tx AS (
