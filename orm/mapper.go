@@ -2,7 +2,6 @@ package orm
 
 import "reflect"
 
-// Mapper defines the relational operations
 type Mapper interface {
 	Insert(obj interface{}) (interface{}, error)
 	Delete(obj interface{}) (interface{}, error)
@@ -14,9 +13,9 @@ type Mapper interface {
 var (
 	categoryMapper BaseMapper
 	walletMapper   BaseMapper
+	txMapper       TransactionMapper
 )
 
-// NewCategoryMapper ...
 func NewCategoryMapper(model interface{}) Mapper {
 	categoryMapper.once.Do(func() {
 		categoryMapper.insertStmt = `
@@ -47,7 +46,6 @@ func NewCategoryMapper(model interface{}) Mapper {
 	return &categoryMapper
 }
 
-// NewWalletMapper ...
 func NewWalletMapper(model interface{}) Mapper {
 	walletMapper.once.Do(func() {
 		walletMapper.insertStmt = `
@@ -76,4 +74,93 @@ func NewWalletMapper(model interface{}) Mapper {
 	walletMapper.modelType = reflect.TypeOf(model)
 
 	return &walletMapper
+}
+
+func NewTxMapper(model interface{}, txType string) Mapper {
+	txMapper.once.Do(func() {
+		txMapper.insertStmt = `
+			WITH tx AS (
+				INSERT INTO transaction
+				(amount, type, category, description, occurred_at)
+				VALUES
+				(:amount, :type, :category, :description, :occurred_at)
+				RETURNING id, amount, type, category, description, occurred_at
+			), tx_wallet AS (
+				INSERT INTO affected_wallet
+				(transaction_id, wallet, role)
+				SELECT id, :wallet, :role FROM inserted_tx
+				RETURNING wallet, role
+			)
+			SELECT
+			tx.id AS id, amount, type, category,
+			description, occurred_at, wallet, role
+			FROM tx, tx_wallet;
+		`
+		txMapper.transferStmt = `
+			WITH tx AS (
+				INSERT INTO transaction
+				(amount, type, category, description, occurred_at)
+				VALUES
+				(:amount, :type, :category, :description, :occurred_at)
+				RETURNING id, amount, type, category, description, occurred_at
+			), tx_wallet AS (
+				INSERT INTO affected_wallet
+				(transaction_id, wallet, role)
+				SELECT id, :src_wallet, 'SRC_WALLET' FROM tx
+				UNION ALL
+				SELECT id, :dst_wallet, 'DST_WALLET' FROM tx
+				RETURNING wallet, role
+			)
+			SELECT
+			id, w1.wallet AS src_wallet, w2.wallet AS dst_wallet,
+			amount, type, category, description, occurred_at
+			FROM tx, tx_wallet w1, tx_wallet w2
+			WHERE w1.role = 'SRC_WALLET' AND w2.role = 'DST_WALLET';
+		`
+		txMapper.deleteStmt = `
+			WITH tx AS (
+				DELETE FROM transaction
+				WHERE id = :id
+				RETURNING id, amount, type, category, description, occurred_at
+			), tx_wallet AS (
+				DELETE FROM affected_wallet
+				WHERE transaction_id = :id
+				RETURNING transaction_id, wallet, role
+			)
+			SELECT
+			id, wallet, role, amount, type, category, description, occurred_at
+			FROM tx, tx_wallet
+			WHERE tx.id = tx_wallet.transaction_id;
+		`
+		txMapper.oneStmt = `
+			SELECT
+			id, wallet, role, amount, type, category, description, occurred_at
+			FROM transaction t, affected_wallet w
+			WHERE t.id = :id AND t.id = w.transaction_id;
+		`
+		txMapper.manyStmt = `
+			SELECT
+			id, wallet, role, amount, type, category, description, occurred_at
+			FROM transaction t, affected_wallet w
+			WHERE w.wallet = :wallet AND t.id = w.transaction_id;
+		`
+		txMapper.clearStmt = `
+			WITH tx AS (
+				DELETE FROM transaction
+				RETURNING id, amount, type, category, description, occurred_at
+			), tx_wallet AS (
+				DELETE FROM affected_wallet
+				RETURNING transaction_id, wallet, role
+			)
+			SELECT
+			id, wallet, role, amount, type, category, description, occurred_at
+			FROM transaction t, affected_wallet w
+			WHERE t.id = w.transaction_id;
+		`
+	})
+
+	txMapper.modelType = reflect.TypeOf(model)
+	txMapper.txType = txType
+
+	return &txMapper
 }
