@@ -13,7 +13,7 @@ type Mapper interface {
 var (
 	categoryMapper BaseMapper
 	walletMapper   BaseMapper
-	txMapper       TransactionMapper
+	txMapper       TxMapper
 )
 
 func NewCategoryMapper(model interface{}) Mapper {
