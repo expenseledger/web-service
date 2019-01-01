@@ -50,12 +50,19 @@ func CreateTransction(
 		tim = time.Now()
 	}
 
-	if t != constant.TransactionTypes().Transfer {
-		var err error
+	if txTypes := constant.TransactionTypes(); t != txTypes.Transfer {
+		var wallet string
+		switch t {
+		case txTypes.Expense:
+			wallet = from
+		case txTypes.Income:
+			wallet = to
+		}
+
 		tx, err := createNonTransferTx(
 			amount,
 			t,
-			from,
+			wallet,
 			category,
 			description,
 			tim,

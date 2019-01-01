@@ -24,6 +24,11 @@ type txExpenseForm struct {
 	txCreateForm
 }
 
+type txIncomeForm struct {
+	To string `json:"to" binding:"required"`
+	txCreateForm
+}
+
 // func transactionClear(context *gin.Context) {
 // 	var txs model.Transactions
 // 	length, err := txs.Clear()
@@ -58,6 +63,31 @@ func transactionCreateExpense(context *gin.Context) {
 		constant.TransactionTypes().Expense,
 		form.From,
 		"",
+		form.Category,
+		form.Description,
+		form.Date,
+	)
+
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	buildSuccessContext(context, tx)
+	return
+}
+
+func transactionCreateIncome(context *gin.Context) {
+	var form txIncomeForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	tx, err := model.CreateTransction(
+		form.Amount,
+		constant.TransactionTypes().Income,
+		"",
+		form.To,
 		form.Category,
 		form.Description,
 		form.Date,
