@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/expenseledger/web-service/config"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 // Route data structure to hold a path and the corresponding handler
@@ -35,6 +36,8 @@ func InitRoutes() *gin.Engine {
 		walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
 	}
+
+	router.Use(cors.Default())
 
 	return router
 }
