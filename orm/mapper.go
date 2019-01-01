@@ -92,7 +92,7 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			), tx_wallet AS (
 				INSERT INTO affected_wallet
 				(transaction_id, wallet, role)
-				SELECT id, :wallet, :role FROM inserted_tx
+				SELECT id, :wallet, :role FROM tx
 				RETURNING wallet, role
 			)
 			SELECT

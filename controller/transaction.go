@@ -1,7 +1,27 @@
 package controller
 
+import (
+	"github.com/expenseledger/web-service/constant"
+	"github.com/expenseledger/web-service/model"
+	"github.com/expenseledger/web-service/pkg/type/date"
+	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
+)
+
 type transactionIdentifyForm struct {
 	ID string `json:"id" binding:"required"`
+}
+
+type txCreateForm struct {
+	Amount      decimal.Decimal `json:"amount" binding:"required"`
+	Category    string          `json:"category" binding:"required"`
+	Description string          `json:"description"`
+	Date        date.Date       `json:"date"`
+}
+
+type txExpenseForm struct {
+	From string `json:"from" binding:"required"`
+	txCreateForm
 }
 
 // func transactionClear(context *gin.Context) {
@@ -26,6 +46,31 @@ type transactionIdentifyForm struct {
 // 	)
 // 	return
 // }
+
+func transactionCreateExpense(context *gin.Context) {
+	var form txExpenseForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	tx, err := model.CreateTransction(
+		form.Amount,
+		constant.TransactionTypes().Expense,
+		form.From,
+		"",
+		form.Category,
+		form.Description,
+		form.Date,
+	)
+
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	buildSuccessContext(context, tx)
+	return
+}
 
 // func transactionGet(context *gin.Context) {
 // 	var form transactionIdentifyForm

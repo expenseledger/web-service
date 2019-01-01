@@ -3,24 +3,148 @@ package model
 import (
 
 	// dbmodel "github.com/expenseledger/web-service/db/model"
+	"time"
+
+	"github.com/expenseledger/web-service/constant"
+	"github.com/expenseledger/web-service/orm"
 	"github.com/expenseledger/web-service/pkg/type/date"
 	"github.com/shopspring/decimal"
 )
 
 // Transaction the structure represents a transaction in application layer
 type Transaction struct {
-	ID          string          `json:"id"`
-	SrcWallet   string          `json:"src_wallet"`
-	DstWallet   string          `json:"dst_wallet"`
-	Amount      decimal.Decimal `json:"amount"`
-	Type        string          `json:"type"`
-	Category    string          `json:"category"`
-	Description string          `json:"description"`
-	Date        date.Date       `json:"date"`
+	ID          string                   `json:"id" db:"id"`
+	From        string                   `json:"src_wallet" db:"src_wallet"`
+	To          string                   `json:"dst_wallet" db:"dst_wallet"`
+	Amount      decimal.Decimal          `json:"amount" db:"amount"`
+	Type        constant.TransactionType `json:"type" db:"type"`
+	Category    string                   `json:"category" db:"category"`
+	Description string                   `json:"description" db:"description"`
+	Date        date.Date                `json:"date"`
+	OccurredAt  time.Time                `json:"-" db:"occurred_at"`
+}
+
+// pass this to ORM
+type _Transaction struct {
+	ID          string                   `db:"id"`
+	Wallet      string                   `db:"wallet"`
+	Role        constant.WalletRole      `db:"role"`
+	Type        constant.TransactionType `db:"type"`
+	Amount      decimal.Decimal          `db:"amount"`
+	Category    string                   `db:"category"`
+	Description string                   `db:"description"`
+	OccurredAt  time.Time                `db:"occurred_at"`
+}
+
+func CreateTransction(
+	amount decimal.Decimal,
+	t constant.TransactionType,
+	from string,
+	to string,
+	category string,
+	description string,
+	d date.Date,
+) (*Transaction, error) {
+	tim := time.Time(d)
+	if tim.IsZero() {
+		tim = time.Now()
+	}
+
+	if t != constant.TransactionTypes().Transfer {
+		var err error
+		tx, err := createNonTransferTx(
+			amount,
+			t,
+			from,
+			category,
+			description,
+			tim,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return tx, nil
+	}
+
+	tx := Transaction{
+		From:        from,
+		To:          to,
+		Amount:      amount,
+		Type:        t,
+		Category:    category,
+		Description: description,
+		OccurredAt:  tim,
+	}
+
+	mapper := orm.NewTxMapper(tx, t)
+
+	tmp, err := mapper.Insert(&tx)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpTx := tmp.(*Transaction)
+	tmpTx.Date = date.Date(tmpTx.OccurredAt)
+	return tmpTx, nil
+}
+
+func createNonTransferTx(
+	amount decimal.Decimal,
+	t constant.TransactionType,
+	wallet string,
+	category string,
+	description string,
+	tim time.Time,
+) (*Transaction, error) {
+	tx := _Transaction{
+		Wallet:      wallet,
+		Type:        t,
+		Amount:      amount,
+		Category:    category,
+		Description: description,
+		OccurredAt:  tim,
+	}
+
+	if t == constant.TransactionTypes().Expense {
+		tx.Role = constant.WalletRoles().SrcWallet
+	} else {
+		tx.Role = constant.WalletRoles().DstWallet
+	}
+
+	mapper := orm.NewTxMapper(tx, t)
+
+	tmp, err := mapper.Insert(&tx)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpTx := tmp.(*_Transaction)
+	return tmpTx.toTransaction(), nil
+}
+
+func (tx *_Transaction) toTransaction() *Transaction {
+	tmpTx := Transaction{
+		ID:          tx.ID,
+		Amount:      tx.Amount,
+		Type:        tx.Type,
+		Category:    tx.Category,
+		Description: tx.Description,
+		OccurredAt:  tx.OccurredAt,
+	}
+
+	if tx.Role == constant.WalletRoles().SrcWallet {
+		tmpTx.From = tx.Wallet
+	} else {
+		tmpTx.To = tx.Wallet
+	}
+
+	tmpTx.Date = date.Date(tmpTx.OccurredAt)
+
+	return &tmpTx
 }
 
 // Transactions is defined just to be used as a receiver
-type Transactions []Transaction
+// type Transactions []Transaction
 
 // Create ...
 // func (tx *Transaction) Create() error {
