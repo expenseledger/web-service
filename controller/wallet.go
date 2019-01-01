@@ -24,12 +24,6 @@ type walletTxRxForm struct {
 	txCreateForm
 }
 
-type walletTransferForm struct {
-	From string `json:"from" binding:"required"`
-	To   string `json:"to" binding:"required"`
-	txCreateForm
-}
-
 func createWallet(context *gin.Context) {
 	var form walletCreateForm
 	if err := bindJSON(context, &form); err != nil {

@@ -110,9 +110,11 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			), tx_wallet AS (
 				INSERT INTO affected_wallet
 				(transaction_id, wallet, role)
-				SELECT id, :src_wallet, 'SRC_WALLET' FROM tx
+				SELECT
+				id, :src_wallet, CAST ('SRC_WALLET' AS wallet_role) FROM tx
 				UNION ALL
-				SELECT id, :dst_wallet, 'DST_WALLET' FROM tx
+				SELECT
+				id, :dst_wallet, CAST ('DST_WALLET' AS wallet_role) FROM tx
 				RETURNING wallet, role
 			)
 			SELECT
