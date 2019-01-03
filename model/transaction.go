@@ -34,6 +34,7 @@ type _Transaction struct {
 	Category    string                   `db:"category"`
 	Description string                   `db:"description"`
 	OccurredAt  time.Time                `db:"occurred_at"`
+	CreatedAt   time.Time                `db:"created_at"`
 }
 
 func CreateTransction(

@@ -58,7 +58,7 @@ type txTransferForm struct {
 // 	return
 // }
 
-func transactionCreateExpense(context *gin.Context) {
+func createExpense(context *gin.Context) {
 	var form txExpenseForm
 	if err := bindJSON(context, &form); err != nil {
 		return
@@ -83,7 +83,7 @@ func transactionCreateExpense(context *gin.Context) {
 	return
 }
 
-func transactionCreateIncome(context *gin.Context) {
+func createIncome(context *gin.Context) {
 	var form txIncomeForm
 	if err := bindJSON(context, &form); err != nil {
 		return
@@ -108,7 +108,7 @@ func transactionCreateIncome(context *gin.Context) {
 	return
 }
 
-func transactionCreateTransfer(context *gin.Context) {
+func createTransfer(context *gin.Context) {
 	var form txTransferForm
 	if err := bindJSON(context, &form); err != nil {
 		return
@@ -130,6 +130,22 @@ func transactionCreateTransfer(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, tx)
+	return
+}
+
+func clearTransactions(context *gin.Context) {
+	txs, err := model.ClearTransactions()
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	items := itemList{
+		Length: len(txs),
+		Items:  txs,
+	}
+
+	buildSuccessContext(context, items)
 	return
 }
 

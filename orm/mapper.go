@@ -148,7 +148,8 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			SELECT
 			id, wallet, role, amount, type, category, description, occurred_at
 			FROM transaction t, affected_wallet w
-			WHERE w.wallet = :wallet AND t.id = w.transaction_id;
+			WHERE w.wallet = :wallet AND t.id = w.transaction_id
+			ORDER BY occurred_at ASC, w.created_at ASC, role DESC;
 		`
 		txMapper.clearStmt = `
 			WITH tx AS (
@@ -156,12 +157,13 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 				RETURNING id, amount, type, category, description, occurred_at
 			), tx_wallet AS (
 				DELETE FROM affected_wallet
-				RETURNING transaction_id, wallet, role
+				RETURNING transaction_id, wallet, role, created_at
 			)
 			SELECT
 			id, wallet, role, amount, type, category, description, occurred_at
 			FROM transaction t, affected_wallet w
-			WHERE t.id = w.transaction_id;
+			WHERE t.id = w.transaction_id
+			ORDER BY occurred_at ASC, w.created_at ASC, role DESC;
 		`
 	})
 

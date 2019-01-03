@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/orm"
 )
 
@@ -22,6 +23,35 @@ func ListWallets() ([]Wallet, error) {
 // ClearWallets ...
 func ClearWallets() ([]Wallet, error) {
 	return applyToWallets(clear)
+}
+
+func ClearTransactions() ([]Transaction, error) {
+	txTypes := constant.TransactionTypes()
+	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
+
+	tmp, err := mapper.Clear()
+	if err != nil {
+		return nil, err
+	}
+
+	_txs := *(tmp.(*[]_Transaction))
+	txs := make([]Transaction, 0, len(_txs))
+	length := len(_txs)
+
+	for i := 0; i < length; i++ {
+		_tx := _txs[i]
+		tx := _tx.toTransaction()
+
+		if tx.Type == txTypes.Transfer {
+			i++
+			_tx = _txs[i]
+			tx.To = _tx.Wallet
+		}
+
+		txs = append(txs, *tx)
+	}
+
+	return txs, nil
 }
 
 func applyToCategories(op operation) ([]Category, error) {
