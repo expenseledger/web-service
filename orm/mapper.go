@@ -10,6 +10,7 @@ type Mapper interface {
 	Insert(obj interface{}) (interface{}, error)
 	Delete(obj interface{}) (interface{}, error)
 	One(obj interface{}) (interface{}, error)
+	Update(obj interface{}) (interface{}, error)
 	Many() (interface{}, error)
 	Clear() (interface{}, error)
 }
@@ -65,6 +66,12 @@ func NewWalletMapper(model interface{}) Mapper {
 		walletMapper.oneStmt = `
 			SELECT name, type, balance FROM wallet
 			WHERE name=:name;
+		`
+		walletMapper.updateStmt = `
+			UPDATE wallet
+			SET balance=:balance
+			WHERE name=:name
+			RETURNING name, type, balance;
 		`
 		walletMapper.manyStmt = `
 			SELECT name, type, balance FROM wallet;

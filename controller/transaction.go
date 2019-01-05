@@ -64,6 +64,12 @@ func createExpense(context *gin.Context) {
 		return
 	}
 
+	wallet, err := model.GetWallet(form.From)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
 	tx, err := model.CreateTransction(
 		form.Amount,
 		constant.TransactionTypes().Expense,
@@ -79,13 +85,30 @@ func createExpense(context *gin.Context) {
 		return
 	}
 
-	buildSuccessContext(context, tx)
+	err = wallet.Expend(tx)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	data := map[string]interface{}{
+		"transaction": tx,
+		"src_wallet":  wallet,
+	}
+
+	buildSuccessContext(context, data)
 	return
 }
 
 func createIncome(context *gin.Context) {
 	var form txIncomeForm
 	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	wallet, err := model.GetWallet(form.To)
+	if err != nil {
+		buildFailedContext(context, err)
 		return
 	}
 
@@ -104,13 +127,36 @@ func createIncome(context *gin.Context) {
 		return
 	}
 
-	buildSuccessContext(context, tx)
+	err = wallet.Receive(tx)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	data := map[string]interface{}{
+		"transaction": tx,
+		"dst_wallet":  wallet,
+	}
+
+	buildSuccessContext(context, data)
 	return
 }
 
 func createTransfer(context *gin.Context) {
 	var form txTransferForm
 	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	srcWallet, err := model.GetWallet(form.From)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	dstWallet, err := model.GetWallet(form.To)
+	if err != nil {
+		buildFailedContext(context, err)
 		return
 	}
 
@@ -129,7 +175,25 @@ func createTransfer(context *gin.Context) {
 		return
 	}
 
-	buildSuccessContext(context, tx)
+	err = srcWallet.Expend(tx)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	err = dstWallet.Receive(tx)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	data := map[string]interface{}{
+		"transaction": tx,
+		"src_wallet":  srcWallet,
+		"dst_wallet":  dstWallet,
+	}
+
+	buildSuccessContext(context, data)
 	return
 }
 

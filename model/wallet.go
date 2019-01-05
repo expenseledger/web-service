@@ -40,6 +40,16 @@ func DeleteWallet(name string) (*Wallet, error) {
 	return applyToWallet(name, delete)
 }
 
+func (wallet *Wallet) Expend(tx *Transaction) error {
+	wallet.Balance = wallet.Balance.Sub(tx.Amount)
+	return wallet.update()
+}
+
+func (wallet *Wallet) Receive(tx *Transaction) error {
+	wallet.Balance = wallet.Balance.Add(tx.Amount)
+	return wallet.update()
+}
+
 // // List ...
 // func (wallets *Wallets) List() (int, error) {
 // 	var dbWallets dbmodel.Wallets
@@ -98,6 +108,14 @@ func DeleteWallet(name string) (*Wallet, error) {
 // 	copier.Copy(wallet, &dbWallet)
 // 	return nil
 // }
+
+func (wallet *Wallet) update() error {
+	mapper := orm.NewWalletMapper(*wallet)
+	if _, err := mapper.Update(wallet); err != nil {
+		return err
+	}
+	return nil
+}
 
 func applyToWallet(name string, op operation) (*Wallet, error) {
 	w := Wallet{Name: name}

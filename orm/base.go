@@ -15,6 +15,7 @@ type BaseMapper struct {
 	insertStmt string
 	deleteStmt string
 	oneStmt    string
+	updateStmt string
 	manyStmt   string
 	clearStmt  string
 }
@@ -32,6 +33,10 @@ func (mapper *BaseMapper) Delete(obj interface{}) (interface{}, error) {
 // One ...
 func (mapper *BaseMapper) One(obj interface{}) (interface{}, error) {
 	return worker(obj, mapper.modelType, mapper.oneStmt, "Error geting")
+}
+
+func (mapper *BaseMapper) Update(obj interface{}) (interface{}, error) {
+	return worker(obj, mapper.modelType, mapper.updateStmt, "Error geting")
 }
 
 // Many ...
