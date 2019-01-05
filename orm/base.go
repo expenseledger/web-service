@@ -40,9 +40,9 @@ func (mapper *BaseMapper) Update(obj interface{}) (interface{}, error) {
 }
 
 // Many ...
-func (mapper *BaseMapper) Many() (interface{}, error) {
+func (mapper *BaseMapper) Many(obj interface{}) (interface{}, error) {
 	return sliceWorker(
-		struct{}{},
+		obj,
 		mapper.modelType,
 		mapper.manyStmt,
 		"Error selecting",

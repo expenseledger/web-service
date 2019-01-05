@@ -95,7 +95,7 @@ func applyToWallets(op operation) ([]Wallet, error) {
 	var err error
 	switch op {
 	case list:
-		tmp, err = mapper.Many()
+		tmp, err = mapper.Many(&struct{}{})
 	case clear:
 		tmp, err = mapper.Clear()
 	}
@@ -104,8 +104,6 @@ func applyToWallets(op operation) ([]Wallet, error) {
 		return nil, err
 	}
 
-	w := tmp.(*[]Wallet)
-	wallets := *w
-
+	wallets := *(tmp.(*[]Wallet))
 	return wallets, nil
 }

@@ -11,7 +11,7 @@ type Mapper interface {
 	Delete(obj interface{}) (interface{}, error)
 	One(obj interface{}) (interface{}, error)
 	Update(obj interface{}) (interface{}, error)
-	Many() (interface{}, error)
+	Many(obj interface{}) (interface{}, error)
 	Clear() (interface{}, error)
 }
 

@@ -38,6 +38,8 @@ type _Transaction struct {
 	CreatedAt   time.Time                `db:"created_at"`
 }
 
+type transactions []_Transaction
+
 func CreateTransction(
 	amount decimal.Decimal,
 	t constant.TransactionType,
@@ -105,6 +107,21 @@ func DeleteTransaction(id string) (*Transaction, error) {
 	return applyToTx(id, delete)
 }
 
+func ListTransactions(walletName string) ([]Transaction, error) {
+	txTypes := constant.TransactionTypes()
+	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
+
+	_tx := _Transaction{Wallet: walletName}
+
+	tmp, err := mapper.Many(&_tx)
+	if err != nil {
+		return nil, err
+	}
+
+	_txs := (*transactions)(tmp.(*[]_Transaction))
+	return _txs.toTransactions(), nil
+}
+
 func ClearTransactions() ([]Transaction, error) {
 	txTypes := constant.TransactionTypes()
 	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
@@ -114,24 +131,8 @@ func ClearTransactions() ([]Transaction, error) {
 		return nil, err
 	}
 
-	_txs := *(tmp.(*[]_Transaction))
-	txs := make([]Transaction, 0, len(_txs))
-	length := len(_txs)
-
-	for i := 0; i < length; i++ {
-		_tx := _txs[i]
-		tx := _tx.toTransaction()
-
-		if tx.Type == txTypes.Transfer {
-			i++
-			_tx = _txs[i]
-			tx.To = _tx.Wallet
-		}
-
-		txs = append(txs, *tx)
-	}
-
-	return txs, nil
+	_txs := (*transactions)(tmp.(*[]_Transaction))
+	return _txs.toTransactions(), nil
 }
 
 func createNonTransferTx(
@@ -187,6 +188,28 @@ func (tx *_Transaction) toTransaction() *Transaction {
 	tmpTx.Date = date.Date(tmpTx.OccurredAt)
 
 	return &tmpTx
+}
+
+func (tmpTxs *transactions) toTransactions() []Transaction {
+	_txs := *tmpTxs
+	length := len(_txs)
+	txs := make([]Transaction, 0, length)
+	txTypes := constant.TransactionTypes()
+
+	for i := 0; i < length; i++ {
+		_tx := _txs[i]
+		tx := _tx.toTransaction()
+
+		if tx.Type == txTypes.Transfer {
+			i++
+			_tx = _txs[i]
+			tx.To = _tx.Wallet
+		}
+
+		txs = append(txs, *tx)
+	}
+
+	return txs
 }
 
 func applyToTx(id string, op operation) (*Transaction, error) {

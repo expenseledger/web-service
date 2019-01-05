@@ -63,7 +63,7 @@ func applyToCategories(op operation) ([]Category, error) {
 	var err error
 	switch op {
 	case list:
-		tmp, err = mapper.Many()
+		tmp, err = mapper.Many(&struct{}{})
 	case clear:
 		tmp, err = mapper.Clear()
 	}
@@ -72,8 +72,6 @@ func applyToCategories(op operation) ([]Category, error) {
 		return nil, err
 	}
 
-	c := tmp.(*[]Category)
-	categories := *c
-
+	categories := *(tmp.(*[]Category))
 	return categories, nil
 }
