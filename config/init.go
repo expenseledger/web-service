@@ -17,7 +17,7 @@ var configs configFields
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file", err)
+		log.Println("Error loading .env file", err)
 	}
 
 	configs.Mode = os.Getenv("MODE")

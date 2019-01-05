@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/expenseledger/web-service/config"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 // Route data structure to hold a path and the corresponding handler
@@ -15,6 +16,7 @@ type Route struct {
 func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	walletRoute := router.Group("/wallet")
 	walletRoute.POST("/create", createWallet)

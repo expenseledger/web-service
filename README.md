@@ -24,7 +24,7 @@ to manage the database.
 
 ```bash
 # this will be added later
-# for now, just create a database named `expense-ledger-web-service`
+# for now, just create a database named `expense_ledger_web_service`
 ```
 
 3. Copy and edit `.env` file
