@@ -98,27 +98,11 @@ func CreateTransction(
 }
 
 func GetTransaction(id string) (*Transaction, error) {
-	txTypes := constant.TransactionTypes()
-	_tx := _Transaction{ID: id}
-	mapper := orm.NewTxMapper(_tx, txTypes.Expense)
+	return applyToTx(id, one)
+}
 
-	tmp, err := mapper.One(&_tx)
-	if err != nil {
-		return nil, err
-	}
-
-	_txs := *(tmp.(*[]_Transaction))
-	length := len(_txs)
-	if length <= 0 {
-		return nil, errors.New("transaction not found")
-	}
-
-	tx := _txs[0].toTransaction()
-	for i := 1; i < length; i++ {
-		tx.To = _txs[i].Wallet
-	}
-
-	return tx, nil
+func DeleteTransaction(id string) (*Transaction, error) {
+	return applyToTx(id, delete)
 }
 
 func ClearTransactions() ([]Transaction, error) {
@@ -205,57 +189,33 @@ func (tx *_Transaction) toTransaction() *Transaction {
 	return &tmpTx
 }
 
-// Transactions is defined just to be used as a receiver
-// type Transactions []Transaction
+func applyToTx(id string, op operation) (*Transaction, error) {
+	_tx := _Transaction{ID: id}
+	mapper := orm.NewTxMapper(_tx, constant.TransactionTypes().Expense)
 
-// Create ...
-// func (tx *Transaction) Create() error {
-// 	dbTx := tx.toDBCounterpart()
-// 	if err := dbTx.Insert(); err != nil {
-// 		return err
-// 	}
+	var tmp interface{}
+	var err error
+	switch op {
+	case delete:
+		tmp, err = mapper.Delete(&_tx)
+	case one:
+		tmp, err = mapper.One(&_tx)
+	}
 
-// 	tx.fromDBCounterpart(dbTx)
-// 	return nil
-// }
+	if err != nil {
+		return nil, err
+	}
 
-// // Clear ...
-// func (txs *Transactions) Clear() (int, error) {
-// 	var dbTxs dbmodel.Transactions
-// 	if err := dbTxs.DeleteAll(); err != nil {
-// 		return 0, err
-// 	}
+	_txs := *(tmp.(*[]_Transaction))
+	length := len(_txs)
+	if length <= 0 {
+		return nil, errors.New("transaction not found")
+	}
 
-// 	length := len(dbTxs)
-// 	transactions := make(Transactions, length)
-// 	for i, dbTx := range dbTxs {
-// 		var tx Transaction
-// 		tx.fromDBCounterpart(&dbTx)
-// 		transactions[i] = tx
-// 	}
+	tx := _txs[0].toTransaction()
+	for i := 1; i < length; i++ {
+		tx.To = _txs[i].Wallet
+	}
 
-// 	*txs = transactions
-// 	return length, nil
-// }
-
-// // Get ...
-// func (tx *Transaction) Get() error {
-// 	dbTx := tx.toDBCounterpart()
-// 	if err := dbTx.One(); err != nil {
-// 		return err
-// 	}
-
-// 	tx.fromDBCounterpart(dbTx)
-// 	return nil
-// }
-
-// // Delete ...
-// func (tx *Transaction) Delete() error {
-// 	dbTx := tx.toDBCounterpart()
-// 	if err := dbTx.Delete(); err != nil {
-// 		return err
-// 	}
-
-// 	tx.fromDBCounterpart(dbTx)
-// 	return nil
-// }
+	return tx, nil
+}

@@ -206,42 +206,48 @@ func clearTransactions(context *gin.Context) {
 	return
 }
 
-// func transactionDelete(context *gin.Context) {
-// 	var form transactionIdentifyForm
-// 	if err := context.ShouldBindJSON(&form); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
+func deleteTransaction(context *gin.Context) {
+	var form txIdentifyForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
 
-// 	tx := model.Transaction{
-// 		ID: form.ID,
-// 	}
+	tx, err := model.DeleteTransaction(form.ID)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
 
-// 	srcWallet, dstWallet, err := business.DeleteTransaction(&tx)
-// 	if err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
+	var srcWallet, dstWallet *model.Wallet
+	if from := tx.From; from != "" {
+		srcWallet, err = model.GetWallet(from)
+		if err != nil {
+			buildFailedContext(context, err)
+			return
+		}
+		if err = srcWallet.Receive(tx); err != nil {
+			buildFailedContext(context, err)
+			return
+		}
+	}
+	if to := tx.To; to != "" {
+		dstWallet, err = model.GetWallet(to)
+		if err != nil {
+			buildFailedContext(context, err)
+			return
+		}
+		if err = dstWallet.Expend(tx); err != nil {
+			buildFailedContext(context, err)
+			return
+		}
+	}
 
-// 	data := map[string]interface{}{
-// 		"transaction": tx,
-// 	}
-// 	if srcWallet != nil {
-// 		data["src_wallet"] = srcWallet
-// 	}
-// 	if dstWallet != nil {
-// 		data["dst_wallet"] = dstWallet
-// 	}
+	data := map[string]interface{}{
+		"transaction": tx,
+		"src_wallet":  srcWallet,
+		"dst_wallet":  dstWallet,
+	}
 
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(data),
-// 	)
-// 	return
-// }
+	buildSuccessContext(context, data)
+	return
+}

@@ -60,65 +60,6 @@ func (wallet *Wallet) Receive(tx *Transaction) error {
 	return wallet.update()
 }
 
-// // List ...
-// func (wallets *Wallets) List() (int, error) {
-// 	var dbWallets dbmodel.Wallets
-
-// 	length, err := dbWallets.All()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	copier.Copy(wallets, &dbWallets)
-// 	return length, nil
-// }
-
-// // Init inserts default wallets
-// func (wallets *Wallets) Init() (int, error) {
-// 	var dbWallets dbmodel.Wallets
-// 	copier.Copy(&dbWallets, wallets)
-
-// 	length, err := dbWallets.BatchInsert()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	return length, nil
-// }
-
-// // Clear ...
-// func (wallets *Wallets) Clear() (int, error) {
-// 	var dbWallets dbmodel.Wallets
-
-// 	length, err := dbWallets.DeleteAll()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	copier.Copy(wallets, &dbWallets)
-// 	return length, nil
-// }
-
-// // Update ...
-// func (wallet *Wallet) Update(replacing bool) error {
-// 	var dbWallet dbmodel.Wallet
-// 	copier.Copy(&dbWallet, wallet)
-
-// 	var err error
-// 	if replacing {
-// 		err = dbWallet.Save()
-// 	} else {
-// 		err = dbWallet.Update()
-// 	}
-
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	copier.Copy(wallet, &dbWallet)
-// 	return nil
-// }
-
 func (wallet *Wallet) update() error {
 	mapper := orm.NewWalletMapper(*wallet)
 	if _, err := mapper.Update(wallet); err != nil {

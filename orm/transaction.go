@@ -43,3 +43,12 @@ func (mapper *TxMapper) One(obj interface{}) (interface{}, error) {
 		"Error getting",
 	)
 }
+
+func (mapper *TxMapper) Delete(obj interface{}) (interface{}, error) {
+	return sliceWorker(
+		obj,
+		mapper.modelType,
+		mapper.deleteStmt,
+		"Error deleting",
+	)
+}
