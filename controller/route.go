@@ -16,6 +16,7 @@ type Route struct {
 func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	walletRoute := router.Group("/wallet")
 	walletRoute.POST("/create", walletCreate)
@@ -36,8 +37,6 @@ func InitRoutes() *gin.Engine {
 		walletRoute.POST("/clear", walletClear)
 		categoryRoute.POST("/clear", categoryClear)
 	}
-
-	router.Use(cors.Default())
 
 	return router
 }
