@@ -41,12 +41,22 @@ func (mapper *BaseMapper) Update(obj interface{}) (interface{}, error) {
 
 // Many ...
 func (mapper *BaseMapper) Many() (interface{}, error) {
-	return sliceWorker(mapper.modelType, mapper.manyStmt, "Error selecting")
+	return sliceWorker(
+		struct{}{},
+		mapper.modelType,
+		mapper.manyStmt,
+		"Error selecting",
+	)
 }
 
 // Clear ...
 func (mapper *BaseMapper) Clear() (interface{}, error) {
-	return sliceWorker(mapper.modelType, mapper.clearStmt, "Error clearing")
+	return sliceWorker(
+		struct{}{},
+		mapper.modelType,
+		mapper.clearStmt,
+		"Error clearing",
+	)
 }
 
 func worker(
@@ -69,18 +79,23 @@ func worker(
 	return newObj, nil
 }
 
-func sliceWorker(t reflect.Type, sqlStmt, logMsg string) (interface{}, error) {
-	stmt, err := db.Conn().Preparex(sqlStmt)
+func sliceWorker(
+	obj interface{},
+	t reflect.Type,
+	sqlStmt string,
+	logMsg string,
+) (interface{}, error) {
+	stmt, err := db.Conn().PrepareNamed(sqlStmt)
 	if err != nil {
-		log.Println("Error selecting", err)
+		log.Println(logMsg, err)
 		return nil, err
 	}
 
 	sliceType := reflect.SliceOf(t)
 	newSlice := reflect.MakeSlice(sliceType, 0, 0)
 	resultSet := reflect.New(newSlice.Type()).Interface()
-	if err := stmt.Select(resultSet); err != nil {
-		log.Println("Error selecting", err)
+	if err := stmt.Select(resultSet, obj); err != nil {
+		log.Println(logMsg, err)
 		return nil, err
 	}
 	return resultSet, nil

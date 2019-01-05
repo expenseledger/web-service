@@ -35,7 +35,7 @@ func InitRoutes() *gin.Engine {
 	transactionRoute.POST("/createExpense", createExpense)
 	transactionRoute.POST("/createIncome", createIncome)
 	transactionRoute.POST("/createTransfer", createTransfer)
-	// transactionRoute.POST("/get", transactionGet)
+	transactionRoute.POST("/get", getTransaction)
 	// transactionRoute.POST("/delete", transactionDelete)
 
 	if configs.Mode != "PRODUCTION" {

@@ -8,7 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type transactionIdentifyForm struct {
+type txIdentifyForm struct {
 	ID string `json:"id" binding:"required"`
 }
 
@@ -34,29 +34,6 @@ type txTransferForm struct {
 	To   string `json:"to" binding:"required"`
 	txCreateForm
 }
-
-// func transactionClear(context *gin.Context) {
-// 	var txs model.Transactions
-// 	length, err := txs.Clear()
-// 	if err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	items := itemList{
-// 		Length: length,
-// 		Items:  txs,
-// 	}
-
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(items),
-// 	)
-// 	return
-// }
 
 func createExpense(context *gin.Context) {
 	var form txExpenseForm
@@ -197,6 +174,22 @@ func createTransfer(context *gin.Context) {
 	return
 }
 
+func getTransaction(context *gin.Context) {
+	var form txIdentifyForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	tx, err := model.GetTransaction(form.ID)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	buildSuccessContext(context, tx)
+	return
+}
+
 func clearTransactions(context *gin.Context) {
 	txs, err := model.ClearTransactions()
 	if err != nil {
@@ -212,35 +205,6 @@ func clearTransactions(context *gin.Context) {
 	buildSuccessContext(context, items)
 	return
 }
-
-// func transactionGet(context *gin.Context) {
-// 	var form transactionIdentifyForm
-// 	if err := context.ShouldBindJSON(&form); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	tx := model.Transaction{
-// 		ID: form.ID,
-// 	}
-
-// 	if err := tx.Get(); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(tx),
-// 	)
-// 	return
-// }
 
 // func transactionDelete(context *gin.Context) {
 // 	var form transactionIdentifyForm

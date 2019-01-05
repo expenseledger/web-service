@@ -12,7 +12,6 @@ type TxMapper struct {
 	txType       constant.TransactionType
 }
 
-// Insert ...
 func (mapper *TxMapper) Insert(obj interface{}) (interface{}, error) {
 	txType := constant.TransactionTypes()
 	switch mapper.txType {
@@ -34,4 +33,13 @@ func (mapper *TxMapper) Insert(obj interface{}) (interface{}, error) {
 		)
 	}
 	return nil, errors.New("unknown transaction type")
+}
+
+func (mapper *TxMapper) One(obj interface{}) (interface{}, error) {
+	return sliceWorker(
+		obj,
+		mapper.modelType,
+		mapper.oneStmt,
+		"Error getting",
+	)
 }

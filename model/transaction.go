@@ -3,6 +3,7 @@ package model
 import (
 
 	// dbmodel "github.com/expenseledger/web-service/db/model"
+	"errors"
 	"time"
 
 	"github.com/expenseledger/web-service/constant"
@@ -94,6 +95,30 @@ func CreateTransction(
 	tmpTx := tmp.(*Transaction)
 	tmpTx.Date = date.Date(tmpTx.OccurredAt)
 	return tmpTx, nil
+}
+
+func GetTransaction(id string) (*Transaction, error) {
+	txTypes := constant.TransactionTypes()
+	_tx := _Transaction{ID: id}
+	mapper := orm.NewTxMapper(_tx, txTypes.Expense)
+
+	tmp, err := mapper.One(&_tx)
+	if err != nil {
+		return nil, err
+	}
+
+	_txs := *(tmp.(*[]_Transaction))
+	length := len(_txs)
+	if length <= 0 {
+		return nil, errors.New("transaction not found")
+	}
+
+	tx := _txs[0].toTransaction()
+	for i := 1; i < length; i++ {
+		tx.To = _txs[i].Wallet
+	}
+
+	return tx, nil
 }
 
 func ClearTransactions() ([]Transaction, error) {
