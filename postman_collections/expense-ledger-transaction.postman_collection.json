@@ -1,0 +1,1248 @@
+{
+	"info": {
+		"_postman_id": "af524f0f-01e1-4cd2-a74c-425ef4e9fb07",
+		"name": "expense-ledger-transaction",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "TransactionClear_Always_DeletesAllTransactions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "67c81496-29c0-4537-bbb9-8693bf3c3731",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletClear_Always_DeletesAllWallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "67c81496-29c0-4537-bbb9-8693bf3c3731",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryClear_Always_DeletesAllCetegories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e330f90-a1bd-453c-8887-293cb8fe7e9a",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "WalletInit_WithEmptyTable_Creates2Wallets",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1bc13159-92a0-4053-92fe-b6be42fd1b1d",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"2 wallets are inserted\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(2);",
+							"    ",
+							"    pm.environment.set(\"wallet_name\", items[0].name);",
+							"    pm.environment.set(\"from_wallet\", items[1].name);",
+							"    pm.environment.set(\"to_wallet\", items[0].name);",
+							"   pm.environment.set(\"wallet_balance\", items[0].balance);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/wallet/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"wallet",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CategoryInit_WithEmptyTable_Creates4Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "83336dcd-99d9-4a93-99eb-4757f2149173",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"4 categories are inserted\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(5);",
+							"    ",
+							"    pm.environment.set(\"category_name\", items[0].name);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/category/init",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"category",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateExpense OnlyRequiredFields InsertsExpenseWithCurrentTime",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Transaction is correctly inserted\", function() {",
+							"    let {data: {transaction}} = pm.response.json();",
+							"",
+							"    pm.expect(transaction.src_wallet).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(transaction.dst_wallet).to.eql(\"\");",
+							"    pm.expect(transaction.amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(transaction.type).to.eql(\"EXPENSE\");",
+							"    pm.expect(transaction.category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(transaction.description).to.eql(\"\");",
+							"    // pm.expect(transaction.date).to.eql(pm.variables.get(\"today\"));",
+							"});",
+							"",
+							"pm.test(\"Wallet balance is correctly updated\", function() {",
+							"    let {data: {src_wallet}} = pm.response.json();",
+							"    let balance = pm.variables.get(\"wallet_balance\") - pm.variables.get(\"transaction_amount\");",
+							"    ",
+							"    pm.expect(src_wallet.name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(src_wallet.balance).to.eql(balance + '');",
+							"    ",
+							"    pm.environment.set(\"wallet_balance\", src_wallet.balance);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"{{wallet_name}}\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createExpense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createExpense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateExpense WithDescAndDate InsertsExpense",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Transaction is correctly inserted\", function() {",
+							"    let {data: {transaction}} = pm.response.json();",
+							"",
+							"    pm.expect(transaction.src_wallet).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(transaction.dst_wallet).to.eql(\"\");",
+							"    pm.expect(transaction.amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(transaction.type).to.eql(\"EXPENSE\");",
+							"    pm.expect(transaction.category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(transaction.description).to.eql(pm.variables.get(\"transaction_desc\"));",
+							"    // pm.expect(transaction.date).to.eql(pm.variables.get(\"today\"));",
+							"});",
+							"",
+							"pm.test(\"Wallet balance is correctly updated\", function() {",
+							"    let {data: {src_wallet}} = pm.response.json();",
+							"    let balance = pm.variables.get(\"wallet_balance\") - pm.variables.get(\"transaction_amount\");",
+							"    ",
+							"    pm.expect(src_wallet.name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(src_wallet.balance).to.eql(balance + '');",
+							"    ",
+							"    pm.environment.set(\"wallet_balance\", src_wallet.balance);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"pm.environment.set(\"transaction_desc\", \"simple description\");",
+							"pm.environment.set(\"transaction_date\", \"1970-10-09\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"{{wallet_name}}\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"{{category_name}}\",\n\t\"description\": \"{{transaction_desc}}\",\n\t\"date\": \"{{transaction_date}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createExpense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createExpense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateExpense WithNonexistentCategory Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"{{wallet_name}}\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"Nonexistent\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createExpense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createExpense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateExpense WithNonexistentWallet Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"Nonexistent\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createExpense",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createExpense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateIncome OnlyRequiredFields InsertsExpenseWithCurrentTime",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Transaction is correctly inserted\", function() {",
+							"    let {data: {transaction}} = pm.response.json();",
+							"",
+							"    pm.expect(transaction.dst_wallet).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(transaction.amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(transaction.type).to.eql(\"INCOME\");",
+							"    pm.expect(transaction.category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(transaction.description).to.eql(\"\");",
+							"    // pm.expect(transaction.date).to.eql(pm.variables.get(\"today\"));",
+							"});",
+							"",
+							"pm.test(\"Wallet balance is correctly updated\", function() {",
+							"    let {data: {dst_wallet}} = pm.response.json();",
+							"    let balance = parseFloat(pm.variables.get(\"wallet_balance\")) + parseFloat(pm.variables.get(\"transaction_amount\"));",
+							"    ",
+							"    pm.expect(dst_wallet.name).to.eql(pm.variables.get(\"wallet_name\"));",
+							"    pm.expect(dst_wallet.balance).to.eql(balance + '');",
+							"    ",
+							"    pm.environment.set(\"wallet_balance\", dst_wallet.balance);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"to\": \"{{wallet_name}}\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createIncome",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createIncome"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateTransfer OnlyRequiredFields TransfersFromWalletToWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c34c6a12-4682-4073-9479-30b17fa7c82b",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Transaction is correctly inserted\", function() {",
+							"    let {data: {transaction}} = pm.response.json();",
+							"    ",
+							"    pm.expect(transaction.src_wallet).to.eql(pm.variables.get(\"from_wallet\"));",
+							"    pm.expect(transaction.dst_wallet).to.eql(pm.variables.get(\"to_wallet\"));",
+							"    pm.expect(transaction.type).to.eql(\"TRANSFER\");",
+							"    pm.expect(transaction.category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(transaction.amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(transaction.description).to.eql(\"\");",
+							"    ",
+							"    pm.environment.set(\"transaction_id\", transaction.id);",
+							"",
+							"    // Why?",
+							"    // pm.expect(transaction.date).to.eql(pm.variables.get(\"today\"));",
+							"    ",
+							"});",
+							"",
+							"pm.test(\"Source wallet balance is correctly updated\", function() {",
+							"    let {data: {src_wallet}} = pm.response.json();",
+							"    let balance = 0 - parseFloat(pm.variables.get(\"transaction_amount\"));",
+							"    ",
+							"    pm.expect(src_wallet.name).to.eql(pm.variables.get(\"from_wallet\"));",
+							"    pm.expect(src_wallet.balance).to.eql(balance + '');",
+							"    ",
+							"    pm.environment.set(\"from_wallet_balance\", balance + '');",
+							"});",
+							"",
+							"pm.test(\"Destination wallet balance is correctly updated\", function() {",
+							"    let {data: {dst_wallet}} = pm.response.json();",
+							"    let balance = parseFloat(pm.variables.get(\"wallet_balance\")) + parseFloat(pm.variables.get(\"transaction_amount\"));",
+							"    ",
+							"    pm.expect(dst_wallet.name).to.eql(pm.variables.get(\"to_wallet\"));",
+							"    pm.expect(dst_wallet.balance).to.eql(balance + '');",
+							"    ",
+							"    pm.environment.set(\"to_wallet_balance\", balance + '');",
+							"",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "377b8ec7-8638-422e-9339-1b8f0b360d5a",
+						"exec": [
+							"pm.environment.set(\"transaction_amount\", \"10.99\");",
+							"pm.environment.set(\"category_name\", \"Withdraw\");",
+							"",
+							"var today = new Date();",
+							"var dd = today.getDate();",
+							"var mm = today.getMonth()+1; //January is 0!",
+							"var yyyy = today.getFullYear();",
+							"",
+							"if(dd<10) {",
+							"    dd = '0'+dd",
+							"} ",
+							"",
+							"if(mm<10) {",
+							"    mm = '0'+mm",
+							"} ",
+							"",
+							"today =  yyyy + '-' + mm + '-' + dd;",
+							"",
+							"pm.environment.set(\"today\", today);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"{{from_wallet}}\",\n\t\"to\": \"{{to_wallet}}\",\n\t\"amount\": \"{{transaction_amount}}\",\n\t\"category\": \"{{category_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/createTransfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"createTransfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TransactionGet_WithExistingId_ReturnsTheTransaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eeb670ac-d62f-4b88-9f55-c79ccc4d94e9",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right transaction is returned\", function() {",
+							"    let {data: {id, src_wallet, dst_wallet, amount, type, category, description, date}} = pm.response.json();",
+							"    ",
+							"    pm.expect(id).to.eql(pm.variables.get(\"transaction_id\"));",
+							"    pm.expect(src_wallet).to.eql(pm.variables.get(\"from_wallet\"));",
+							"    pm.expect(dst_wallet).to.eql(pm.variables.get(\"to_wallet\"));",
+							"    pm.expect(amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(type).to.eql(\"TRANSFER\");",
+							"    pm.expect(category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(description).to.eql(\"\");",
+							"    // pm.expect(date).to.eql(pm.variables.get(\"today\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1aec604a-02f9-4209-83f4-8993bee868ec",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"{{transaction_id}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TransactionGet_WithNonexistentId_Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4d5bafe7-108c-424f-815e-ef98dbea4454",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"21f86a12-dacc-11e8-9f8b-f2801f1b9fd1\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ListTransactions Always ReturnsTransactionsBelongingToWallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "91ac389a-050a-4574-8d6f-353c4c8e4b90",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"4 transactions are returned\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(4);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"wallet\": \"Cash\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TransactionDelete_WithExistingID_DeletesAndReturnsATransaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8c429fa1-7c07-4a0a-aaf7-f71fbf3f0bd9",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"Right transaction is returned\", function() {",
+							"    let {data: {transaction}} = pm.response.json();",
+							"    ",
+							"    pm.expect(transaction.id).to.eql(pm.variables.get(\"transaction_id\"));",
+							"    pm.expect(transaction.src_wallet).to.eql(pm.variables.get(\"from_wallet\"));",
+							"    pm.expect(transaction.dst_wallet).to.eql(pm.variables.get(\"to_wallet\"));",
+							"    pm.expect(transaction.amount).to.eql(pm.variables.get(\"transaction_amount\"));",
+							"    pm.expect(transaction.type).to.eql(\"TRANSFER\");",
+							"    pm.expect(transaction.category).to.eql(pm.variables.get(\"category_name\"));",
+							"    pm.expect(transaction.description).to.eql(\"\");",
+							"    // pm.expect(date).to.eql(pm.variables.get(\"today\"));",
+							"});",
+							"",
+							"pm.test(\"Source wallet balance is correctly updated\", function() {",
+							"    let {data: {src_wallet}} = pm.response.json();",
+							"    let balance = parseFloat(pm.variables.get(\"from_wallet_balance\")) + parseFloat(pm.variables.get(\"transaction_amount\"));",
+							"    ",
+							"    pm.expect(src_wallet.name).to.eql(pm.variables.get(\"from_wallet\"));",
+							"    pm.expect(src_wallet.balance).to.eql(balance + '');",
+							"});",
+							"",
+							"pm.test(\"Destination wallet balance is correctly updated\", function() {",
+							"    let {data: {dst_wallet}} = pm.response.json();",
+							"    let balance = parseFloat(pm.variables.get(\"to_wallet_balance\")) - parseFloat(pm.variables.get(\"transaction_amount\"));",
+							"    ",
+							"    pm.expect(dst_wallet.name).to.eql(pm.variables.get(\"to_wallet\"));",
+							"    pm.expect(dst_wallet.balance).to.eql(balance + '');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9c376267-533f-492d-888e-7ad608a8e255",
+						"exec": [
+							"pm.environment.set(\"wallet_name\", \"My Bank\");",
+							"pm.environment.set(\"wallet_type\", \"BANK_ACCOUNT\");"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"{{transaction_id}}\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TransactionDelete_WithNonexistentID_Fails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "aa342107-1c50-48dd-b64e-8c3a26b78368",
+						"exec": [
+							"pm.test(\"Response in failure\", function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is NOT success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": \"21f86a12-dacc-11e8-9f8b-f2801f1b9fd1\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ListTransactionTypes Always ReturnsAllTransactionTypes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75d5047d-61b2-49af-b8f1-da0c3bc0f429",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});",
+							"",
+							"pm.test(\"3 wallet types are returned\", function() {",
+							"    let {data: {length, items}} = pm.response.json();",
+							"    ",
+							"    pm.expect(length).to.eql(items.length);",
+							"    pm.expect(length).to.eql(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/listTypes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"listTypes"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -6,6 +6,54 @@
 	},
 	"item": [
 		{
+			"name": "TransactionClear_Always_DeletesAllTransactions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "67c81496-29c0-4537-bbb9-8693bf3c3731",
+						"exec": [
+							"pm.test(\"Response in success\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response in JSON\", function() {",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Response status is success\", function() {",
+							"    let {success} = pm.response.json();",
+							"    ",
+							"    pm.expect(success).to.eql(true);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:3000/transaction/clear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"transaction",
+						"clear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "CategoryClear_Always_DeletesAllCetegories",
 			"event": [
 				{
@@ -75,11 +123,11 @@
 							"    pm.expect(success).to.eql(true);",
 							"});",
 							"",
-							"pm.test(\"4 categories are inserted\", function() {",
+							"pm.test(\"5 categories are inserted\", function() {",
 							"    let {data: {length, items}} = pm.response.json();",
 							"    ",
 							"    pm.expect(length).to.eql(items.length);",
-							"    pm.expect(length).to.eql(4);",
+							"    pm.expect(length).to.eql(5);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -530,11 +578,11 @@
 							"    pm.expect(success).to.eql(true);",
 							"});",
 							"",
-							"pm.test(\"2 wallets are returned\", function() {",
+							"pm.test(\"5 categories are returned\", function() {",
 							"    let {data: {length, items}} = pm.response.json();",
 							"    ",
 							"    pm.expect(length).to.eql(items.length);",
-							"    pm.expect(length).to.eql(4);",
+							"    pm.expect(length).to.eql(5);",
 							"});"
 						],
 						"type": "text/javascript"

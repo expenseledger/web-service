@@ -1,6 +1,10 @@
 package controller
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 type itemList struct {
 	Length int         `json:"length"`
@@ -23,4 +27,29 @@ func buildNonsuccessResponse(
 		"message": err.Error(),
 		"context": data,
 	}
+}
+
+func bindJSON(context *gin.Context, form interface{}) (err error) {
+	if err = context.ShouldBindJSON(form); err != nil {
+		context.JSON(
+			http.StatusBadRequest,
+			buildNonsuccessResponse(err, nil),
+		)
+		return
+	}
+	return
+}
+
+func buildFailedContext(context *gin.Context, err error) {
+	context.JSON(
+		http.StatusBadRequest,
+		buildNonsuccessResponse(err, nil),
+	)
+}
+
+func buildSuccessContext(context *gin.Context, data interface{}) {
+	context.JSON(
+		http.StatusOK,
+		buildSuccessResponse(data),
+	)
 }

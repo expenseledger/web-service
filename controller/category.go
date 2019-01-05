@@ -1,106 +1,97 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 )
 
-type categoryIdentifyForm struct {
+type categoryIDForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-func categoryCreate(context *gin.Context) {
-	var form categoryIdentifyForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+func createCategory(context *gin.Context) {
+	var form categoryIDForm
+	if err := bindJSON(context, &form); err != nil {
 		return
 	}
 
-	var category model.Category
-	copier.Copy(&category, &form)
-
-	if err := category.Create(); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
-	return
-}
-
-func categoryGet(context *gin.Context) {
-	var form categoryIdentifyForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	var category model.Category
-	if err := category.Get(form.Name); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
-	return
-}
-
-func categoryDelete(context *gin.Context) {
-	var form categoryIdentifyForm
-	if err := context.ShouldBindJSON(&form); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	var category model.Category
-	if err := category.Delete(form.Name); err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(category),
-	)
-	return
-}
-
-func categoryList(context *gin.Context) {
-	var categories model.Categories
-	length, err := categories.List()
+	category, err := model.CreateCategory(form.Name)
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
+	}
+
+	buildSuccessContext(context, category)
+	return
+}
+
+func getCategory(context *gin.Context) {
+	var form categoryIDForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	category, err := model.GetCategory(form.Name)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	buildSuccessContext(context, category)
+	return
+}
+
+func deleteCategory(context *gin.Context) {
+	var form categoryIDForm
+	if err := bindJSON(context, &form); err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	category, err := model.DeleteCategory(form.Name)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	buildSuccessContext(context, category)
+	return
+}
+
+func listCategories(context *gin.Context) {
+	categories, err := model.ListCategories()
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	items := itemList{
+		Length: len(categories),
+		Items:  categories,
+	}
+
+	buildSuccessContext(context, items)
+	return
+}
+
+func initCategories(context *gin.Context) {
+	names := []string{
+		"Food And Drink",
+		"Transportation",
+		"Shopping",
+		"Bill",
+		"Withdraw",
+	}
+
+	length := len(names)
+	categories := make([]*model.Category, length)
+	for i, name := range names {
+		category, err := model.CreateCategory(name)
+		if err != nil {
+			buildFailedContext(context, err)
+			return
+		}
+		categories[i] = category
 	}
 
 	items := itemList{
@@ -108,69 +99,22 @@ func categoryList(context *gin.Context) {
 		Items:  categories,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }
 
-func categoryInit(context *gin.Context) {
-	categories := model.Categories{
-		model.Category{
-			Name: "Food And Drink",
-		},
-		model.Category{
-			Name: "Transportation",
-		},
-		model.Category{
-			Name: "Shopping",
-		},
-		model.Category{
-			Name: "Bill",
-		},
-	}
-
-	length, err := categories.Init()
+func clearCategories(context *gin.Context) {
+	categories, err := model.ClearCategories()
 	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
+		buildFailedContext(context, err)
 		return
 	}
 
 	items := itemList{
-		Length: length,
+		Length: len(categories),
 		Items:  categories,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
-	return
-}
-
-func categoryClear(context *gin.Context) {
-	var categories model.Categories
-	length, err := categories.Clear()
-	if err != nil {
-		context.JSON(
-			http.StatusBadRequest,
-			buildNonsuccessResponse(err, nil),
-		)
-		return
-	}
-
-	items := itemList{
-		Length: length,
-		Items:  categories,
-	}
-
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }

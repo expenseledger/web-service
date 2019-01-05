@@ -1,89 +1,77 @@
 package model
 
 import (
-	dbmodel "github.com/expenseledger/web-service/database/model"
-	"github.com/jinzhu/copier"
+	"github.com/expenseledger/web-service/orm"
 )
 
 // Category the structure represents a category in presentation layer
 type Category struct {
-	Name string `json:"name"`
+	Name string `json:"name" db:"name"`
 }
 
-// Categories is defined just to be used as a receiver
-type Categories []Category
+// CreateCategory inserts category to DB
+func CreateCategory(name string) (*Category, error) {
+	return applyToCategory(name, insert)
+}
 
-// Create ...
-func (category *Category) Create() error {
-	var dbCategory dbmodel.Category
+// GetCategory returns matching category from DB
+func GetCategory(name string) (*Category, error) {
+	return applyToCategory(name, one)
+}
 
-	copier.Copy(&dbCategory, &category)
+// DeleteCategory removes category from DB
+func DeleteCategory(name string) (*Category, error) {
+	return applyToCategory(name, delete)
+}
 
-	if err := dbCategory.Insert(); err != nil {
-		return err
+// ListCategories ...
+func ListCategories() ([]Category, error) {
+	return applyToCategories(list)
+}
+
+// ClearCategories ...
+func ClearCategories() ([]Category, error) {
+	return applyToCategories(clear)
+}
+
+func applyToCategory(name string, op operation) (*Category, error) {
+	c := Category{Name: name}
+	mapper := orm.NewCategoryMapper(c)
+
+	var tmp interface{}
+	var err error
+	switch op {
+	case insert:
+		tmp, err = mapper.Insert(&c)
+	case delete:
+		tmp, err = mapper.Delete(&c)
+	case one:
+		tmp, err = mapper.One(&c)
 	}
 
-	copier.Copy(category, &dbCategory)
-	return nil
-}
-
-// Get ...
-func (category *Category) Get(name string) error {
-	var dbCategory dbmodel.Category
-	if err := dbCategory.One(name); err != nil {
-		return err
-	}
-
-	copier.Copy(category, &dbCategory)
-	return nil
-}
-
-// Delete ...
-func (category *Category) Delete(name string) error {
-	var dbCategory dbmodel.Category
-	if err := dbCategory.Delete(name); err != nil {
-		return err
-	}
-
-	copier.Copy(category, &dbCategory)
-	return nil
-}
-
-// List ...
-func (categories *Categories) List() (int, error) {
-	var dbCategories dbmodel.Categories
-
-	length, err := dbCategories.All()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	copier.Copy(categories, &dbCategories)
-	return length, nil
+	return tmp.(*Category), nil
 }
 
-// Init insert default categories
-func (categories *Categories) Init() (int, error) {
-	var dbCategories dbmodel.Categories
-	copier.Copy(&dbCategories, categories)
+func applyToCategories(op operation) ([]Category, error) {
+	mapper := orm.NewCategoryMapper(Category{})
 
-	length, err := dbCategories.BatchInsert()
-	if err != nil {
-		return 0, err
+	var tmp interface{}
+	var err error
+	switch op {
+	case list:
+		tmp, err = mapper.Many(&struct{}{})
+	case clear:
+		tmp, err = mapper.Clear()
 	}
 
-	return length, nil
-}
-
-// Clear ...
-func (categories *Categories) Clear() (int, error) {
-	var dbCategories dbmodel.Categories
-
-	length, err := dbCategories.DeleteAll()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	copier.Copy(categories, &dbCategories)
-	return length, nil
+	categories := *(tmp.(*[]Category))
+	return categories, nil
 }
