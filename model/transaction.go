@@ -96,6 +96,35 @@ func CreateTransction(
 	return tmpTx, nil
 }
 
+func ClearTransactions() ([]Transaction, error) {
+	txTypes := constant.TransactionTypes()
+	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
+
+	tmp, err := mapper.Clear()
+	if err != nil {
+		return nil, err
+	}
+
+	_txs := *(tmp.(*[]_Transaction))
+	txs := make([]Transaction, 0, len(_txs))
+	length := len(_txs)
+
+	for i := 0; i < length; i++ {
+		_tx := _txs[i]
+		tx := _tx.toTransaction()
+
+		if tx.Type == txTypes.Transfer {
+			i++
+			_tx = _txs[i]
+			tx.To = _tx.Wallet
+		}
+
+		txs = append(txs, *tx)
+	}
+
+	return txs, nil
+}
+
 func createNonTransferTx(
 	amount decimal.Decimal,
 	t constant.TransactionType,
@@ -204,29 +233,4 @@ func (tx *_Transaction) toTransaction() *Transaction {
 
 // 	tx.fromDBCounterpart(dbTx)
 // 	return nil
-// }
-
-// func (tx *Transaction) toDBCounterpart() *dbmodel.Transaction {
-
-// 	return &dbmodel.Transaction{
-// 		ID:          tx.ID,
-// 		SrcWallet:   tx.SrcWallet,
-// 		DstWallet:   tx.DstWallet,
-// 		Type:        tx.Type,
-// 		Category:    tx.Category,
-// 		Amount:      tx.Amount,
-// 		Description: tx.Description,
-// 		OccurredAt:  time.Time(tx.Date),
-// 	}
-// }
-
-// func (tx *Transaction) fromDBCounterpart(dbTx *dbmodel.Transaction) {
-// 	tx.ID = dbTx.ID
-// 	tx.SrcWallet = dbTx.SrcWallet
-// 	tx.DstWallet = dbTx.DstWallet
-// 	tx.Amount = dbTx.Amount
-// 	tx.Type = dbTx.Type
-// 	tx.Category = dbTx.Category
-// 	tx.Description = dbTx.Description
-// 	tx.Date = date.Date(dbTx.OccurredAt)
 // }

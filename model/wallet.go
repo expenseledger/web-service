@@ -40,6 +40,16 @@ func DeleteWallet(name string) (*Wallet, error) {
 	return applyToWallet(name, delete)
 }
 
+// ListWallets ...
+func ListWallets() ([]Wallet, error) {
+	return applyToWallets(list)
+}
+
+// ClearWallets ...
+func ClearWallets() ([]Wallet, error) {
+	return applyToWallets(clear)
+}
+
 func (wallet *Wallet) Expend(tx *Transaction) error {
 	wallet.Balance = wallet.Balance.Sub(tx.Amount)
 	return wallet.update()
@@ -135,4 +145,26 @@ func applyToWallet(name string, op operation) (*Wallet, error) {
 	}
 
 	return tmp.(*Wallet), nil
+}
+
+func applyToWallets(op operation) ([]Wallet, error) {
+	mapper := orm.NewWalletMapper(Wallet{})
+
+	var tmp interface{}
+	var err error
+	switch op {
+	case list:
+		tmp, err = mapper.Many()
+	case clear:
+		tmp, err = mapper.Clear()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	w := tmp.(*[]Wallet)
+	wallets := *w
+
+	return wallets, nil
 }
