@@ -64,10 +64,23 @@ func WalletRoles() walletRole {
 	return wr
 }
 
-// ListWalletTypes returns the types of a wallet as a slice of strings
+// ListWalletTypes returns the types of wallets as a slice of strings
 func ListWalletTypes() []string {
 	wt := WalletTypes()
 	v := reflect.ValueOf(wt)
+	types := make([]string, v.NumField()-1)
+
+	for i := 1; i < v.NumField(); i++ {
+		types[i-1] = v.Field(i).String()
+	}
+
+	return types
+}
+
+// ListTransactionTypes returns the types of transactions as a slice of strings
+func ListTransactionTypes() []string {
+	t := TransactionTypes()
+	v := reflect.ValueOf(t)
 	types := make([]string, v.NumField()-1)
 
 	for i := 1; i < v.NumField(); i++ {

@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
 	"github.com/gin-gonic/gin"
@@ -96,10 +94,7 @@ func listWalletTypes(context *gin.Context) {
 		Items:  types,
 	}
 
-	context.JSON(
-		http.StatusOK,
-		buildSuccessResponse(items),
-	)
+	buildSuccessContext(context, items)
 	return
 }
 
@@ -157,105 +152,7 @@ func clearWallets(context *gin.Context) {
 	return
 }
 
-// func walletReceive(context *gin.Context) {
-// 	var form walletTxRxForm
-// 	if err := context.ShouldBindJSON(&form); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	tx := form.toIncomeTransaction()
-
-// 	dstWallet, err := business.Receive(tx)
-// 	if err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	data := map[string]interface{}{
-// 		"dst_wallet":  dstWallet,
-// 		"transaction": tx,
-// 	}
-
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(data),
-// 	)
-// 	return
-// }
-
-// func walletTransfer(context *gin.Context) {
-// 	var form walletTransferForm
-// 	if err := context.ShouldBindJSON(&form); err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	tx := form.toTransferTransaction()
-
-// 	srcWallet, dstWallet, err := business.Transfer(tx)
-// 	if err != nil {
-// 		context.JSON(
-// 			http.StatusBadRequest,
-// 			buildNonsuccessResponse(err, nil),
-// 		)
-// 		return
-// 	}
-
-// 	data := map[string]interface{}{
-// 		"src_wallet":  srcWallet,
-// 		"dst_wallet":  dstWallet,
-// 		"transaction": tx,
-// 	}
-
-// 	context.JSON(
-// 		http.StatusOK,
-// 		buildSuccessResponse(data),
-// 	)
-// 	return
-// }
-
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
 	d, _ := decimal.NewFromString(num)
 	return d
 }
-
-// func (form *walletTransferForm) toTransferTransaction() *model.Transaction {
-// 	tx := form.toTransaction(constant.TransactionTypes().Transfer)
-// 	tx.SrcWallet = form.From
-// 	tx.DstWallet = form.To
-// 	return tx
-// }
-
-// func (form *walletTxRxForm) toExpenseTransaction() *model.Transaction {
-// 	tx := form.toTransaction(constant.TransactionTypes().Expense)
-// 	tx.SrcWallet = form.Name
-// 	return tx
-// }
-
-// func (form *walletTxRxForm) toIncomeTransaction() *model.Transaction {
-// 	tx := form.toTransaction(constant.TransactionTypes().Income)
-// 	tx.DstWallet = form.Name
-// 	return tx
-// }
-
-// func (form *txCreateForm) toTransaction(
-// 	txType string,
-// ) *model.Transaction {
-// 	return &model.Transaction{
-// 		Amount:      form.Amount,
-// 		Type:        txType,
-// 		Category:    form.Category,
-// 		Description: form.Description,
-// 		Date:        form.Date,
-// 	}
-// }

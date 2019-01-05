@@ -231,6 +231,17 @@ func listTransactions(context *gin.Context) {
 	return
 }
 
+func listTransactionTypes(context *gin.Context) {
+	types := constant.ListTransactionTypes()
+	items := itemList{
+		Length: len(types),
+		Items:  types,
+	}
+
+	buildSuccessContext(context, items)
+	return
+}
+
 func deleteTransaction(context *gin.Context) {
 	var form txIdentifyForm
 	if err := bindJSON(context, &form); err != nil {
