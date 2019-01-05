@@ -12,6 +12,10 @@ type txIdentifyForm struct {
 	ID string `json:"id" binding:"required"`
 }
 
+type txListForm struct {
+	Wallet string `json:"wallet" binding:"required"`
+}
+
 type txCreateForm struct {
 	Amount      decimal.Decimal `json:"amount" binding:"required"`
 	Category    string          `json:"category" binding:"required"`
@@ -192,6 +196,27 @@ func getTransaction(context *gin.Context) {
 
 func clearTransactions(context *gin.Context) {
 	txs, err := model.ClearTransactions()
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	items := itemList{
+		Length: len(txs),
+		Items:  txs,
+	}
+
+	buildSuccessContext(context, items)
+	return
+}
+
+func listTransactions(context *gin.Context) {
+	var form txListForm
+	if err := bindJSON(context, &form); err != nil {
+		return
+	}
+
+	txs, err := model.ListTransactions(form.Wallet)
 	if err != nil {
 		buildFailedContext(context, err)
 		return

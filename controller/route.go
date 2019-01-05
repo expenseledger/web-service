@@ -37,6 +37,7 @@ func InitRoutes() *gin.Engine {
 	transactionRoute.POST("/createTransfer", createTransfer)
 	transactionRoute.POST("/get", getTransaction)
 	transactionRoute.POST("/delete", deleteTransaction)
+	transactionRoute.POST("/list", listTransactions)
 
 	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", clearWallets)
