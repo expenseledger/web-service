@@ -5,6 +5,7 @@ to solve the pain of the lack of good-enough expense tracking applications.
 
 ## Prerequisites
 * [Go](https://golang.org/)
+* [Dep](https://github.com/golang/dep)
 * [Docker Compose](https://docs.docker.com/compose/) (_This is just for
 local database_)
 
