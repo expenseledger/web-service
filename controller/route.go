@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/expenseledger/web-service/config"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 // Route data structure to hold a path and the corresponding handler
@@ -18,29 +18,38 @@ func InitRoutes() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
 
+	authorized := router.Group("/")
+
+	authorized.Use(ValidateHeader())
+	{
+		walletRoute := authorized.Group("/wallet")
+		walletRoute.POST("/create", createWallet)
+		walletRoute.POST("/get", getWallet)
+		walletRoute.POST("/delete", deleteWallet)
+		walletRoute.POST("/list", listWallets)
+		walletRoute.POST("/listTypes", listWalletTypes)
+		walletRoute.POST("/init", initWallets)
+
+		categoryRoute := authorized.Group("/category")
+		categoryRoute.POST("/create", createCategory)
+		categoryRoute.POST("/get", getCategory)
+		categoryRoute.POST("/delete", deleteCategory)
+		categoryRoute.POST("/list", listCategories)
+		categoryRoute.POST("/init", initCategories)
+
+		transactionRoute := authorized.Group("/transaction")
+		transactionRoute.POST("/createExpense", createExpense)
+		transactionRoute.POST("/createIncome", createIncome)
+		transactionRoute.POST("/createTransfer", createTransfer)
+		transactionRoute.POST("/get", getTransaction)
+		transactionRoute.POST("/delete", deleteTransaction)
+		transactionRoute.POST("/list", listTransactions)
+		transactionRoute.POST("/listTypes", listTransactionTypes)
+	}
+
 	walletRoute := router.Group("/wallet")
-	walletRoute.POST("/create", createWallet)
-	walletRoute.POST("/get", getWallet)
-	walletRoute.POST("/delete", deleteWallet)
-	walletRoute.POST("/list", listWallets)
-	walletRoute.POST("/listTypes", listWalletTypes)
-	walletRoute.POST("/init", initWallets)
-
 	categoryRoute := router.Group("/category")
-	categoryRoute.POST("/create", createCategory)
-	categoryRoute.POST("/get", getCategory)
-	categoryRoute.POST("/delete", deleteCategory)
-	categoryRoute.POST("/list", listCategories)
-	categoryRoute.POST("/init", initCategories)
-
 	transactionRoute := router.Group("/transaction")
-	transactionRoute.POST("/createExpense", createExpense)
-	transactionRoute.POST("/createIncome", createIncome)
-	transactionRoute.POST("/createTransfer", createTransfer)
-	transactionRoute.POST("/get", getTransaction)
-	transactionRoute.POST("/delete", deleteTransaction)
-	transactionRoute.POST("/list", listTransactions)
-	transactionRoute.POST("/listTypes", listTransactionTypes)
 
 	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", clearWallets)
