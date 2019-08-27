@@ -29,7 +29,9 @@ func GetFirebaseInstance() (*firebase.App, error) {
 		return instance, nil
 	}
 
-	if instance, err := initilizeFirebase(), err != nil {
+	instance, err := initilizeFirebase()
+
+	if err != nil {
 		return nil, err
 	}
 
