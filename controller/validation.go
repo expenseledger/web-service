@@ -15,7 +15,7 @@ func ValidateHeader() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		if err != nil {
-			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Errorf("Cannot initialize firebase, %v", err))
+			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Sprintf("Cannot initialize firebase, %s", err.Error()))
 			return
 		}
 
@@ -29,7 +29,7 @@ func ValidateHeader() gin.HandlerFunc {
 		auth, err := firebase.Auth(context.Background())
 
 		if err != nil {
-			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Errorf("Cannot initialize firebase auth, %v", err))
+			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Sprintf("Cannot initialize firebase auth, %s", err.Error()))
 			return
 		}
 
