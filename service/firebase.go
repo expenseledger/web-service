@@ -14,7 +14,8 @@ var once sync.Once
 var instance *firebase.App
 
 func initilizeFirebase() (*firebase.App, error) {
-	opt := option.WithCredentialsJSON([]byte(os.Getenv("FIREBASE_CONFIG")))
+	config := os.Getenv("FIREBASE_CONFIG")
+	opt := option.WithCredentialsJSON([]byte(config))
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return nil, fmt.Errorf("Error initializing app: %v", err)
