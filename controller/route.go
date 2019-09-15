@@ -23,7 +23,7 @@ func InitRoutes() *gin.Engine {
 	categoryRoute := router.Group("/category")
 	transactionRoute := router.Group("/transaction")
 
-	if configs.Mode != "PRODUCTION" {
+	if configs.Mode == "PRODUCTION" {
 		walletRoute.Use(ValidateHeader())
 		categoryRoute.Use(ValidateHeader())
 		transactionRoute.Use(ValidateHeader())
