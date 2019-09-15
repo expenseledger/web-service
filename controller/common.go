@@ -47,9 +47,23 @@ func buildFailedContext(context *gin.Context, err error) {
 	)
 }
 
+func buildAbortContext(context *gin.Context, err error, httpStatus int) {
+	context.AbortWithStatusJSON(
+		httpStatus,
+		buildNonsuccessResponse(err, nil),
+	)
+}
+
 func buildSuccessContext(context *gin.Context, data interface{}) {
 	context.JSON(
 		http.StatusOK,
 		buildSuccessResponse(data),
+	)
+}
+
+func getRoot(context *gin.Context) {
+	context.JSON(
+		http.StatusOK,
+		"Welcome to expense ledger service",
 	)
 }

@@ -2,8 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/service"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
@@ -15,35 +15,31 @@ func ValidateHeader() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		if err != nil {
-			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Sprintf("Cannot initialize firebase, %s", err.Error()))
+			buildAbortContext(c, fmt.Errorf("Cannot initialize firebase, %v", err), http.StatusInternalServerError)
 			return
 		}
 
 		token := c.Request.Header.Get("X-Token")
 
 		if token == "" {
-			respondWithError(c, constant.HTTPStatusTypes().BadRequest, "Token cannot be empty")
+			buildAbortContext(c, fmt.Errorf("Token cannot be empty"), http.StatusBadRequest)
 			return
 		}
 
 		auth, err := firebase.Auth(context.Background())
 
 		if err != nil {
-			respondWithError(c, constant.HTTPStatusTypes().InternalServerError, fmt.Sprintf("Cannot initialize firebase auth, %s", err.Error()))
+			buildAbortContext(c, fmt.Errorf("Cannot initialize firebase auth, %v", err), http.StatusInternalServerError)
 			return
 		}
 
 		_, err = auth.VerifyIDToken(context.Background(), token)
 
 		if err != nil {
-			respondWithError(c, constant.HTTPStatusTypes().BadRequest, "Token is invalid")
+			buildAbortContext(c, fmt.Errorf("Token is invalid"), http.StatusBadRequest)
 			return
 		}
 
 		c.Next()
 	}
-}
-
-func respondWithError(c *gin.Context, code int, message interface{}) {
-	c.AbortWithStatusJSON(code, gin.H{"error": message})
 }

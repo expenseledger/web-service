@@ -18,38 +18,37 @@ func InitRoutes() *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	authorized := router.Group("/")
-
-	authorized.Use(ValidateHeader())
-	{
-		walletRoute := authorized.Group("/wallet")
-		walletRoute.POST("/create", createWallet)
-		walletRoute.POST("/get", getWallet)
-		walletRoute.POST("/delete", deleteWallet)
-		walletRoute.POST("/list", listWallets)
-		walletRoute.POST("/listTypes", listWalletTypes)
-		walletRoute.POST("/init", initWallets)
-
-		categoryRoute := authorized.Group("/category")
-		categoryRoute.POST("/create", createCategory)
-		categoryRoute.POST("/get", getCategory)
-		categoryRoute.POST("/delete", deleteCategory)
-		categoryRoute.POST("/list", listCategories)
-		categoryRoute.POST("/init", initCategories)
-
-		transactionRoute := authorized.Group("/transaction")
-		transactionRoute.POST("/createExpense", createExpense)
-		transactionRoute.POST("/createIncome", createIncome)
-		transactionRoute.POST("/createTransfer", createTransfer)
-		transactionRoute.POST("/get", getTransaction)
-		transactionRoute.POST("/delete", deleteTransaction)
-		transactionRoute.POST("/list", listTransactions)
-		transactionRoute.POST("/listTypes", listTransactionTypes)
-	}
-
+	router.GET("/", getRoot)
 	walletRoute := router.Group("/wallet")
 	categoryRoute := router.Group("/category")
 	transactionRoute := router.Group("/transaction")
+
+	if configs.Mode != "PRODUCTION" {
+		walletRoute.Use(ValidateHeader())
+		categoryRoute.Use(ValidateHeader())
+		transactionRoute.Use(ValidateHeader())
+	}
+
+	walletRoute.POST("/create", createWallet)
+	walletRoute.POST("/get", getWallet)
+	walletRoute.POST("/delete", deleteWallet)
+	walletRoute.POST("/list", listWallets)
+	walletRoute.POST("/listTypes", listWalletTypes)
+	walletRoute.POST("/init", initWallets)
+
+	categoryRoute.POST("/create", createCategory)
+	categoryRoute.POST("/get", getCategory)
+	categoryRoute.POST("/delete", deleteCategory)
+	categoryRoute.POST("/list", listCategories)
+	categoryRoute.POST("/init", initCategories)
+
+	transactionRoute.POST("/createExpense", createExpense)
+	transactionRoute.POST("/createIncome", createIncome)
+	transactionRoute.POST("/createTransfer", createTransfer)
+	transactionRoute.POST("/get", getTransaction)
+	transactionRoute.POST("/delete", deleteTransaction)
+	transactionRoute.POST("/list", listTransactions)
+	transactionRoute.POST("/listTypes", listTransactionTypes)
 
 	if configs.Mode != "PRODUCTION" {
 		walletRoute.POST("/clear", clearWallets)

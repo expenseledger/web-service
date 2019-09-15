@@ -29,18 +29,10 @@ type walletType struct {
 	Credit      WalletType
 }
 
-type httpStatusType struct {
-	once                sync.Once
-	Okay                int
-	BadRequest          int
-	InternalServerError int
-}
-
 var (
 	wt walletType
 	tt transactionType
 	wr walletRole
-	hs httpStatusType
 )
 
 // TransactionTypes returns the types of a transaction
@@ -70,17 +62,6 @@ func WalletRoles() walletRole {
 		wr.DstWallet = "DST_WALLET"
 	})
 	return wr
-}
-
-// HTTPStatusTypes return type of http status
-func HTTPStatusTypes() httpStatusType {
-	hs.once.Do(func() {
-		hs.Okay = 200
-		hs.BadRequest = 400
-		hs.InternalServerError = 500
-	})
-
-	return hs
 }
 
 // ListWalletTypes returns the types of wallets as a slice of strings
