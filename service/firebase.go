@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
@@ -13,9 +14,35 @@ import (
 var once sync.Once
 var instance *firebase.App
 
+type firebaseConfig struct {
+	FirebaseType        string `json:"type"`
+	ProjectID           string `json:"project_id"`
+	PrivateKeyID        string `json:"private_key_id"`
+	PrivateKey          string `json:"private_key"`
+	ClientEmail         string `json:"client_email"`
+	ClientID            string `json:"client_id"`
+	AuthURL             string `json:"auth_url"`
+	TokenURL            string `json:"token_url"`
+	AuthProviderCertURL string `json:"auth_provider_x509_cert_url"`
+	ClientCertURL       string `json:"client_x509_cert_url"`
+}
+
 func initilizeFirebase() (*firebase.App, error) {
-	config := []byte(os.Getenv("FIREBASE_CONFIG_JSON"))
-	opt := option.WithCredentialsJSON(config)
+	config := firebaseConfig{
+		FirebaseType:        os.Getenv("FIREBASE_CONFIG_TYPE"),
+		ProjectID:           os.Getenv("FIREBASE_CONFIG_PROJECT_ID"),
+		PrivateKeyID:        os.Getenv("FIREBASE_CONFIG_PRIVATE_KEY_ID"),
+		PrivateKey:          os.Getenv("FIREBASE_CONFIG_PRIVATE_KEY"),
+		ClientEmail:         os.Getenv("FIREBASE_CLIENT_EMAIL"),
+		ClientID:            os.Getenv("FIREBASE_CLIENT_ID"),
+		AuthURL:             os.Getenv("FIREBASE_AUTH_URL"),
+		TokenURL:            os.Getenv("FIREBASE_TOKEN_URL"),
+		AuthProviderCertURL: os.Getenv("FIREBASE_AUTH_PROVIDER_CERT_URL"),
+		ClientCertURL:       os.Getenv("FIREBASE_CLIENT_CERT_URL"),
+	}
+
+	serializedConfig, _ := json.Marshal(config)
+	opt := option.WithCredentialsJSON(serializedConfig)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 
 	if err != nil {
