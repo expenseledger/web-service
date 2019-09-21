@@ -24,9 +24,9 @@ func InitRoutes() *gin.Engine {
 	transactionRoute := router.Group("/transaction")
 
 	if configs.Mode == "PRODUCTION" {
-		walletRoute.Use(ValidateHeader())
-		categoryRoute.Use(ValidateHeader())
-		transactionRoute.Use(ValidateHeader())
+		walletRoute.Use(validateHeader)
+		categoryRoute.Use(validateHeader)
+		transactionRoute.Use(validateHeader)
 	}
 
 	walletRoute.POST("/create", createWallet)
