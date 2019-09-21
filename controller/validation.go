@@ -19,7 +19,7 @@ func ValidateHeader() gin.HandlerFunc {
 			return
 		}
 
-		token := c.Request.Header.Get("X-Token")
+		token := c.Request.Header.Get("Authorization")
 
 		if token == "" {
 			buildAbortContext(c, fmt.Errorf("Token cannot be empty"), http.StatusBadRequest)
