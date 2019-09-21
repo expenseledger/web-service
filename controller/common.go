@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,6 +60,14 @@ func buildSuccessContext(context *gin.Context, data interface{}) {
 		http.StatusOK,
 		buildSuccessResponse(data),
 	)
+}
+
+func getCorsConfig() cors.Config {
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AddAllowHeaders("Authorization")
+
+	return config
 }
 
 func getRoot(context *gin.Context) {

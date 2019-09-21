@@ -16,7 +16,7 @@ type Route struct {
 func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.New(getCorsConfig()))
 
 	router.GET("/", getRoot)
 	walletRoute := router.Group("/wallet")
