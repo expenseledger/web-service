@@ -176,6 +176,7 @@ func createWalletTable() (err error) {
 		`
 		CREATE TABLE IF NOT EXISTS %s (
 			name character varying(20) PRIMARY KEY,
+			user_id character varying(128) NOT NULL,
 			type %s NOT NULL,
 			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -198,6 +199,7 @@ func createTransactionTable() (err error) {
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 		CREATE TABLE IF NOT EXISTS %s (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+			user_id character varying(128) NOT NULL,
 			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
 			type %s NOT NULL,
 			category character varying(20) NOT NULL REFERENCES %s,
@@ -221,6 +223,7 @@ func createAffectedWalletTable() (err error) {
 		`
 		CREATE TABLE IF NOT EXISTS %s (
 			transaction_id uuid NOT NULL REFERENCES %s,
+			user_id character varying(128) NOT NULL,
 			wallet character varying(20) NOT NULL REFERENCES %s,
 			role %s NOT NULL,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
