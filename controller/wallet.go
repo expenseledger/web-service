@@ -17,11 +17,6 @@ type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-type walletTxRxForm struct {
-	Name string `json:"name" binding:"required"`
-	txCreateForm
-}
-
 func createWallet(context *gin.Context) {
 	var form walletCreateForm
 	if err := bindJSON(context, &form); err != nil {
