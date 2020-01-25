@@ -22,7 +22,6 @@ func createCategory(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, category)
-	return
 }
 
 func getCategory(context *gin.Context) {
@@ -38,7 +37,6 @@ func getCategory(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, category)
-	return
 }
 
 func deleteCategory(context *gin.Context) {
@@ -55,7 +53,6 @@ func deleteCategory(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, category)
-	return
 }
 
 func listCategories(context *gin.Context) {
@@ -71,7 +68,6 @@ func listCategories(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func initCategories(context *gin.Context) {
@@ -100,7 +96,6 @@ func initCategories(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func clearCategories(context *gin.Context) {
@@ -116,5 +111,4 @@ func clearCategories(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }

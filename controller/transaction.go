@@ -78,7 +78,6 @@ func createExpense(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, data)
-	return
 }
 
 func createIncome(context *gin.Context) {
@@ -120,7 +119,6 @@ func createIncome(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, data)
-	return
 }
 
 func createTransfer(context *gin.Context) {
@@ -175,7 +173,6 @@ func createTransfer(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, data)
-	return
 }
 
 func getTransaction(context *gin.Context) {
@@ -191,7 +188,6 @@ func getTransaction(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, tx)
-	return
 }
 
 func clearTransactions(context *gin.Context) {
@@ -207,7 +203,6 @@ func clearTransactions(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func listTransactions(context *gin.Context) {
@@ -228,7 +223,6 @@ func listTransactions(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func listTransactionTypes(context *gin.Context) {
@@ -239,7 +233,6 @@ func listTransactionTypes(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func deleteTransaction(context *gin.Context) {
@@ -285,5 +278,4 @@ func deleteTransaction(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, data)
-	return
 }
