@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,9 +48,31 @@ func buildFailedContext(context *gin.Context, err error) {
 	)
 }
 
+func buildAbortContext(context *gin.Context, err error, httpStatus int) {
+	context.AbortWithStatusJSON(
+		httpStatus,
+		buildNonsuccessResponse(err, nil),
+	)
+}
+
 func buildSuccessContext(context *gin.Context, data interface{}) {
 	context.JSON(
 		http.StatusOK,
 		buildSuccessResponse(data),
+	)
+}
+
+func getCorsConfig() cors.Config {
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AddAllowHeaders("Authorization")
+
+	return config
+}
+
+func getRoot(context *gin.Context) {
+	context.JSON(
+		http.StatusOK,
+		"Welcome to expense ledger service",
 	)
 }

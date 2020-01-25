@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/expenseledger/web-service/config"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 // Route data structure to hold a path and the corresponding handler
@@ -16,9 +16,19 @@ type Route struct {
 func InitRoutes() *gin.Engine {
 	configs := config.GetConfigs()
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.New(getCorsConfig()))
 
+	router.GET("/", getRoot)
 	walletRoute := router.Group("/wallet")
+	categoryRoute := router.Group("/category")
+	transactionRoute := router.Group("/transaction")
+
+	if configs.Mode == "PRODUCTION" {
+		walletRoute.Use(validateHeader)
+		categoryRoute.Use(validateHeader)
+		transactionRoute.Use(validateHeader)
+	}
+
 	walletRoute.POST("/create", createWallet)
 	walletRoute.POST("/get", getWallet)
 	walletRoute.POST("/delete", deleteWallet)
@@ -26,14 +36,12 @@ func InitRoutes() *gin.Engine {
 	walletRoute.POST("/listTypes", listWalletTypes)
 	walletRoute.POST("/init", initWallets)
 
-	categoryRoute := router.Group("/category")
 	categoryRoute.POST("/create", createCategory)
 	categoryRoute.POST("/get", getCategory)
 	categoryRoute.POST("/delete", deleteCategory)
 	categoryRoute.POST("/list", listCategories)
 	categoryRoute.POST("/init", initCategories)
 
-	transactionRoute := router.Group("/transaction")
 	transactionRoute.POST("/createExpense", createExpense)
 	transactionRoute.POST("/createIncome", createIncome)
 	transactionRoute.POST("/createTransfer", createTransfer)
