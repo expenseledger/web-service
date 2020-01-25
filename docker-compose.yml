@@ -1,4 +1,4 @@
-version: '3.1'
+version: "3.1"
 services:
   db:
     image: postgres
@@ -10,7 +10,7 @@ services:
     ports:
       - "5430:5432"
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:4.16
     restart: always
     ports:
       - "8008:80"
