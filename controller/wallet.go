@@ -17,11 +17,6 @@ type walletIdentifyForm struct {
 	Name string `json:"name" binding:"required"`
 }
 
-type walletTxRxForm struct {
-	Name string `json:"name" binding:"required"`
-	txCreateForm
-}
-
 func createWallet(context *gin.Context) {
 	var form walletCreateForm
 	if err := bindJSON(context, &form); err != nil {
@@ -35,7 +30,6 @@ func createWallet(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, wallet)
-	return
 }
 
 func getWallet(context *gin.Context) {
@@ -51,7 +45,6 @@ func getWallet(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, wallet)
-	return
 }
 
 func deleteWallet(context *gin.Context) {
@@ -68,7 +61,6 @@ func deleteWallet(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, wallet)
-	return
 }
 
 func listWallets(context *gin.Context) {
@@ -84,7 +76,6 @@ func listWallets(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func listWalletTypes(context *gin.Context) {
@@ -95,7 +86,6 @@ func listWalletTypes(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func initWallets(context *gin.Context) {
@@ -133,7 +123,6 @@ func initWallets(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func clearWallets(context *gin.Context) {
@@ -149,7 +138,6 @@ func clearWallets(context *gin.Context) {
 	}
 
 	buildSuccessContext(context, items)
-	return
 }
 
 func decimalFromStringIgnoreError(num string) decimal.Decimal {
