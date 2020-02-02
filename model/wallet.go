@@ -18,6 +18,7 @@ func CreateWallet(
 	name string,
 	t constant.WalletType,
 	balance decimal.Decimal,
+	userId string,
 ) (*Wallet, error) {
 	w := Wallet{Name: name, Type: t, Balance: balance}
 	mapper := orm.NewWalletMapper(w)

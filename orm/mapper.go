@@ -54,30 +54,36 @@ func NewCategoryMapper(model interface{}) Mapper {
 func NewWalletMapper(model interface{}) Mapper {
 	walletMapper.once.Do(func() {
 		walletMapper.insertStmt = `
-			INSERT INTO wallet (name, type, balance)
-			VALUES (:name, :type, :balance)
+			INSERT INTO wallet (name, type, balance, user_id)
+			VALUES (:name, :type, :balance, :userId)
 			RETURNING name, type, balance;
 		`
 		walletMapper.deleteStmt = `
 			DELETE FROM wallet
 			WHERE name=:name
+			AND user_id=:userId
 			RETURNING name, type, balance;
 		`
 		walletMapper.oneStmt = `
 			SELECT name, type, balance FROM wallet
-			WHERE name=:name;
+			WHERE name=:name
+			AND user_id=:userId;
 		`
 		walletMapper.updateStmt = `
 			UPDATE wallet
 			SET balance=:balance
 			WHERE name=:name
+			AND user_id=:userId
 			RETURNING name, type, balance;
 		`
 		walletMapper.manyStmt = `
-			SELECT name, type, balance FROM wallet;
+			SELECT name, type, balance 
+			FROM wallet
+			WHERE user_id=:userId;
 		`
 		walletMapper.clearStmt = `
 			DELETE FROM wallet
+			WHERE user_id=:userId
 			RETURNING name, type, balance;
 		`
 	})

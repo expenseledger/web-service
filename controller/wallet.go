@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
+	"github.com/expenseledger/web-service/pkg"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 )
@@ -23,7 +24,13 @@ func createWallet(context *gin.Context) {
 		return
 	}
 
-	wallet, err := model.CreateWallet(form.Name, form.Type, form.Balance)
+	userId, err := pkg.GetUserId(context)
+
+	if err != nil {
+		return
+	}
+
+	wallet, err := model.CreateWallet(form.Name, form.Type, form.Balance, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return

@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/expenseledger/web-service/pkg"
 	"github.com/expenseledger/web-service/service"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 )
 
 func validateHeader(c *gin.Context) {
-	token := c.Request.Header.Get("Authorization")
+	token, err := pkg.GetUserToken(c)
 
-	if token == "" {
-		buildAbortContext(c, fmt.Errorf("Token cannot be empty"), http.StatusBadRequest)
+	if err != nil {
+		buildAbortContext(c, err, http.StatusBadRequest)
 		return
 	}
 
