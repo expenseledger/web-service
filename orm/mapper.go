@@ -24,24 +24,30 @@ var (
 func NewCategoryMapper(model interface{}) Mapper {
 	categoryMapper.once.Do(func() {
 		categoryMapper.insertStmt = `
-			INSERT INTO category (name)
-			VALUES (:name)
+			INSERT INTO category (name, user_id)
+			VALUES (:name, :userId)
 			RETURNING name;
 		`
 		categoryMapper.deleteStmt = `
 			DELETE FROM category
 			WHERE name=:name
+			AND user_id=:userId
 			RETURNING name;
 		`
 		categoryMapper.oneStmt = `
-			SELECT name FROM category
-			WHERE name=:name;
+			SELECT name 
+			FROM category
+			WHERE name=:name
+			AND user_id=:userId;
 		`
 		categoryMapper.manyStmt = `
-			SELECT name FROM category;
+			SELECT name 
+			FROM category
+			WHERE user_id=:userId;
 		`
 		categoryMapper.clearStmt = `
 			DELETE FROM category
+			WHERE user_id=:userId
 			RETURNING name;
 		`
 	})

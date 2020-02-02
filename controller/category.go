@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/expenseledger/web-service/model"
+	"github.com/expenseledger/web-service/pkg"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +16,13 @@ func createCategory(context *gin.Context) {
 		return
 	}
 
-	category, err := model.CreateCategory(form.Name)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	category, err := model.CreateCategory(form.Name, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -30,7 +37,13 @@ func getCategory(context *gin.Context) {
 		return
 	}
 
-	category, err := model.GetCategory(form.Name)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	category, err := model.GetCategory(form.Name, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -46,7 +59,13 @@ func deleteCategory(context *gin.Context) {
 		return
 	}
 
-	category, err := model.DeleteCategory(form.Name)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	category, err := model.DeleteCategory(form.Name, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -56,7 +75,13 @@ func deleteCategory(context *gin.Context) {
 }
 
 func listCategories(context *gin.Context) {
-	categories, err := model.ListCategories()
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	categories, err := model.ListCategories(userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -71,6 +96,12 @@ func listCategories(context *gin.Context) {
 }
 
 func initCategories(context *gin.Context) {
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
 	names := []string{
 		"Food And Drink",
 		"Transportation",
@@ -82,7 +113,7 @@ func initCategories(context *gin.Context) {
 	length := len(names)
 	categories := make([]*model.Category, length)
 	for i, name := range names {
-		category, err := model.CreateCategory(name)
+		category, err := model.CreateCategory(name, userId)
 		if err != nil {
 			buildFailedContext(context, err)
 			return
@@ -99,7 +130,13 @@ func initCategories(context *gin.Context) {
 }
 
 func clearCategories(context *gin.Context) {
-	categories, err := model.ClearCategories()
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	categories, err := model.ClearCategories(userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
