@@ -11,6 +11,7 @@ type Wallet struct {
 	Name    string              `json:"name" db:"name"`
 	Type    constant.WalletType `json:"type" db:"type"`
 	Balance decimal.Decimal     `json:"balance" db:"balance"`
+	UserId  string              `json:"userId" db:"user_id"`
 }
 
 // CreateWallet inserts wallet to DB
@@ -20,7 +21,7 @@ func CreateWallet(
 	balance decimal.Decimal,
 	userId string,
 ) (*Wallet, error) {
-	w := Wallet{Name: name, Type: t, Balance: balance}
+	w := Wallet{Name: name, Type: t, Balance: balance, UserId: userId}
 	mapper := orm.NewWalletMapper(w)
 
 	tmp, err := mapper.Insert(&w)
@@ -32,23 +33,23 @@ func CreateWallet(
 }
 
 // GetWallet returns matching wallet from DB
-func GetWallet(name string) (*Wallet, error) {
-	return applyToWallet(name, one)
+func GetWallet(name string, userId string) (*Wallet, error) {
+	return applyToWallet(name, one, userId)
 }
 
 // DeleteWallet removes wallet from DB
-func DeleteWallet(name string) (*Wallet, error) {
-	return applyToWallet(name, delete)
+func DeleteWallet(name string, userId string) (*Wallet, error) {
+	return applyToWallet(name, delete, userId)
 }
 
 // ListWallets ...
-func ListWallets() ([]Wallet, error) {
-	return applyToWallets(list)
+func ListWallets(userId string) ([]Wallet, error) {
+	return applyToWallets(list, userId)
 }
 
 // ClearWallets ...
-func ClearWallets() ([]Wallet, error) {
-	return applyToWallets(clear)
+func ClearWallets(userId string) ([]Wallet, error) {
+	return applyToWallets(clear, userId)
 }
 
 func (wallet *Wallet) Expend(tx *Transaction) error {
@@ -69,8 +70,8 @@ func (wallet *Wallet) update() error {
 	return nil
 }
 
-func applyToWallet(name string, op operation) (*Wallet, error) {
-	w := Wallet{Name: name}
+func applyToWallet(name string, op operation, userId string) (*Wallet, error) {
+	w := Wallet{Name: name, UserId: userId}
 	mapper := orm.NewWalletMapper(w)
 
 	var tmp interface{}
@@ -89,8 +90,8 @@ func applyToWallet(name string, op operation) (*Wallet, error) {
 	return tmp.(*Wallet), nil
 }
 
-func applyToWallets(op operation) ([]Wallet, error) {
-	mapper := orm.NewWalletMapper(Wallet{})
+func applyToWallets(op operation, userId string) ([]Wallet, error) {
+	mapper := orm.NewWalletMapper(Wallet{UserId: userId})
 
 	var tmp interface{}
 	var err error

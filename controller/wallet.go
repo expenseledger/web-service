@@ -25,8 +25,8 @@ func createWallet(context *gin.Context) {
 	}
 
 	userId, err := pkg.GetUserId(context)
-
 	if err != nil {
+		buildFailedContext(context, err)
 		return
 	}
 
@@ -45,7 +45,13 @@ func getWallet(context *gin.Context) {
 		return
 	}
 
-	wallet, err := model.GetWallet(form.Name)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallet, err := model.GetWallet(form.Name, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -61,7 +67,13 @@ func deleteWallet(context *gin.Context) {
 		return
 	}
 
-	wallet, err := model.DeleteWallet(form.Name)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallet, err := model.DeleteWallet(form.Name, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -71,7 +83,13 @@ func deleteWallet(context *gin.Context) {
 }
 
 func listWallets(context *gin.Context) {
-	wallets, err := model.ListWallets()
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallets, err := model.ListWallets(userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -96,6 +114,12 @@ func listWalletTypes(context *gin.Context) {
 }
 
 func initWallets(context *gin.Context) {
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
 	recipes := []walletCreateForm{
 		walletCreateForm{
 			Name:    "Cash",
@@ -116,6 +140,7 @@ func initWallets(context *gin.Context) {
 			recipe.Name,
 			recipe.Type,
 			recipe.Balance,
+			userId,
 		)
 		if err != nil {
 			buildFailedContext(context, err)
@@ -133,7 +158,13 @@ func initWallets(context *gin.Context) {
 }
 
 func clearWallets(context *gin.Context) {
-	wallets, err := model.ClearWallets()
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallets, err := model.ClearWallets(userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
