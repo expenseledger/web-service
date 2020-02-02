@@ -23,6 +23,7 @@ type Transaction struct {
 	Description string                   `json:"description" db:"description"`
 	Date        date.Date                `json:"date"`
 	OccurredAt  time.Time                `json:"-" db:"occurred_at"`
+	UserId      string                   `json:"userId" db:"user_id"`
 }
 
 // pass this to ORM
@@ -36,6 +37,7 @@ type _Transaction struct {
 	Description string                   `db:"description"`
 	OccurredAt  time.Time                `db:"occurred_at"`
 	CreatedAt   time.Time                `db:"created_at"`
+	UserId      string                   `db:"user_id"`
 }
 
 type transactions []_Transaction
@@ -48,6 +50,7 @@ func CreateTransction(
 	category string,
 	description string,
 	d date.Date,
+	userId string,
 ) (*Transaction, error) {
 	tim := time.Time(d)
 	if tim.IsZero() {
@@ -70,6 +73,7 @@ func CreateTransction(
 			category,
 			description,
 			tim,
+			userId,
 		)
 		if err != nil {
 			return nil, err
@@ -85,6 +89,7 @@ func CreateTransction(
 		Category:    category,
 		Description: description,
 		OccurredAt:  tim,
+		UserId:      userId,
 	}
 
 	mapper := orm.NewTxMapper(tx, t)
@@ -99,19 +104,19 @@ func CreateTransction(
 	return tmpTx, nil
 }
 
-func GetTransaction(id string) (*Transaction, error) {
-	return applyToTx(id, one)
+func GetTransaction(id string, userId string) (*Transaction, error) {
+	return applyToTx(id, one, userId)
 }
 
-func DeleteTransaction(id string) (*Transaction, error) {
-	return applyToTx(id, delete)
+func DeleteTransaction(id string, userId string) (*Transaction, error) {
+	return applyToTx(id, delete, userId)
 }
 
-func ListTransactions(walletName string) ([]Transaction, error) {
+func ListTransactions(walletName string, userId string) ([]Transaction, error) {
 	txTypes := constant.TransactionTypes()
-	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
+	mapper := orm.NewTxMapper(_Transaction{UserId: userId}, txTypes.Expense)
 
-	_tx := _Transaction{Wallet: walletName}
+	_tx := _Transaction{Wallet: walletName, UserId: userId}
 
 	tmp, err := mapper.Many(&_tx)
 	if err != nil {
@@ -122,9 +127,9 @@ func ListTransactions(walletName string) ([]Transaction, error) {
 	return _txs.toTransactions(), nil
 }
 
-func ClearTransactions() ([]Transaction, error) {
+func ClearTransactions(userId string) ([]Transaction, error) {
 	txTypes := constant.TransactionTypes()
-	mapper := orm.NewTxMapper(_Transaction{}, txTypes.Expense)
+	mapper := orm.NewTxMapper(_Transaction{UserId: userId}, txTypes.Expense)
 
 	tmp, err := mapper.Clear()
 	if err != nil {
@@ -142,6 +147,7 @@ func createNonTransferTx(
 	category string,
 	description string,
 	tim time.Time,
+	userId string,
 ) (*Transaction, error) {
 	tx := _Transaction{
 		Wallet:      wallet,
@@ -150,6 +156,7 @@ func createNonTransferTx(
 		Category:    category,
 		Description: description,
 		OccurredAt:  tim,
+		UserId:      userId,
 	}
 
 	if t == constant.TransactionTypes().Expense {
@@ -177,6 +184,7 @@ func (tx *_Transaction) toTransaction() *Transaction {
 		Category:    tx.Category,
 		Description: tx.Description,
 		OccurredAt:  tx.OccurredAt,
+		UserId:      tx.UserId,
 	}
 
 	if tx.Role == constant.WalletRoles().SrcWallet {
@@ -212,8 +220,8 @@ func (tmpTxs *transactions) toTransactions() []Transaction {
 	return txs
 }
 
-func applyToTx(id string, op operation) (*Transaction, error) {
-	_tx := _Transaction{ID: id}
+func applyToTx(id string, op operation, userId string) (*Transaction, error) {
+	_tx := _Transaction{ID: id, UserId: userId}
 	mapper := orm.NewTxMapper(_tx, constant.TransactionTypes().Expense)
 
 	var tmp interface{}

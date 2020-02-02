@@ -25,29 +25,29 @@ func NewCategoryMapper(model interface{}) Mapper {
 	categoryMapper.once.Do(func() {
 		categoryMapper.insertStmt = `
 			INSERT INTO category (name, user_id)
-			VALUES (:name, :userId)
+			VALUES (:name, :user_id)
 			RETURNING name;
 		`
 		categoryMapper.deleteStmt = `
 			DELETE FROM category
 			WHERE name=:name
-			AND user_id=:userId
+			AND user_id=:user_id
 			RETURNING name;
 		`
 		categoryMapper.oneStmt = `
 			SELECT name 
 			FROM category
 			WHERE name=:name
-			AND user_id=:userId;
+			AND user_id=:user_id;
 		`
 		categoryMapper.manyStmt = `
 			SELECT name 
 			FROM category
-			WHERE user_id=:userId;
+			WHERE user_id=:user_id;
 		`
 		categoryMapper.clearStmt = `
 			DELETE FROM category
-			WHERE user_id=:userId
+			WHERE user_id=:user_id
 			RETURNING name;
 		`
 	})
@@ -61,35 +61,35 @@ func NewWalletMapper(model interface{}) Mapper {
 	walletMapper.once.Do(func() {
 		walletMapper.insertStmt = `
 			INSERT INTO wallet (name, type, balance, user_id)
-			VALUES (:name, :type, :balance, :userId)
+			VALUES (:name, :type, :balance, :user_id)
 			RETURNING name, type, balance;
 		`
 		walletMapper.deleteStmt = `
 			DELETE FROM wallet
 			WHERE name=:name
-			AND user_id=:userId
+			AND user_id=:user_id
 			RETURNING name, type, balance;
 		`
 		walletMapper.oneStmt = `
 			SELECT name, type, balance FROM wallet
 			WHERE name=:name
-			AND user_id=:userId;
+			AND user_id=:user_id;
 		`
 		walletMapper.updateStmt = `
 			UPDATE wallet
 			SET balance=:balance
 			WHERE name=:name
-			AND user_id=:userId
+			AND user_id=:user_id
 			RETURNING name, type, balance;
 		`
 		walletMapper.manyStmt = `
 			SELECT name, type, balance 
 			FROM wallet
-			WHERE user_id=:userId;
+			WHERE user_id=:user_id;
 		`
 		walletMapper.clearStmt = `
 			DELETE FROM wallet
-			WHERE user_id=:userId
+			WHERE user_id=:user_id
 			RETURNING name, type, balance;
 		`
 	})
@@ -104,14 +104,14 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 		txMapper.insertStmt = `
 			WITH tx AS (
 				INSERT INTO transaction
-				(amount, type, category, description, occurred_at)
+				(amount, type, category, description, occurred_at, user_id)
 				VALUES
-				(:amount, :type, :category, :description, :occurred_at)
+				(:amount, :type, :category, :description, :occurred_at, :user_id)
 				RETURNING id, amount, type, category, description, occurred_at
 			), tx_wallet AS (
 				INSERT INTO affected_wallet
-				(transaction_id, wallet, role)
-				SELECT id, :wallet, :role FROM tx
+				(transaction_id, wallet, role, user_id)
+				SELECT id, :wallet, :role, :user_id FROM tx
 				RETURNING wallet, role
 			)
 			SELECT
@@ -122,13 +122,13 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 		txMapper.transferStmt = `
 			WITH tx AS (
 				INSERT INTO transaction
-				(amount, type, category, description, occurred_at)
+				(amount, type, category, description, occurred_at, user_id)
 				VALUES
-				(:amount, :type, :category, :description, :occurred_at)
+				(:amount, :type, :category, :description, :occurred_at, :user_id)
 				RETURNING id, amount, type, category, description, occurred_at
 			), tx_wallet AS (
 				INSERT INTO affected_wallet
-				(transaction_id, wallet, role)
+				(transaction_id, wallet, role, user_id)
 				SELECT
 				id, :src_wallet, CAST ('SRC_WALLET' AS wallet_role) FROM tx
 				UNION ALL
@@ -146,10 +146,12 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			WITH tx AS (
 				DELETE FROM transaction
 				WHERE id = :id
+				AND user_id = :user_id
 				RETURNING id, amount, type, category, description, occurred_at
 			), tx_wallet AS (
 				DELETE FROM affected_wallet
 				WHERE transaction_id = :id
+				AND user_id = :user_id
 				RETURNING transaction_id, wallet, role
 			)
 			SELECT
@@ -163,6 +165,7 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			id, wallet, role, amount, type, category, description, occurred_at
 			FROM transaction t, affected_wallet w
 			WHERE t.id = :id AND t.id = w.transaction_id
+			AND t.user_id = :user_id AND t.user_id = w.user_id
 			ORDER BY role ASC;
 		`
 		txMapper.manyStmt = `
@@ -172,15 +175,19 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			WHERE t.id IN (
 				SELECT transaction_id FROM affected_wallet
 				WHERE wallet = :wallet
-			) AND t.id = w.transaction_id
+				AND user_id = :user_id
+			) AND t.id = w.transaction_id 
+			AND user_id = :user_id
 			ORDER BY occurred_at ASC, w.created_at ASC, role ASC;
 		`
 		txMapper.clearStmt = `
 			WITH tx AS (
 				DELETE FROM transaction
+				WHERE user_id = :user_id
 				RETURNING id, amount, type, category, description, occurred_at
 			), tx_wallet AS (
 				DELETE FROM affected_wallet
+				WHERE user_id = :user_id
 				RETURNING transaction_id, wallet, role, created_at
 			)
 			SELECT
