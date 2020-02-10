@@ -4,13 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/expenseledger/web-service/config"
 	"github.com/expenseledger/web-service/pkg"
 	"github.com/expenseledger/web-service/service"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 )
 
+var configs = config.GetConfigs()
+
 func validateHeader(c *gin.Context) {
+	if configs.Mode == "DEVELOPMENT" {
+		c.Next()
+		return
+	}
+
 	token, err := pkg.GetUserToken(c)
 
 	if err != nil {
@@ -33,5 +41,4 @@ func validateHeader(c *gin.Context) {
 	}
 
 	c.Next()
-
 }
