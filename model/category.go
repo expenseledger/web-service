@@ -58,13 +58,14 @@ func applyToCategory(name string, op operation, userId string) (*Category, error
 }
 
 func applyToCategories(op operation, userId string) ([]Category, error) {
-	mapper := orm.NewCategoryMapper(Category{UserId: userId})
+	category := Category{UserId: userId}
+	mapper := orm.NewCategoryMapper(category)
 
 	var tmp interface{}
 	var err error
 	switch op {
 	case list:
-		tmp, err = mapper.Many(&struct{}{})
+		tmp, err = mapper.Many(&category)
 	case clear:
 		tmp, err = mapper.Clear()
 	}

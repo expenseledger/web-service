@@ -91,13 +91,14 @@ func applyToWallet(name string, op operation, userId string) (*Wallet, error) {
 }
 
 func applyToWallets(op operation, userId string) ([]Wallet, error) {
-	mapper := orm.NewWalletMapper(Wallet{UserId: userId})
+	wallet := Wallet{UserId: userId}
+	mapper := orm.NewWalletMapper(wallet)
 
 	var tmp interface{}
 	var err error
 	switch op {
 	case list:
-		tmp, err = mapper.Many(&struct{}{})
+		tmp, err = mapper.Many(&wallet)
 	case clear:
 		tmp, err = mapper.Clear()
 	}
