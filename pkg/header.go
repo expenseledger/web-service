@@ -15,13 +15,19 @@ const TestUserId = "t4ND1OuMCRVvM6sMuNS0c48Ad0o2"
 
 func GetUserToken(c *gin.Context) (string, error) {
 	var err error = nil
-	token := c.Request.Header.Get("Authorization")
+	authorizedHeader := c.Request.Header.Get("Authorization")
 
-	if token == "" {
-		err = fmt.Errorf("Token cannot be empty")
+	if authorizedHeader == "" {
+		err = fmt.Errorf("authorizedHeader cannot be empty")
 	}
 
-	return token, err
+	token := authorizedHeader[8:]
+
+	if token == "" {
+		err = fmt.Errorf("token cannot be empty")
+	}
+
+	return authorizedHeader, err
 }
 
 func GetUserId(c *gin.Context) (string, error) {
