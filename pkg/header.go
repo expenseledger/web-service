@@ -37,7 +37,7 @@ func GetUserId(c *gin.Context) (string, error) {
 		return TestUserId, nil
 	}
 
-	token := c.Request.Header.Get("Authorization")
+	token := GetUserToken(c)
 
 	if token == "" {
 		err = fmt.Errorf("Token cannot be empty")
