@@ -27,7 +27,7 @@ func GetUserToken(c *gin.Context) (string, error) {
 		err = fmt.Errorf("token cannot be empty")
 	}
 
-	return authorizedHeader, err
+	return token, err
 }
 
 func GetUserId(c *gin.Context) (string, error) {
