@@ -21,7 +21,7 @@ func GetUserToken(c *gin.Context) (string, error) {
 		err = fmt.Errorf("authorizedHeader cannot be empty")
 	}
 
-	token := authorizedHeader[8:]
+	token := authorizedHeader[7:]
 
 	if token == "" {
 		err = fmt.Errorf("token cannot be empty")
