@@ -4,27 +4,29 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/expenseledger/web-service/config"
+	"github.com/expenseledger/web-service/pkg"
 	"github.com/expenseledger/web-service/service"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 )
 
+var configs = config.GetConfigs()
+
 func validateHeader(c *gin.Context) {
-	firebase, err := service.GetFirebaseInstance()
+	if configs.Mode == "DEVELOPMENT" {
+		c.Next()
+		return
+	}
+
+	token, err := pkg.GetUserToken(c)
 
 	if err != nil {
-		buildAbortContext(c, fmt.Errorf("Cannot initialize firebase, %v", err), http.StatusInternalServerError)
+		buildAbortContext(c, err, http.StatusBadRequest)
 		return
 	}
 
-	token := c.Request.Header.Get("Authorization")
-
-	if token == "" {
-		buildAbortContext(c, fmt.Errorf("Token cannot be empty"), http.StatusBadRequest)
-		return
-	}
-
-	auth, err := firebase.Auth(context.Background())
+	auth, err := service.GetFirebaseAuth(context.Background())
 
 	if err != nil {
 		buildAbortContext(c, fmt.Errorf("Cannot initialize firebase auth, %v", err), http.StatusInternalServerError)
@@ -39,5 +41,4 @@ func validateHeader(c *gin.Context) {
 	}
 
 	c.Next()
-
 }

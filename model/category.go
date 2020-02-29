@@ -6,36 +6,37 @@ import (
 
 // Category the structure represents a category in presentation layer
 type Category struct {
-	Name string `json:"name" db:"name"`
+	Name   string `json:"name" db:"name"`
+	UserId string `json:"userId" db:"user_id"`
 }
 
 // CreateCategory inserts category to DB
-func CreateCategory(name string) (*Category, error) {
-	return applyToCategory(name, insert)
+func CreateCategory(name string, userId string) (*Category, error) {
+	return applyToCategory(name, insert, userId)
 }
 
 // GetCategory returns matching category from DB
-func GetCategory(name string) (*Category, error) {
-	return applyToCategory(name, one)
+func GetCategory(name string, userId string) (*Category, error) {
+	return applyToCategory(name, one, userId)
 }
 
 // DeleteCategory removes category from DB
-func DeleteCategory(name string) (*Category, error) {
-	return applyToCategory(name, delete)
+func DeleteCategory(name string, userId string) (*Category, error) {
+	return applyToCategory(name, delete, userId)
 }
 
 // ListCategories ...
-func ListCategories() ([]Category, error) {
-	return applyToCategories(list)
+func ListCategories(userId string) ([]Category, error) {
+	return applyToCategories(list, userId)
 }
 
 // ClearCategories ...
-func ClearCategories() ([]Category, error) {
-	return applyToCategories(clear)
+func ClearCategories(userId string) ([]Category, error) {
+	return applyToCategories(clear, userId)
 }
 
-func applyToCategory(name string, op operation) (*Category, error) {
-	c := Category{Name: name}
+func applyToCategory(name string, op operation, userId string) (*Category, error) {
+	c := Category{Name: name, UserId: userId}
 	mapper := orm.NewCategoryMapper(c)
 
 	var tmp interface{}
@@ -56,14 +57,15 @@ func applyToCategory(name string, op operation) (*Category, error) {
 	return tmp.(*Category), nil
 }
 
-func applyToCategories(op operation) ([]Category, error) {
-	mapper := orm.NewCategoryMapper(Category{})
+func applyToCategories(op operation, userId string) ([]Category, error) {
+	category := Category{UserId: userId}
+	mapper := orm.NewCategoryMapper(category)
 
 	var tmp interface{}
 	var err error
 	switch op {
 	case list:
-		tmp, err = mapper.Many(&struct{}{})
+		tmp, err = mapper.Many(&category)
 	case clear:
 		tmp, err = mapper.Clear()
 	}

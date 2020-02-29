@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 )
@@ -69,4 +70,21 @@ func GetFirebaseInstance() (*firebase.App, error) {
 	}
 
 	return instance, nil
+}
+
+//GetFirebaseAuth get firebase authentication client
+func GetFirebaseAuth(context context.Context) (*auth.Client, error) {
+	firebase, err := GetFirebaseInstance()
+
+	if err != nil {
+		return nil, fmt.Errorf("Cannot initialize firebase, %v", err)
+	}
+
+	auth, err := firebase.Auth(context)
+
+	if err != nil {
+		return nil, fmt.Errorf("Cannot initialize firebase authentication client, %v", err)
+	}
+
+	return auth, nil
 }

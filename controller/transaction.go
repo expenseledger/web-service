@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/expenseledger/web-service/constant"
 	"github.com/expenseledger/web-service/model"
+	"github.com/expenseledger/web-service/pkg"
 	"github.com/expenseledger/web-service/pkg/type/date"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
@@ -45,7 +46,13 @@ func createExpense(context *gin.Context) {
 		return
 	}
 
-	wallet, err := model.GetWallet(form.From)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallet, err := model.GetWallet(form.From, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -59,6 +66,7 @@ func createExpense(context *gin.Context) {
 		form.Category,
 		form.Description,
 		form.Date,
+		userId,
 	)
 
 	if err != nil {
@@ -86,7 +94,13 @@ func createIncome(context *gin.Context) {
 		return
 	}
 
-	wallet, err := model.GetWallet(form.To)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	wallet, err := model.GetWallet(form.To, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -100,6 +114,7 @@ func createIncome(context *gin.Context) {
 		form.Category,
 		form.Description,
 		form.Date,
+		userId,
 	)
 
 	if err != nil {
@@ -127,13 +142,19 @@ func createTransfer(context *gin.Context) {
 		return
 	}
 
-	srcWallet, err := model.GetWallet(form.From)
+	userId, err := pkg.GetUserId(context)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
 	}
 
-	dstWallet, err := model.GetWallet(form.To)
+	srcWallet, err := model.GetWallet(form.From, userId)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	dstWallet, err := model.GetWallet(form.To, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -147,6 +168,7 @@ func createTransfer(context *gin.Context) {
 		form.Category,
 		form.Description,
 		form.Date,
+		userId,
 	)
 
 	if err != nil {
@@ -181,7 +203,13 @@ func getTransaction(context *gin.Context) {
 		return
 	}
 
-	tx, err := model.GetTransaction(form.ID)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	tx, err := model.GetTransaction(form.ID, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -191,7 +219,13 @@ func getTransaction(context *gin.Context) {
 }
 
 func clearTransactions(context *gin.Context) {
-	txs, err := model.ClearTransactions()
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	txs, err := model.ClearTransactions(userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -211,7 +245,13 @@ func listTransactions(context *gin.Context) {
 		return
 	}
 
-	txs, err := model.ListTransactions(form.Wallet)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	txs, err := model.ListTransactions(form.Wallet, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -241,7 +281,13 @@ func deleteTransaction(context *gin.Context) {
 		return
 	}
 
-	tx, err := model.DeleteTransaction(form.ID)
+	userId, err := pkg.GetUserId(context)
+	if err != nil {
+		buildFailedContext(context, err)
+		return
+	}
+
+	tx, err := model.DeleteTransaction(form.ID, userId)
 	if err != nil {
 		buildFailedContext(context, err)
 		return
@@ -249,7 +295,7 @@ func deleteTransaction(context *gin.Context) {
 
 	var srcWallet, dstWallet *model.Wallet
 	if from := tx.From; from != "" {
-		srcWallet, err = model.GetWallet(from)
+		srcWallet, err = model.GetWallet(from, userId)
 		if err != nil {
 			buildFailedContext(context, err)
 			return
@@ -260,7 +306,7 @@ func deleteTransaction(context *gin.Context) {
 		}
 	}
 	if to := tx.To; to != "" {
-		dstWallet, err = model.GetWallet(to)
+		dstWallet, err = model.GetWallet(to, userId)
 		if err != nil {
 			buildFailedContext(context, err)
 			return

@@ -85,7 +85,7 @@ func CreateTables() (err error) {
 		return
 	}
 
-	err = createConstantTable(Category)
+	err = createCategoryTable()
 	if err != nil {
 		log.Println("Error creating table:", Category, err)
 		return
@@ -117,13 +117,15 @@ func CreateTables() (err error) {
 	return
 }
 
-func createConstantTable(tableName string) (err error) {
-	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", tableName)
+func createCategoryTable() (err error) {
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (", Category)
 	query +=
 		`
-		name character varying(20) PRIMARY KEY,
+		name character varying(20),
 		created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+		updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		user_id character varying(128),
+		PRIMARY KEY (user_id, name)
 		);
 		`
 	_, err = conn.Exec(query)
@@ -175,11 +177,13 @@ func createWalletTable() (err error) {
 	query := fmt.Sprintf(
 		`
 		CREATE TABLE IF NOT EXISTS %s (
-			name character varying(20) PRIMARY KEY,
+			name character varying(20),
 			type %s NOT NULL,
 			balance NUMERIC(11, 2) NOT NULL DEFAULT 0.00,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			user_id character varying(128),
+			PRIMARY KEY (name, user_id)
 		);
 		`,
 		Wallet,
@@ -200,11 +204,13 @@ func createTransactionTable() (err error) {
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 			amount NUMERIC(11, 2) NOT NULL DEFAULT 0.00 CHECK (amount >= 0),
 			type %s NOT NULL,
-			category character varying(20) NOT NULL REFERENCES %s,
+			category character varying(20) NOT NULL ,
 			description text NOT NULL DEFAULT '',
 			occurred_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			user_id character varying(128),
+			FOREIGN KEY (category, user_id) REFERENCES %s (name, user_id)
 		);
 		`,
 		Transaction,
@@ -221,17 +227,19 @@ func createAffectedWalletTable() (err error) {
 		`
 		CREATE TABLE IF NOT EXISTS %s (
 			transaction_id uuid NOT NULL REFERENCES %s,
-			wallet character varying(20) NOT NULL REFERENCES %s,
+			wallet character varying(20) NOT NULL,
 			role %s NOT NULL,
 			created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY (transaction_id, wallet, role)
+			user_id character varying(128),
+			PRIMARY KEY (transaction_id, wallet, role),
+			FOREIGN KEY (wallet, user_id) REFERENCES %s (name, user_id)
 		);
 		`,
 		AffectedWallet,
 		Transaction,
-		Wallet,
 		WalletRoles,
+		Wallet,
 	)
 
 	_, err = conn.Exec(query)
