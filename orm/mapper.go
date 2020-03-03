@@ -174,11 +174,12 @@ func NewTxMapper(model interface{}, txType constant.TransactionType) Mapper {
 			id, wallet, role, amount, type, category, description, occurred_at, user_id
 			FROM transaction t, affected_wallet w
 			WHERE t.id IN (
-				SELECT transaction_id FROM affected_wallet
+				SELECT transaction_id 
+				FROM affected_wallet
 				WHERE wallet = :wallet
 				AND user_id = :user_id
 			) AND t.id = w.transaction_id 
-			AND user_id = :user_id
+			AND t.user_id = :user_id
 			ORDER BY occurred_at ASC, w.created_at ASC, role ASC;
 		`
 		txMapper.clearStmt = `
