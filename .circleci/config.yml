@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/expenseledger/web-service
+    docker:
+      - image: circleci/golang:1.10
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          name: Setup Docker network
+          command: |
+            docker network create my-net
+
+      - run:
+          name: Install dep
+          command: |
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+      - run:
+          name: dep ensure
+          command: |
+            dep ensure
+      - run:
+          name: Build Client Binary
+          command: |
+            mkdir -p build
+            env CGO_ENABLED=0 GOOS=linux \
+              go build -a -v -installsuffix cgo \
+              -o ./build/web-service
