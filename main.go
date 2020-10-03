@@ -6,10 +6,12 @@ import (
 	"github.com/expenseledger/web-service/config"
 	"github.com/expenseledger/web-service/controller"
 	"github.com/expenseledger/web-service/db"
+	"github.com/shopspring/decimal"
 )
 
 func main() {
 	var err error
+	decimal.MarshalJSONWithoutQuotes = true
 
 	err = db.CreateTables()
 	if err != nil {
